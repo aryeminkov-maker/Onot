@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>לוח הטהרה</title>
+<meta property="og:title" content="לוח הטהרה - חישוב עונות פרישה">
+<meta property="og:description" content="הדרך הקלה והנוחה לחישוב עונות פרישה סמוך לוסת">
+<meta property="og:image" content="https://aryeminkov-maker.github.io/Onot/logo.jpg">
+<meta property="og:url" content="https://aryeminkov-maker.github.io/Onot/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="לוח הטהרה - חישוב עונות פרישה">
+<meta name="twitter:description" content="הדרך הקלה והנוחה לחישוב עונות פרישה סמוך לוסת">
+<meta name="twitter:image" content="https://aryeminkov-maker.github.io/Onot/logo.jpg">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
@@ -1453,7 +1462,7 @@ function addToGoogleCalendar(results) {
     if (f.type === 'haflaga') {
       const days = parseInt(f.title.match(/(\d+)/)[1]);
       predGreg  = HebCal.absToGreg(lastAbs + days);
-      predTitle = style === 'emoji' ? '🔄' : 'ראיה צפויה (הפלגה קבועה)';
+      predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (הפלגה קבועה)';
       predDesc  = `ראיה צפויה לפי מחזוריות הפלגה קבועה של ${days} ימים`;
     } else if (f.type === 'hodesh') {
       const lastHeb = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
@@ -1461,7 +1470,7 @@ function addToGoogleCalendar(results) {
       const day = Number(f.title.match(/\d+/)[0]);
       const actualDay = Math.min(day, HebCal.daysInMonth(nm.month, nm.year));
       predGreg  = HebCal.hebToGreg(nm.year, nm.month, actualDay);
-      predTitle = style === 'emoji' ? '🔄' : 'ראיה צפויה (עונת החודש הקבועה)';
+      predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (עונת החודש הקבועה)';
       predDesc  = `ראיה צפויה לפי מחזוריות יום קבוע בחודש`;
     } else if (f.type === 'complex') {
       const intervals_h = [];
@@ -1472,7 +1481,7 @@ function addToGoogleCalendar(results) {
       });
       const nextDays = f.seq[intervals_h.length % f.seq.length];
       predGreg  = HebCal.absToGreg(lastAbs + nextDays);
-      predTitle = style === 'emoji' ? '🔄' : 'ראיה צפויה (מחזוריות)';
+      predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (מחזוריות)';
       predDesc  = `ראיה צפויה לפי מחזוריות מורכבת (${nextDays} ימים)`;
     }
     if (predGreg) {
@@ -1506,9 +1515,14 @@ function addToGoogleCalendar(results) {
     <div class="modal-handle"></div>
     <div class="modal-title">הוספה ליומן Google</div>
 
-    <button class="btn-primary" id="gcal-save-all" style="margin-bottom:14px;">📥 שמירת כל העונות בבת אחת</button>
+    ${cycleSection}
 
-    <div id="gcal-import-steps" style="display:none; background:var(--green-pale); border:1px solid #BFE0CC; border-radius:12px; padding:14px; margin-bottom:18px;">
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;${cycleSection ? 'border-top:1px solid var(--rose-pale);padding-top:14px;' : ''}">עונות פרישה רגילות (לחיצה לכל אחת):</p>
+    ${links.map(l=>`<a href="${l.url}" target="_blank" rel="noopener" style="display:block;padding:13px;border-radius:10px;border:1.5px solid var(--sand);background:var(--rose-pale);text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:10px;">${l.icon} ${l.name} →</a>`).join('')}
+
+    <button class="btn-primary" id="gcal-save-all" style="margin-bottom:10px;">📥 שמירת כל העונות הרגילות בבת אחת</button>
+
+    <div id="gcal-import-steps" style="display:none; background:var(--green-pale); border:1px solid #BFE0CC; border-radius:12px; padding:14px; margin-bottom:14px;">
       <p style="font-size:13px; font-weight:600; color:#2E5E3E; margin-bottom:8px;">הקובץ ירד ✓ עכשיו שני צעדים קטנים:</p>
       <p style="font-size:13px; color:#2E5E3E; line-height:1.8; margin-bottom:4px;">
         <strong>1.</strong> לוחצים על הכפתור הירוק למטה — זה פותח ישירות את עמוד הייבוא ביומן Google.<br>
@@ -1520,10 +1534,6 @@ function addToGoogleCalendar(results) {
       </a>
     </div>
 
-    ${cycleSection}
-
-    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;border-top:1px solid var(--rose-pale);padding-top:14px;">עונות פרישה רגילות (לחיצה לכל אחת):</p>
-    ${links.map(l=>`<a href="${l.url}" target="_blank" rel="noopener" style="display:block;padding:13px;border-radius:10px;border:1.5px solid var(--sand);background:var(--rose-pale);text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:10px;">${l.icon} ${l.name} →</a>`).join('')}
     <div style="height:8px;"></div>
     <button class="btn-secondary" id="gcal-modal-close">סגירה</button>
   </div>`;
