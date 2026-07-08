@@ -1068,19 +1068,13 @@ function sendContact() {
   btn.textContent = '⏳ שולח...';
   status.style.display = 'none';
 
-  fetch('https://api.emailjs.com/api/v1.0/email/send', {
+  fetch('https://formspree.io/f/xdarrkjy', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
-      service_id:  'service_jz77xj1',
-      template_id: 'template_epmurnc',
-      user_id:     'lxkM1z6vkSf1QCLg_',
-      template_params: {
-        from_name: name || 'משתמשת אנונימית',
-        reply_to:  reply || '(לא צוין)',
-        message:   msg,
-        to_email:  'arye.minkov@gmail.com'
-      }
+      name:     name || 'אנונימי',
+      reply_to: reply || '(לא צוין)',
+      message:  msg
     })
   }).then(r => {
     if (r.ok) {
