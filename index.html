@@ -1068,21 +1068,34 @@ function sendContact() {
   btn.textContent = '⏳ שולח...';
   status.style.display = 'none';
 
-  emailjs.send('service_jz77xj1', 'template_epmurnc', {
-    from_name: name || 'משתמשת אנונימית',
-    reply_to:  reply || '(לא צוין)',
-    message:   msg,
-    to_email:  'arye.minkov@gmail.com'
-  }).then(() => {
-    status.style.cssText = 'display:block;color:#4E8060;font-weight:600;';
-    status.textContent = '✓ ההודעה נשלחה בהצלחה!';
-    document.getElementById('contact-name').value  = '';
-    document.getElementById('contact-reply').value = '';
-    document.getElementById('contact-msg').value   = '';
+  fetch('https://api.emailjs.com/api/v1.1/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id:  'service_jz77xj1',
+      template_id: 'template_epmurnc',
+      user_id:     'lxkM1z6vkSf1QCLg_',
+      template_params: {
+        from_name: name || 'משתמשת אנונימית',
+        reply_to:  reply || '(לא צוין)',
+        message:   msg,
+        to_email:  'arye.minkov@gmail.com'
+      }
+    })
+  }).then(r => {
+    if (r.ok) {
+      status.style.cssText = 'display:block;color:#4E8060;font-weight:600;margin-top:10px;text-align:center;';
+      status.textContent = '✓ ההודעה נשלחה בהצלחה!';
+      document.getElementById('contact-name').value  = '';
+      document.getElementById('contact-reply').value = '';
+      document.getElementById('contact-msg').value   = '';
+    } else {
+      throw new Error(r.status);
+    }
     btn.textContent = '📨 שליחה';
     btn.disabled = false;
   }).catch(() => {
-    status.style.cssText = 'display:block;color:#C0392B;font-weight:600;';
+    status.style.cssText = 'display:block;color:#C0392B;font-weight:600;margin-top:10px;text-align:center;';
     status.textContent = '✗ שגיאה בשליחה – נסי שוב';
     btn.textContent = '📨 שליחה';
     btn.disabled = false;
@@ -1500,7 +1513,5 @@ window.addEventListener('load', () => {
   document.getElementById('privacy-banner').addEventListener('click', function() { this.style.display='none'; });
 });
 </script>
-<script src="https://unpkg.com/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init({publicKey: 'lxkM1z6vkSf1QCLg_'});</script>
 </body>
 </html>
