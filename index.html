@@ -1221,9 +1221,21 @@ function addToGoogleCalendar(results) {
   const links = valid.map(r => {
     const g = r.greg;
     const title = titleFor(r);
-    const ds  = `${g.year}${String(g.month).padStart(2,'0')}${String(g.day).padStart(2,'0')}`;
-    const ng  = HebCal.addDaysToGreg(g.year, g.month, g.day, 1);
-    const de  = `${ng.year}${String(ng.month).padStart(2,'0')}${String(ng.day).padStart(2,'0')}`;
+    const pad = n => String(n).padStart(2,'0');
+
+    // Time based on onah + user settings
+    const yomTime   = (appState.settings.notifTimeYom   || '07:00').replace(':','');
+    const laylaTime = (appState.settings.notifTimeLayla || '19:00').replace(':','');
+    const startTime = r.onah === 'layla' ? laylaTime : yomTime;
+    // End time = 1 hour later
+    const startH = parseInt(startTime.slice(0,2));
+    const startM = startTime.slice(2);
+    const endH   = String(startH + 1).padStart(2,'0');
+
+    const dateStr = `${g.year}${pad(g.month)}${pad(g.day)}`;
+    const ds = `${dateStr}T${startTime}00`;
+    const de = `${dateStr}T${endH}${startM}00`;
+
     return { url:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${ds}/${de}&details=${encodeURIComponent(detailsFor(r))}${husbandParam}`, name:r.name, icon:r.icon };
   });
 
@@ -1277,8 +1289,20 @@ function downloadIcs(items, titleFor, detailsFor) {
 
   const events = items.map((r, i) => {
     const g = r.greg;
-    const next = HebCal.addDaysToGreg(g.year, g.month, g.day, 1);
-    const uid = `veset-${dstamp(g)}-${r.type}-${Date.now()}-${i}@luach-tahara`;
+    const pad = n => String(n).padStart(2, '0');
+
+    const yomTime   = (appState.settings.notifTimeYom   || '07:00').replace(':','');
+    const laylaTime = (appState.settings.notifTimeLayla || '19:00').replace(':','');
+    const startTime = r.onah === 'layla' ? laylaTime : yomTime;
+    const startH = parseInt(startTime.slice(0,2));
+    const endH   = String(startH + 1).padStart(2,'0');
+    const startM = startTime.slice(2);
+
+    const dateStr = `${g.year}${pad(g.month)}${pad(g.day)}`;
+    const dtstart = `${dateStr}T${startTime}00`;
+    const dtend   = `${dateStr}T${endH}${startM}00`;
+
+    const uid = `veset-${dateStr}-${r.type}-${Date.now()}-${i}@luach-tahara`;
     const summary = escapeIcs(titleFor(r));
     const desc = escapeIcs(detailsFor ? detailsFor(r) : `${r.name} | ${r.desc}`);
     const attendee = (appState.settings.husband && appState.settings.husbandEmail)
@@ -1287,8 +1311,8 @@ function downloadIcs(items, titleFor, detailsFor) {
       'BEGIN:VEVENT',
       `UID:${uid}`,
       `DTSTAMP:${dtstamp}`,
-      `DTSTART;VALUE=DATE:${dstamp(g)}`,
-      `DTEND;VALUE=DATE:${dstamp(next)}`,
+      `DTSTART:${dtstart}`,
+      `DTEND:${dtend}`,
       `SUMMARY:${summary}`,
       `DESCRIPTION:${desc}` + attendee,
       'END:VEVENT'
