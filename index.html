@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>לוח הטהרה</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+  :root {
+    --rose:#C17B8A; --rose-light:#EDD5DC; --rose-pale:#FAF3F5;
+    --sand:#E8DDD0; --ink:#2D2320; --ink-soft:#6B5050;
+    --white:#FFFFFF; --gold:#B8975A; --green:#6B9E7A; --green-pale:#EDF4EF;
+    --shadow:rgba(45,35,32,0.10); --radius:18px; --radius-sm:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Heebo',sans-serif;background:var(--rose-pale);color:var(--ink);min-height:100vh;font-size:15px;}
+  .nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--white);border-top:1px solid var(--rose-light);display:flex;justify-content:space-around;align-items:center;padding:8px 0 env(safe-area-inset-bottom,8px);box-shadow:0 -4px 20px var(--shadow);}
+  .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--ink-soft);font-family:inherit;font-size:10px;padding:6px 14px;border-radius:var(--radius-sm);transition:color .2s;}
+  .nav-btn.active{color:var(--rose);}
+  .nav-btn svg{width:22px;height:22px;}
+  .page{display:none;padding:0 0 80px;}
+  .page.active{display:block;}
+  .page-header{background:linear-gradient(135deg,var(--rose) 0%,#9E5F6E 100%);padding:52px 20px 28px;color:var(--white);position:relative;overflow:hidden;}
+  .page-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='160' cy='40' r='80' fill='%23ffffff08'/%3E%3Ccircle cx='20' cy='160' r='60' fill='%23ffffff06'/%3E%3C/svg%3E") no-repeat right top;}
+  .page-header h1{font-size:22px;font-weight:700;letter-spacing:.3px;}
+  .page-header p{font-size:13px;opacity:.85;margin-top:4px;}
+  .card{background:var(--white);border-radius:var(--radius);box-shadow:0 2px 16px var(--shadow);padding:20px;margin:16px 16px 0;}
+  .card-title{font-size:13px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--rose-light);color:var(--rose);}
+  .privacy-banner{background:linear-gradient(135deg,#F0EAE3,#EDD5DC);border-radius:var(--radius);padding:16px 18px;margin:16px 16px 0;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--rose-light);}
+  .privacy-banner .icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+  .privacy-banner p{font-size:13px;color:var(--ink-soft);line-height:1.6;}
+  .form-group{margin-bottom:16px;}
+  .form-label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .form-input{width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--sand);background:var(--rose-pale);font-family:inherit;font-size:15px;color:var(--ink);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+  .form-input:focus{border-color:var(--rose);}
+  .form-select{width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--sand);background:var(--rose-pale);font-family:inherit;font-size:15px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236B5050' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center;}
+  .toggle-group{display:flex;gap:8px;}
+  .toggle-btn{flex:1;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--sand);background:var(--rose-pale);font-family:inherit;font-size:14px;color:var(--ink-soft);cursor:pointer;transition:all .2s;font-weight:500;}
+  .toggle-btn.active{background:var(--rose);border-color:var(--rose);color:var(--white);box-shadow:0 3px 12px rgba(193,123,138,.35);}
+  .btn-primary{width:100%;padding:16px;border-radius:var(--radius);background:linear-gradient(135deg,var(--rose) 0%,#9E5F6E 100%);color:var(--white);border:none;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(193,123,138,.40);transition:transform .15s,box-shadow .15s;letter-spacing:.3px;}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-secondary{width:100%;padding:13px;border-radius:var(--radius);background:var(--rose-pale);color:var(--rose);border:1.5px solid var(--rose-light);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;}
+  .summary-card{background:var(--white);border-radius:var(--radius);box-shadow:0 2px 16px var(--shadow);margin:16px 16px 0;overflow:hidden;}
+  .summary-header{background:linear-gradient(135deg,#6B9E7A,#4E8060);padding:16px 20px;color:var(--white);font-size:14px;font-weight:600;}
+  .summary-header .date-display{font-size:20px;font-weight:700;margin-top:4px;}
+  .onah-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--rose-pale);}
+  .onah-row:last-child{border-bottom:none;}
+  .onah-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
+  .onah-info{flex:1;}
+  .onah-name{font-size:13px;color:var(--ink-soft);font-weight:600;}
+  .onah-date{font-size:15px;color:var(--ink);font-weight:500;margin-top:2px;}
+  .onah-hebrew{font-size:12px;color:var(--ink-soft);margin-top:1px;}
+  .settings-item{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--rose-pale);}
+  .settings-item:last-child{border-bottom:none;}
+  .settings-label{font-size:15px;font-weight:500;}
+  .settings-desc{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .switch{position:relative;display:inline-block;width:48px;height:26px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;border-radius:26px;background:#D1C5C0;cursor:pointer;transition:.3s;}
+  .slider::before{content:'';position:absolute;height:20px;width:20px;border-radius:50%;left:3px;bottom:3px;background:white;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+  input:checked+.slider{background:var(--rose);}
+  input:checked+.slider::before{transform:translateX(22px);}
+  .history-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--rose-pale);cursor:pointer;}
+  .history-item:last-child{border-bottom:none;}
+  .history-dot{width:10px;height:10px;border-radius:50%;background:var(--rose);flex-shrink:0;}
+  .history-info{flex:1;}
+  .history-date{font-size:15px;font-weight:500;}
+  .history-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .info-link{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--rose-pale);text-decoration:none;color:var(--ink);}
+  .info-link:last-child{border-bottom:none;}
+  .info-link-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+  .info-link-text{flex:1;}
+  .info-link-title{font-size:15px;font-weight:500;}
+  .info-link-desc{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:24px 20px calc(env(safe-area-inset-bottom,20px) + 20px);width:100%;max-height:80vh;overflow-y:auto;animation:slideUp .3s ease;}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-handle{width:36px;height:4px;background:var(--sand);border-radius:2px;margin:0 auto 20px;}
+  .modal-title{font-size:18px;font-weight:700;margin-bottom:16px;}
+  .tooltip-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--sand);color:var(--ink-soft);font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;margin-right:4px;}
+  .special-types{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+  .special-type-btn{padding:14px;border-radius:var(--radius-sm);border:1.5px solid var(--sand);background:var(--rose-pale);font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;text-align:right;transition:all .2s;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--ink-soft);}
+  .empty-state .emoji{font-size:48px;margin-bottom:12px;}
+  .empty-state h3{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .empty-state p{font-size:14px;line-height:1.6;}
+  /* ── DATE MODE TOGGLE ── */
+  .dmt-btn{flex:1;padding:9px 0;font-family:inherit;font-size:14px;font-weight:500;border:none;background:var(--rose-pale);color:var(--ink-soft);cursor:pointer;transition:background .15s;}
+  .dmt-btn.active{background:var(--rose);color:var(--white);}
+  /* ── HEBREW CALENDAR MODAL ── */
+  .hcal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;direction:rtl;}
+  .hcal-overlay.open{display:flex;}
+  .hcal-box{background:var(--white);border-radius:16px;width:310px;box-shadow:0 8px 40px rgba(0,0,0,.35);overflow:hidden;}
+  .hcal-header{background:var(--rose);color:var(--white);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .hcal-header h3{font-size:15px;font-weight:700;margin:0;}
+  .hcal-nav{background:none;border:none;color:var(--white);font-size:20px;cursor:pointer;padding:2px 10px;border-radius:4px;line-height:1;}
+  .hcal-nav:hover{background:rgba(255,255,255,.25);}
+  .hcal-selects{display:flex;gap:6px;padding:9px 12px;border-bottom:1px solid var(--rose-pale);}
+  .hcal-selects select{flex:1;font-family:inherit;font-size:13px;padding:5px 6px;border:1px solid var(--sand);border-radius:5px;direction:rtl;background:var(--rose-pale);}
+  .hcal-grid{padding:8px 10px 10px;}
+  .hcal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
+  .hcal-dow span{text-align:center;font-size:10px;font-weight:600;color:var(--ink-soft);padding:3px 0;}
+  .hcal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .hcal-day{text-align:center;padding:6px 2px;font-size:13px;cursor:pointer;border-radius:5px;border:none;background:none;color:var(--ink);font-weight:500;width:100%;}
+  .hcal-day:hover{background:var(--rose-light);}
+  .hcal-day.today{border:2px solid var(--rose);}
+  .hcal-day.selected{background:var(--rose);color:var(--white);}
+  .hcal-day.empty{visibility:hidden;pointer-events:none;}
+  .hcal-footer{padding:9px 12px;border-top:1px solid var(--rose-pale);display:flex;justify-content:flex-end;gap:8px;}
+  .hcal-fbtn{font-family:inherit;font-size:13px;padding:8px 16px;border-radius:8px;border:1.5px solid var(--sand);background:var(--white);cursor:pointer;color:var(--ink);}
+  .hcal-fbtn.ok{background:var(--rose);color:var(--white);border-color:var(--rose);}
+</style>
+</head>
+<body>
+
+<!-- PAGE: HOME -->
+<div class="page active" id="page-home">
+  <div class="page-header">
+    <h1>לוח הטהרה</h1>
+    <p>חישוב ימי הפרישה לפי הלכה</p>
+  </div>
+  <div class="privacy-banner" id="privacy-banner">
+    <div class="icon">🔒</div>
+    <p><strong>פרטיות מלאה:</strong> כל הנתונים שמורים במכשיר שלך בלבד ואינם משותפים עם אף גורם – למעט הוספת אירועים ליומן Google אם בחרת באפשרות זו.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">הזנת וסת חדש</div>
+    <div class="form-group">
+      <label class="form-label">תאריך הראיה</label>
+      <!-- Toggle -->
+      <div style="display:flex;gap:0;margin-bottom:8px;border:1.5px solid var(--sand);border-radius:var(--radius-sm);overflow:hidden;">
+        <button class="dmt-btn" id="dmt-greg" onclick="setDateMode('greg')">לועזי</button>
+        <button class="dmt-btn active" id="dmt-heb" onclick="setDateMode('heb')">עברי</button>
+      </div>
+      <!-- Gregorian input -->
+      <div id="date-greg-wrap" style="display:none;">
+        <input type="date" class="form-input" id="input-date" />
+      </div>
+      <!-- Hebrew picker trigger -->
+      <div id="date-heb-wrap">
+        <button type="button" id="heb-cal-trigger" onclick="openVesetCal()"
+          style="width:100%;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--sand);background:var(--rose-pale);font-family:inherit;font-size:15px;color:var(--ink);text-align:right;cursor:pointer;">
+          📅 בחרי תאריך עברי
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">עונה</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btn-yom" onclick="setOnah('yom')">☀️ יום</button>
+        <button class="toggle-btn" id="btn-layla" onclick="setOnah('layla')">🌙 לילה</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">סוג וסת</label>
+      <select class="form-select" id="input-type">
+        <option value="regular">וסת רגיל</option>
+        <option value="special">וסת מיוחד (רק בינונית)</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn-primary" onclick="calculate()" style="flex:1">חשבי ימי פרישה</button>
+      <button class="btn-secondary" onclick="openSpecialModal()" style="width:52px;padding:0;font-size:20px;">⚙️</button>
+    </div>
+  </div>
+  <div id="results-area"></div>
+  <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D98B;">
+    <p style="font-size:13px;color:#7A6020;line-height:1.7;">
+      💛 <strong>הרגשות ייחודיות:</strong> במקרה של הרגשות הגורמות לחשש וסת – יש לרשום את מועד ההרגשה ולשאול רב על קביעת וסת הגוף.
+    </p>
+  </div>
+</div>
+
+<!-- PAGE: HISTORY -->
+<div class="page" id="page-history">
+  <div class="page-header"><h1>היסטוריה</h1><p>כל הרישומים שהוזנו</p></div>
+  <div class="card" id="history-list">
+    <div class="empty-state"><div class="emoji">📋</div><h3>אין היסטוריה עדיין</h3><p>לאחר הזנת הוסת הראשון, הרישומים יופיעו כאן.</p></div>
+  </div>
+  <div class="card" style="margin-top:0;"><button class="btn-secondary" onclick="exportData()">📤 ייצוא כל הנתונים</button></div>
+  <div class="card" style="margin-top:0;"><button class="btn-secondary" onclick="analyzeCycles()" style="color:var(--rose);border-color:var(--rose);">🔍 בדיקת מחזוריות</button></div>
+  <div class="card" style="margin-top:0;"><button class="btn-secondary" id="btn-clear-history" style="color:#C0392B;border-color:#C0392B;">🗑 מחיקת כל ההיסטוריה</button></div>
+</div>
+
+<!-- PAGE: SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-header"><h1>הגדרות</h1><p>התאמה אישית</p></div>
+
+  <div class="card">
+    <div class="card-title">יומן Google</div>
+    <div class="settings-item">
+      <div><div class="settings-label">הוספה ליומן Google</div><div class="settings-desc">הצעת הוספה אחרי כל חישוב</div></div>
+      <label class="switch"><input type="checkbox" id="toggle-gcal" checked><span class="slider"></span></label>
+    </div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label">סגנון כיתוב ביומן</div>
+        <div class="settings-desc">איך יופיע שם האירוע ביומן Google</div>
+      </div>
+      <select class="form-select" style="width:auto;font-size:13px;padding:8px 32px 8px 10px;" id="cal-style">
+        <option value="text">טקסט מלא</option>
+        <option value="emoji">פרחים 🌸🌼🌺🌷</option>
+      </select>
+    </div>
+    <div class="settings-item">
+      <div><div class="settings-label">שיתוף עם הבעל</div><div class="settings-desc">הוספת הבעל כמשתתף בכל אירוע ביומן</div></div>
+      <label class="switch"><input type="checkbox" id="toggle-husband"><span class="slider"></span></label>
+    </div>
+    <div id="husband-email-group" style="display:none;margin-top:8px;">
+      <input type="email" class="form-input" placeholder="כתובת מייל של הבעל" id="husband-email">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">התראות במכשיר</div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label">הפעלת התראות</div>
+        <div class="settings-desc">תזכורת ביום כל עונה</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggle-notif"><span class="slider"></span></label>
+    </div>
+    <div id="notif-install-tip" style="display:none; background:var(--rose-pale); border:1px solid var(--rose-light); border-radius:10px; padding:12px 14px; margin-bottom:4px;">
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:10px;">כדי לקבל התראות, יש להתקין את האפליקציה על מסך הבית:</p>
+      <div style="font-size:13px;color:var(--ink);line-height:1.9;">
+        <strong>אנדרואיד (Chrome):</strong><br>תפריט ⋮ ← <em>הוסף למסך הבית</em><br><br>
+        <strong>iPhone (Safari):</strong><br>כפתור שתף 📤 ← <em>הוסף למסך הבית</em>
+      </div>
+      <button class="btn-primary" id="btn-pwa-install" style="margin-top:12px;padding:11px;font-size:14px;display:none;">📲 התקני כאפליקציה</button>
+    </div>
+    <div id="notif-times-group" style="display:none;">
+      <div class="settings-item" style="padding-bottom:8px;">
+        <div><div class="settings-label">☀️ עונת יום – שעת התראה</div></div>
+        <input type="time" class="form-input" id="notif-time-yom" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;">
+      </div>
+      <div class="settings-item" style="border-bottom:none;">
+        <div><div class="settings-label">🌙 עונת לילה – שעת התראה</div></div>
+        <input type="time" class="form-input" id="notif-time-layla" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">הלכה</div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label"><button class="tooltip-btn" onclick="openTooltip('orzarua')">?</button>חשש לעונת אור זרוע</div>
+        <div class="settings-desc">חישוב עונת אור זרוע</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggle-orzarua" checked><span class="slider"></span></label>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0;"><button class="btn-primary" onclick="saveSettings()">שמירת הגדרות</button></div>
+</div>
+
+<!-- PAGE: INFO -->
+<div class="page" id="page-info">
+  <div class="page-header"><h1>מידע שימושי</h1><p>קישורים ומשאבים</p></div>
+
+  <div class="card">
+    <a class="info-link" href="https://www.puah.org.il" target="_blank" rel="noopener">
+      <div class="info-link-icon">🌸</div>
+      <div class="info-link-text"><div class="info-link-title">מכון פועה</div><div class="info-link-desc">ייעוץ הלכתי בנושאי פוריות ומשפחה</div></div>
+      <div style="color:var(--ink-soft)">‹</div>
+    </a>
+    <a class="info-link" href="https://www.yeshiva.org.il/article/1435" target="_blank" rel="noopener">
+      <div class="info-link-icon">📖</div>
+      <div class="info-link-text"><div class="info-link-title">בית ההוראה – אתר ישיבה</div><div class="info-link-desc">שאלות ותשובות בדיני טהרה</div></div>
+      <div style="color:var(--ink-soft)">‹</div>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-title">עקרונות החישוב</div>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:10px;">
+      האפליקציה מחשבת את ימי הפרישה לפי שיטת <strong>לוח השנה העברי</strong> על פי אלגוריתם דרשוביץ–ריינגולד, המחשב כל תאריך עברי מתוך נוסחת המולד (חשבון ה<em>חלקים</em>).<br><br>
+      <strong>עונה בינונית</strong> – 30 ימים עבריים מלאים מיום הראיה, באותה עונה (יום/לילה).<br>
+      <strong>עונת החודש</strong> – אותו יום בחודש העברי הבא, באותה עונה. כשהחודש הבא חסר ואין בו את היום, נלקח היום האחרון של אותו חודש.<br>
+      <strong>עונת הפלגה</strong> – הפרש הימים העבריים (בחישוב עונות, כל עונה = חצי יום) בין הוסת הקודם לנוכחי, והוספתו מיום הנוכחי.<br>
+      <strong>עונת אור זרוע</strong> – העונה שלפני עונת הבינונית (29 ימים), בעונה ההפוכה. נחשבת רק לפי שיטת הרמ"א.
+    </p>
+    <p style="font-size:12px;color:#aaa;line-height:1.6;">
+      הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לשאול רב מוסמך.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">יצירת קשר – הערות ופרטים</div>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:14px;">שאלות, הערות, או בקשות שיפור? נשמח לשמוע.</p>
+    <div class="form-group">
+      <label class="form-label">שם (אופציונלי)</label>
+      <input type="text" class="form-input" id="contact-name" placeholder="שמך">
+    </div>
+    <div class="form-group">
+      <label class="form-label">מייל או טלפון לתשובה (אופציונלי)</label>
+      <input type="text" class="form-input" id="contact-reply" placeholder="your@email.com / 05x-xxxxxxx" dir="ltr">
+    </div>
+    <div class="form-group">
+      <label class="form-label">הודעה</label>
+      <textarea class="form-input" id="contact-msg" rows="3" placeholder="כתבי כאן..." style="resize:vertical;min-height:80px;"></textarea>
+    </div>
+    <button class="btn-primary" id="contact-send-btn" onclick="sendContact()">📨 שליחה</button>
+    <div id="contact-status" style="display:none;margin-top:10px;font-size:13px;text-align:center;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">אודות</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:14px;">אפליקציה זו נועדה לסייע בחישוב ימי הפרישה בלבד. אין היא תחליף לפסיקת רב. בכל שאלה הלכתית יש לפנות לרב המשפחה.</p>
+    <button class="btn-secondary" onclick="shareApp()">📤 שיתוף האפליקציה</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cycles" onclick="if(event.target===this)closeModal('modal-cycles')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div id="modal-cycles-content"></div>
+    <div style="height:12px;"></div>
+    <button class="btn-primary" onclick="closeModal('modal-cycles')">סגירה</button>
+  </div>
+</div>
+
+<!-- HEBREW CALENDAR MODAL -->
+<div class="hcal-overlay" id="hcal-overlay" onclick="if(event.target===this)closeVesetCal()">
+  <div class="hcal-box">
+    <div class="hcal-header">
+      <button class="hcal-nav" onclick="hcalNext()">&#x276E;</button>
+      <h3 id="hcal-title"></h3>
+      <button class="hcal-nav" onclick="hcalPrev()">&#x276F;</button>
+    </div>
+    <div class="hcal-selects">
+      <select id="hcal-msel" onchange="hcalGoM()"></select>
+      <select id="hcal-ysel" onchange="hcalGoY()"></select>
+    </div>
+    <div class="hcal-grid">
+      <div class="hcal-dow">
+        <span>א׳</span><span>ב׳</span><span>ג׳</span><span>ד׳</span><span>ה׳</span><span>ו׳</span><span>ש׳</span>
+      </div>
+      <div class="hcal-days" id="hcal-days"></div>
+    </div>
+    <div class="hcal-footer">
+      <button class="hcal-fbtn" onclick="closeVesetCal()">ביטול</button>
+      <button class="hcal-fbtn ok" onclick="confirmVesetCal()">אישור</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ראשי
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="navigate('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>היסטוריה
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="navigate('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>הגדרות
+  </button>
+  <button class="nav-btn" id="nav-info" onclick="navigate('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>מידע
+  </button>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-orzarua" onclick="closeModal('modal-orzarua')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">עונת אור זרוע</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:12px;"><strong>מהי עונת אור זרוע?</strong> העונה שלפני עונת הבינונית – כלומר, ל׳-1=כ״ט ימים אחרי הוסת, בעונה ההפוכה.</p>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:12px;"><strong>שיטת הרמ"א והאשכנזים:</strong> יש לחשוש לה ולנהוג בה כעונת פרישה גמורה.</p>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;"><strong>שיטת הספרדים:</strong> רבים סוברים שאין צורך לחשוש לה. בכל ספק – שאלי רב.</p>
+    <button class="btn-primary" onclick="closeModal('modal-orzarua')">הבנתי</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-special" onclick="closeModal('modal-special')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">וסת מיוחד</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">בסוגים אלו מחשבים <strong>בינונית בלבד</strong> (ללא הפלגה ועונה):</p>
+    <div class="special-types">
+      <button class="special-type-btn" onclick="setSpecialType('pills')">💊 אחרי כדורים / הפסקת גלולות</button>
+      <button class="special-type-btn" onclick="setSpecialType('birth')">👶 אחרי לידה</button>
+      <button class="special-type-btn" onclick="setSpecialType('other')">⚕️ סיבה רפואית אחרת</button>
+    </div>
+    <div style="background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D98B;border-radius:10px;padding:14px;font-size:13px;color:#7A6020;line-height:1.6;margin-top:14px;">
+      💛 זכרי לרשום הרגשות ייחודיות לפני הראיה ולשאול רב על קביעת וסת הגוף.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-edit" onclick="closeModal('modal-edit')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-modal-title">עריכת רישום</div>
+    <div id="edit-modal-content"></div>
+    <div style="height:16px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary" onclick="deleteEntry()" style="flex:1;color:#C0392B;border-color:#C0392B;">🗑 מחיקה</button>
+      <button class="btn-primary" onclick="closeModal('modal-edit')" style="flex:1;">סגירה</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-clear-history" onclick="closeModal('modal-clear-history')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">מחיקת כל ההיסטוריה</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:18px;">
+      פעולה זו תמחק את כל הרישומים שנשמרו, לצמיתות. מומלץ לייצא את הנתונים קודם אם רוצים לשמור עותק.
+    </p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary" id="btn-confirm-clear-history" style="flex:1;color:#C0392B;border-color:#C0392B;">🗑 כן, למחוק הכל</button>
+      <button class="btn-primary" onclick="closeModal('modal-clear-history')" style="flex:1;">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// HEBREW DATE PICKER (ported from obit tool)
+// Uses absolute day number (fG/fH), fully tested engine
+// ════════════════════════════════════════════════════════
+var HN_P=['','ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר ב׳'];
+var HD_P=['','א','ב','ג','ד','ה','ו','ז','ח','ט','י','יא','יב','יג','יד','טו','טז','יז','יח','יט','כ','כא','כב','כג','כד','כה','כו','כז','כח','כט','ל'];
+var HEP_P=-1373427;
+
+function pLeap(y){return((7*y)+1)%19<7;}
+function pEl(y){
+  var me=Math.floor((235*y-234)/19),pe=204+793*(me%1080);
+  var he=5+12*me+793*Math.floor(me/1080)+Math.floor(pe/1080);
+  var cj=1+29*me+Math.floor(he/24),cp=1080*(he%24)+(pe%1080),a;
+  if(cp>=19440||(cj%7===2&&cp>=9924&&!pLeap(y))||(cj%7===1&&cp>=16789&&pLeap(y-1)))a=cj+1;else a=cj;
+  return(a%7===0||a%7===3||a%7===5)?a+1:a;}
+function pYD(y){return pEl(y+1)-pEl(y);}
+function pMD(m,y){
+  if(m===1||m===3||m===5||m===7||m===11)return 30;
+  if(m===4||m===6||m===10||m===13)return 29;
+  if(m===8)return pYD(y)%10===5?30:29;
+  if(m===9)return pYD(y)%10===3?29:30;
+  if(m===2)return 29;
+  if(m===12)return pLeap(y)?30:29;
+  return 29;}
+function pEF(y){return HEP_P-1+pEl(y);}
+function pGLeap(y){return y%4===0&&!(y%100===0&&y%400!==0);}
+function pFG(y,m,d){
+  return 365*(y-1)+Math.floor((y-1)/4)-Math.floor((y-1)/100)+Math.floor((y-1)/400)+
+    Math.floor((367*m-362)/12)+(m<=2?0:(pGLeap(y)?-1:-2))+d;}
+function pFH(y,m,d){
+  var ml=pLeap(y)?13:12,el=pEF(y)+d-1;
+  if(m<7){for(var i=7;i<=ml;i++)el+=pMD(i,y);for(var i=1;i<m;i++)el+=pMD(i,y);}
+  else{for(var i=7;i<m;i++)el+=pMD(i,y);}
+  return el;}
+function pH2G(f){
+  var d0=f-1,n4=Math.floor(d0/146097),r1=d0%146097,n1=Math.floor(r1/36524),r2=r1%36524,n01=Math.floor(r2/1461),r3=r2%1461,n001=Math.floor(r3/365);
+  var y=400*n4+100*n1+4*n01+n001+1;
+  if(n1===4||n001===4)return{y:y-1,m:12,d:31};
+  var yd=f-pFG(y,1,1)+1,mc=[0,31,pGLeap(y)?29:28,31,30,31,30,31,31,30,31,30,31],mo=1;
+  while(yd>mc[mo]){yd-=mc[mo];mo++;}
+  return{y:y,m:mo,d:yd};}
+function pG2H(f){
+  var y=Math.round((f-HEP_P)/365.25);
+  while(pEF(y)>f)y--;while(pEF(y+1)<=f)y++;
+  var sm=f>=pFH(y,1,1)?1:7,m=sm;
+  while(f>pFH(y,m,pMD(m,y)))m=m===13?1:m+1;
+  return{year:y,month:m,day:f-pFH(y,m,1)+1};}
+function pHYS(n){
+  var r=n%1000,H=['','ק','ר','ש','ת'],T=['','י','כ','ל','מ','נ','ס','ע','פ','צ'],O=['','א','ב','ג','ד','ה','ו','ז','ח','ט'];
+  var s='',rem=Math.floor(r/100);while(rem>=4){s+='ת';rem-=4;}if(rem>0)s+=H[rem];
+  var t=Math.floor((r%100)/10),o=r%10;
+  if(t===1&&o===5)s+='טו';else if(t===1&&o===6)s+='טז';else{if(t)s+=T[t];if(o)s+=O[o];}
+  return s.length===1?'ה'+s+'׳':'ה'+s.slice(0,-1)+'"'+s.slice(-1);}
+function pMonths(y){
+  return pLeap(y)?[7,8,9,10,11,12,13,1,2,3,4,5,6]:[7,8,9,10,11,12,1,2,3,4,5,6];}
+function pTodayF(){var n=new Date();return pFG(n.getFullYear(),n.getMonth()+1,n.getDate());}
+
+// Calendar state
+var VCY=5786, VCM=7, VCSF=null, VCTF=null;
+
+function openVesetCal(){
+  VCTF=pTodayF();
+  var th=pG2H(VCTF); VCY=th.year; VCM=th.month;
+  // If there's already a date selected, open there
+  var ex=document.getElementById('input-date').value;
+  if(ex){var p=ex.split('-'),f=pFG(+p[0],+p[1],+p[2]),h=pG2H(f);VCY=h.year;VCM=h.month;VCSF=f;}
+  else VCSF=null;
+  renderVesetCal();
+  document.getElementById('hcal-overlay').classList.add('open');
+}
+function closeVesetCal(){document.getElementById('hcal-overlay').classList.remove('open');}
+function confirmVesetCal(){
+  if(VCSF===null){closeVesetCal();return;}
+  var g=pH2G(VCSF);
+  var ds=g.y+'-'+String(g.m).padStart(2,'0')+'-'+String(g.d).padStart(2,'0');
+  var h=pG2H(VCSF);
+  var label=HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
+  document.getElementById('input-date').value=ds;
+  document.getElementById('heb-cal-trigger').textContent='📅 '+label;
+  closeVesetCal();
+}
+function renderVesetCal(){
+  var ms=pMonths(VCY);
+  document.getElementById('hcal-title').textContent=HN_P[VCM]+' '+pHYS(VCY);
+  var msel=document.getElementById('hcal-msel');
+  msel.innerHTML='';
+  ms.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=HN_P[m];if(m===VCM)o.selected=true;msel.appendChild(o);});
+  var ysel=document.getElementById('hcal-ysel');
+  ysel.innerHTML='';
+  for(var y=5780;y<=5800;y++){var o=document.createElement('option');o.value=y;o.textContent=pHYS(y);if(y===VCY)o.selected=true;ysel.appendChild(o);}
+  var firstF=pFH(VCY,VCM,1);
+  var dow=firstF%7;
+  var total=pMD(VCM,VCY);
+  var grid=document.getElementById('hcal-days');
+  grid.innerHTML='';
+  for(var i=0;i<dow;i++){var e=document.createElement('button');e.className='hcal-day empty';e.textContent='';grid.appendChild(e);}
+  for(var d=1;d<=total;d++){
+    var f=firstF+d-1;
+    var btn=document.createElement('button');
+    btn.className='hcal-day';
+    btn.textContent=HD_P[d];
+    if(f===VCTF)btn.classList.add('today');
+    if(VCSF!==null&&f===VCSF)btn.classList.add('selected');
+    btn.setAttribute('data-f',f);
+    btn.onclick=function(){VCSF=parseInt(this.getAttribute('data-f'));renderVesetCal();};
+    grid.appendChild(btn);
+  }
+}
+function hcalPrev(){var ms=pMonths(VCY),i=ms.indexOf(VCM);if(i>0)VCM=ms[i-1];else{VCY--;VCM=pMonths(VCY).slice(-1)[0];}renderVesetCal();}
+function hcalNext(){var ms=pMonths(VCY),i=ms.indexOf(VCM);if(i<ms.length-1)VCM=ms[i+1];else{VCY++;VCM=pMonths(VCY)[0];}renderVesetCal();}
+function hcalGoM(){VCM=parseInt(document.getElementById('hcal-msel').value);renderVesetCal();}
+function hcalGoY(){
+  VCY=parseInt(document.getElementById('hcal-ysel').value);
+  var ms=pMonths(VCY);if(ms.indexOf(VCM)===-1)VCM=ms[0];
+  renderVesetCal();}
+
+// Date mode toggle
+function setDateMode(mode){
+  document.getElementById('dmt-greg').classList.toggle('active', mode==='greg');
+  document.getElementById('dmt-heb').classList.toggle('active', mode==='heb');
+  document.getElementById('date-greg-wrap').style.display = mode==='greg' ? '' : 'none';
+  document.getElementById('date-heb-wrap').style.display  = mode==='heb'  ? '' : 'none';
+  // Clear the date when switching modes to avoid confusion
+  if(mode==='greg'){
+    document.getElementById('heb-cal-trigger').textContent='📅 בחרי תאריך עברי';
+  }
+  document.getElementById('input-date').value='';
+}
+
+// ════════════════════════════════════════════════════════
+// HEBREW CALENDAR ENGINE  (Dershowitz & Reingold algorithm)
+// Months: 1=Nisan, 2=Iyar, 3=Sivan, 4=Tammuz, 5=Av, 6=Elul,
+//         7=Tishri, 8=Cheshvan, 9=Kislev, 10=Tevet, 11=Shvat,
+//         12=Adar/AdarI, 13=AdarII
+// ════════════════════════════════════════════════════════
+const HebCal = {
+
+  isLeapYear(y) { return ((7 * y) + 1) % 19 < 7; },
+
+  // Elapsed days from Hebrew epoch to start of Hebrew year y
+  _elapsedDays(y) {
+    const m = Math.floor((235 * y - 234) / 19);
+    const p = 12084 + 13753 * m;
+    let d = m * 29 + Math.floor(p / 25920);
+    if ((3 * (d + 1)) % 7 < 3) d++;
+    return d;
+  },
+
+  // New-year postponement (dechiyot)
+  _newYearDelay(y) {
+    const e  = this._elapsedDays(y);
+    const e1 = this._elapsedDays(y + 1);
+    const e0 = this._elapsedDays(y - 1);
+    if (e1 - e === 356) return 2;
+    if (e  - e0 === 382) return 1;
+    return 0;
+  },
+
+  // Days in Hebrew month
+  daysInMonth(month, year) {
+    const len = this._elapsedDays(year + 1) + this._newYearDelay(year + 1)
+              - this._elapsedDays(year)     - this._newYearDelay(year);
+    if (month === 7)  return 30;
+    if (month === 8)  return (len % 10 === 5) ? 30 : 29;
+    if (month === 9)  return (len % 10 === 3) ? 29 : 30;
+    if (month === 10) return 29;
+    if (month === 11) return 30;
+    if (month === 12) return this.isLeapYear(year) ? 30 : 29;
+    if (month === 13) return 29;
+    if (month === 1)  return 30;
+    if (month === 2)  return 29;
+    if (month === 3)  return 30;
+    if (month === 4)  return 29;
+    if (month === 5)  return 30;
+    if (month === 6)  return 29;
+    return 29;
+  },
+
+  // Month order within year, starting Tishri
+  _monthOrder(year) {
+    return this.isLeapYear(year)
+      ? [7,8,9,10,11,12,13,1,2,3,4,5,6]
+      : [7,8,9,10,11,12,1,2,3,4,5,6];
+  },
+
+  // Hebrew date → absolute day (days since proleptic 1 Jan 1 CE Gregorian)
+  // We use the Hebrew epoch offset: Hebrew abs day 1 = absolute day -1373428
+  _HEBREW_EPOCH: -1373428,
+
+  hebToAbs(year, month, day) {
+    let abs = this._HEBREW_EPOCH
+            + this._elapsedDays(year)
+            + this._newYearDelay(year)
+            + day - 1;
+    for (const m of this._monthOrder(year)) {
+      if (m === month) break;
+      abs += this.daysInMonth(m, year);
+    }
+    return abs;
+  },
+
+  // Absolute day → Hebrew date
+  absToHeb(abs) {
+    // Estimate year from average Hebrew year length
+    let year = Math.floor((abs - this._HEBREW_EPOCH) / 365.25);
+    while (this.hebToAbs(year + 1, 7, 1) <= abs) year++;
+    while (this.hebToAbs(year,     7, 1) >  abs) year--;
+    let rem = abs - this.hebToAbs(year, 7, 1);
+    let month = 7, day = 1;
+    for (const m of this._monthOrder(year)) {
+      const dim = this.daysInMonth(m, year);
+      if (rem < dim) { month = m; day = rem + 1; break; }
+      rem -= dim;
+    }
+    return { year, month, day };
+  },
+
+  // Gregorian → absolute day
+  gregToAbs(year, month, day) {
+    let abs = 365 * (year - 1)
+            + Math.floor((year - 1) / 4)
+            - Math.floor((year - 1) / 100)
+            + Math.floor((year - 1) / 400);
+    const dm = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+    for (let m = 1; m < month; m++) abs += dm[m];
+    if (month > 2 && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)) abs++;
+    return abs + day;
+  },
+
+  // Absolute day → Gregorian
+  absToGreg(abs) {
+    let year = Math.floor(abs / 365.2425);
+    while (this.gregToAbs(year + 1, 1, 1) <= abs) year++;
+    while (this.gregToAbs(year,     1, 1) >  abs) year--;
+    let month = 1;
+    while (month < 12 && this.gregToAbs(year, month + 1, 1) <= abs) month++;
+    const day = abs - this.gregToAbs(year, month, 1) + 1;
+    return { year, month, day };
+  },
+
+  // Public conversions
+  gregToHeb(year, month, day) { return this.absToHeb(this.gregToAbs(year, month, day)); },
+  hebToGreg(year, month, day) { return this.absToGreg(this.hebToAbs(year, month, day)); },
+
+  // Add n days to a Hebrew date
+  addDaysToHeb(hebYear, hebMonth, hebDay, n) {
+    return this.absToHeb(this.hebToAbs(hebYear, hebMonth, hebDay) + n);
+  },
+
+  // Add n days to a Gregorian date
+  addDaysToGreg(year, month, day, n) {
+    return this.absToGreg(this.gregToAbs(year, month, day) + n);
+  },
+
+  // Same Hebrew day in next month (Tishri-order)
+  nextMonthDate(hebYear, hebMonth, hebDay) {
+    const order = this._monthOrder(hebYear);
+    const idx   = order.indexOf(hebMonth);
+    let nextMonth, nextYear;
+    if (idx === order.length - 1) { nextMonth = 7; nextYear = hebYear + 1; }
+    else                          { nextMonth = order[idx + 1]; nextYear = hebYear; }
+    const maxDay    = this.daysInMonth(nextMonth, nextYear);
+    const actualDay = Math.min(hebDay, maxDay);
+    return { year: nextYear, month: nextMonth, day: actualDay, capped: actualDay < hebDay };
+  },
+
+  // Month name
+  MONTH_NAMES: {1:'ניסן',2:'אייר',3:'סיוון',4:'תמוז',5:'אב',6:'אלול',
+    7:'תשרי',8:'חשוון',9:'כסלו',10:'טבת',11:'שבט',12:'אדר',13:'אדר ב\''},
+  monthName(m, year) {
+    if (m === 12 && this.isLeapYear(year)) return 'אדר א\'';
+    return this.MONTH_NAMES[m] || '';
+  },
+
+  // Convert a number to Hebrew letters (gematria), e.g. 16 -> ט"ז, 5786 -> תשפ"ו
+  // dropThousands: if true, only render the last 3 digits (standard for "ה'תשפ"ו" style years)
+  toHebLetters(num, dropThousands) {
+    if (!num || num <= 0) return '';
+    let n = num;
+    let prefix = '';
+    if (dropThousands) {
+      const thousands = Math.floor(n / 1000);
+      n = n % 1000;
+      if (n === 0) { n = 1000; } // edge safety, shouldn't occur for valid years
+    }
+    const HUNDREDS = ['','ק','ר','ש','ת','תק','תר','תש','תת','תתק'];
+    const TENS     = ['','י','כ','ל','מ','נ','ס','ע','פ','צ'];
+    const ONES     = ['','א','ב','ג','ד','ה','ו','ז','ח','ט'];
+
+    const hundredsDigit = Math.floor(n / 100);
+    const tensDigit     = Math.floor((n % 100) / 10);
+    const onesDigit     = n % 10;
+
+    let letters = HUNDREDS[hundredsDigit] || '';
+
+    // Special-case 15 and 16 to avoid spelling God's name (טו / טז instead of יה / יו)
+    const remainder = tensDigit * 10 + onesDigit;
+    if (remainder === 15) letters += 'טו';
+    else if (remainder === 16) letters += 'טז';
+    else letters += (TENS[tensDigit] || '') + (ONES[onesDigit] || '');
+
+    // Insert gershayim (") before the last letter, or geresh (') if single letter
+    if (letters.length === 0) return '';
+    if (letters.length === 1) return letters + '\'';
+    return letters.slice(0, -1) + '"' + letters.slice(-1);
+  },
+
+  // Day of month in Hebrew letters (1–30), e.g. 16 -> ט"ז
+  dayLetters(day) { return this.toHebLetters(day, false); },
+
+  // Year in Hebrew letters, dropping the thousands digit (standard usage), e.g. 5786 -> תשפ"ו
+  yearLetters(year) { return this.toHebLetters(year, true); },
+
+  formatHeb(h) {
+    return `${this.dayLetters(h.day)} ${this.monthName(h.month, h.year)} ${this.yearLetters(h.year)}`;
+  },
+};
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function onahLabel(o) { return o === 'yom' ? 'יום' : 'לילה'; }
+function oppOnah(o)   { return o === 'yom' ? 'layla' : 'yom'; }
+function fmtGreg(g)   { return `${String(g.day).padStart(2,'0')}/${String(g.month).padStart(2,'0')}/${g.year}`; }
+function fmtHeb(h)    { return HebCal.formatHeb(h); }
+
+// ════════════════════════════════════════════════════════
+// PRISHUT CALCULATOR
+// ════════════════════════════════════════════════════════
+function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeOrZarua) {
+  const [gy, gm, gd] = dateStr.split('-').map(Number);
+  const heb0 = HebCal.gregToHeb(gy, gm, gd);
+  const abs0 = HebCal.gregToAbs(gy, gm, gd);
+  const results = [];
+
+  // 1. BEINONIT – 30 Hebrew days later, same onah
+  const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 30);
+  const beinonit_greg = HebCal.hebToGreg(beinonit_heb.year, beinonit_heb.month, beinonit_heb.day);
+  results.push({ type:'beinonit', name:'עונה בינונית', desc:'30 ימים עבריים', icon:'📅',
+    onah, heb:beinonit_heb, greg:beinonit_greg, color:'rose' });
+
+  // 2. HODESH – same Hebrew day next month, same onah
+  const hodesh_heb  = HebCal.nextMonthDate(heb0.year, heb0.month, heb0.day);
+  const hodesh_greg = HebCal.hebToGreg(hodesh_heb.year, hodesh_heb.month, hodesh_heb.day);
+  results.push({ type:'hodesh', name:'עונת החודש',
+    desc:`יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''}`,
+    icon:'🌙', onah, heb:hodesh_heb, greg:hodesh_greg, color:'gold' });
+
+  // 3. HAFLAGA + 4. OR ZARUA
+  if (specialType !== 'special' && prevDateStr && prevOnah) {
+    const [py, pm, pd] = prevDateStr.split('-').map(Number);
+    const absPrev = HebCal.gregToAbs(py, pm, pd);
+    const hebPrev = HebCal.gregToHeb(py, pm, pd);
+
+    // Haflaga = abs difference in Hebrew days (abs days = Hebrew days here)
+    const dayDiff = abs0 - absPrev; // days between the two veset days
+
+    // Onah offset: same onah = 0 extra, yom→layla adds half, layla→yom subtracts half
+    // We treat each full day as 2 onahs; compute total onahs elapsed
+    let totalOnahs = dayDiff * 2;
+    if (prevOnah === 'yom'   && onah === 'layla') totalOnahs -= 1;
+    if (prevOnah === 'layla' && onah === 'yom')   totalOnahs += 1;
+
+    const haflagaDays  = Math.floor(totalOnahs / 2);
+    const haflagaOnah  = (totalOnahs % 2 === 0) ? onah : oppOnah(onah);
+
+    const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaDays);
+    const haflaga_heb  = HebCal.gregToHeb(haflaga_greg.year, haflaga_greg.month, haflaga_greg.day);
+
+    results.push({ type:'haflaga', name:'עונת ההפלגה',
+      desc:`פרש של ${haflagaDays} ימים עבריים`,
+      icon:'📏', onah:haflagaOnah, heb:haflaga_heb, greg:haflaga_greg, color:'green' });
+
+    // 4. OR ZARUA – day 29 from veset, opposite onah
+    if (includeOrZarua) {
+      const orz_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
+      const orz_greg = HebCal.hebToGreg(orz_heb.year, orz_heb.month, orz_heb.day);
+      results.push({ type:'orzarua', name:'עונת אור זרוע',
+        desc:'יום כ״ט – עונה ההפוכה',
+        icon:'🌸', onah:oppOnah(onah), heb:orz_heb, greg:orz_greg, color:'rose' });
+    }
+  } else if (specialType !== 'special') {
+    results.push({ type:'haflaga', name:'עונת ההפלגה',
+      desc:'נדרש עדכון קודם לחישוב', icon:'📏',
+      onah:null, heb:null, greg:null, color:'gray', missing:true });
+  }
+
+  return { results, heb0, onah };
+}
+
+// ════════════════════════════════════════════════════════
+// APP STATE
+// ════════════════════════════════════════════════════════
+let appState = {
+  onah: 'yom', specialType: 'regular', history: [],
+  settings: { gcal:true, notif:false, calStyle:'text', husband:false, husbandEmail:'', orZarua:true }
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('veset_app_v2');
+    if (s) { const p = JSON.parse(s); appState = { ...appState, ...p }; applySettings(); }
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('veset_app_v2', JSON.stringify(appState)); } catch(e) {}
+}
+function applySettings() {
+  document.getElementById('toggle-gcal').checked   = appState.settings.gcal;
+  document.getElementById('toggle-notif').checked  = appState.settings.notif;
+  document.getElementById('notif-time-yom').value   = appState.settings.notifTimeYom   || '07:00';
+  document.getElementById('notif-time-layla').value = appState.settings.notifTimeLayla || '19:00';
+  document.getElementById('cal-style').value        = appState.settings.calStyle || 'text';
+  document.getElementById('toggle-husband').checked = appState.settings.husband;
+  document.getElementById('husband-email').value    = appState.settings.husbandEmail || '';
+  document.getElementById('toggle-orzarua').checked = appState.settings.orZarua !== false;
+  if (appState.settings.husband) document.getElementById('husband-email-group').style.display = 'block';
+  if (appState.settings.notif)  { document.getElementById('notif-install-tip').style.display = 'block'; document.getElementById('notif-times-group').style.display = 'block'; }
+}
+
+// ════════════════════════════════════════════════════════
+// UI
+// ════════════════════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-'  + page).classList.add('active');
+  if (page === 'history') renderHistory();
+}
+function setOnah(val) {
+  appState.onah = val;
+  document.getElementById('btn-yom').classList.toggle('active', val === 'yom');
+  document.getElementById('btn-layla').classList.toggle('active', val === 'layla');
+}
+function openSpecialModal() { document.getElementById('modal-special').classList.add('open'); }
+function setSpecialType(t)  {
+  appState.specialType = 'special';
+  document.getElementById('input-type').value = 'special';
+  closeModal('modal-special');
+  showToast('וסת מיוחד נבחר – תחושב בינונית בלבד');
+}
+function openTooltip(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id)  { document.getElementById(id).classList.remove('open'); }
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)',
+    background:'rgba(45,35,32,.9)', color:'#fff', padding:'10px 20px',
+    borderRadius:'24px', fontSize:'13px', zIndex:'300', whiteSpace:'nowrap', maxWidth:'80vw'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ════════════════════════════════════════════════════════
+// CALCULATE
+// ════════════════════════════════════════════════════════
+function calculate() {
+  const dateStr = document.getElementById('input-date').value;
+  if (!dateStr) { showToast('נא להזין תאריך'); return; }
+
+  const specialType = document.getElementById('input-type').value;
+  let prevDateStr = null, prevOnah = null;
+  if (appState.history.length > 0) {
+    const prev = appState.history[appState.history.length - 1];
+    prevDateStr = prev.date; prevOnah = prev.onah;
+  }
+
+  try {
+    const calc = calcPrishut(dateStr, appState.onah, specialType, prevDateStr, prevOnah, appState.settings.orZarua);
+    renderResults(calc, dateStr);
+
+    const entry = { id:Date.now(), date:dateStr, onah:appState.onah, specialType,
+                    results:calc.results, heb0:calc.heb0, timestamp:new Date().toISOString() };
+    appState.history.push(entry);
+    saveState();
+
+    // store last results for the calendar button
+    appState._lastResults = calc.results;
+
+    if (appState.settings.notif) scheduleNotifications(calc.results);
+    setTimeout(() => document.getElementById('results-area').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+
+    // Auto-check cycles after each entry (with slight delay so results are visible first)
+    setTimeout(() => checkCyclesAfterCalculate(), 600);
+  } catch(e) {
+    showToast('שגיאה בחישוב: ' + e.message);
+    console.error(e);
+  }
+}
+
+function renderResults(calc, dateStr) {
+  const [gy, gm, gd] = dateStr.split('-').map(Number);
+  const colorMap = { rose:'var(--rose)', gold:'var(--gold)', green:'var(--green)', gray:'#bbb' };
+
+  const sorted = [...calc.results]
+    .filter(r => !r.missing)
+    .sort((a, b) => {
+      const aa = HebCal.hebToAbs(a.heb.year, a.heb.month, a.heb.day);
+      const bb = HebCal.hebToAbs(b.heb.year, b.heb.month, b.heb.day);
+      return aa - bb;
+    });
+
+  let rows = sorted.map(r => {
+    const c = colorMap[r.color] || '#bbb';
+    return `
+      <div class="onah-row">
+        <div class="onah-icon">${r.icon}</div>
+        <div class="onah-info">
+          <div class="onah-name" style="color:${c}">${r.name}</div>
+          <div class="onah-date">${fmtGreg(r.greg)} <span class="badge" style="background:${c}22;color:${c}">עונת ${onahLabel(r.onah)}</span></div>
+          <div class="onah-hebrew">${fmtHeb(r.heb)}</div>
+          <div class="onah-hebrew" style="font-size:11px;color:#aaa">${r.desc}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const missing = calc.results.find(r => r.missing);
+  if (missing) rows += `
+    <div class="onah-row">
+      <div class="onah-icon">📏</div>
+      <div class="onah-info">
+        <div class="onah-name" style="color:#bbb">עונת ההפלגה</div>
+        <div class="onah-date" style="color:#bbb;font-size:13px">דרושה הזנה קודמת לחישוב</div>
+      </div>
+    </div>`;
+
+  document.getElementById('results-area').innerHTML = `
+    <div class="summary-card">
+      <div class="summary-header">
+        <div>ראיה: ${fmtGreg({year:gy,month:gm,day:gd})} | ${onahLabel(calc.onah)}</div>
+        <div class="date-display">${fmtHeb(calc.heb0)}</div>
+      </div>
+      ${rows}
+      <div style="padding:16px 20px;">
+        <button class="btn-primary" onclick="addToGoogleCalendar(appState._lastResults)"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+          שמירה ביומן Google
+        </button>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════════════════
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!appState.history.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><h3>אין היסטוריה עדיין</h3><p>לאחר הזנת הוסת הראשון, הרישומים יופיעו כאן.</p></div>';
+    return;
+  }
+  list.innerHTML = [...appState.history].reverse().map(e => {
+    const [gy,gm,gd] = e.date.split('-').map(Number);
+    const special = e.specialType === 'special' ? ' • וסת מיוחד' : '';
+    return `<div class="history-item" onclick="editEntry(${e.id})">
+      <div class="history-dot"></div>
+      <div class="history-info">
+        <div class="history-date">${fmtGreg({year:gy,month:gm,day:gd})} | עונת ${onahLabel(e.onah)}</div>
+        <div class="history-sub">${e.heb0 ? fmtHeb(e.heb0) : ''}${special}</div>
+      </div>
+      <div style="color:var(--ink-soft);font-size:18px">‹</div>
+    </div>`;
+  }).join('');
+}
+
+let editingId = null;
+function editEntry(id) {
+  editingId = id;
+  const e = appState.history.find(x => x.id == id);
+  if (!e) return;
+  const [gy,gm,gd] = e.date.split('-').map(Number);
+  document.getElementById('edit-modal-title').textContent = `${fmtGreg({year:gy,month:gm,day:gd})} | עונת ${onahLabel(e.onah)}`;
+  document.getElementById('edit-modal-content').innerHTML = `
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:8px;">
+      ${e.heb0 ? fmtHeb(e.heb0) : ''}<br>${e.specialType === 'special' ? '• וסת מיוחד' : '• וסת רגיל'}
+    </p>
+    ${(e.results||[]).filter(r=>r.heb).map(r=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
+        ${r.icon} <strong>${r.name}</strong>: ${r.greg ? fmtGreg(r.greg) : ''} | ${r.onah ? onahLabel(r.onah) : ''}
+      </div>`).join('')}`;
+  document.getElementById('modal-edit').classList.add('open');
+}
+function deleteEntry() {
+  if (!editingId) return;
+  const before = appState.history.length;
+  appState.history = appState.history.filter(e => e.id != editingId);
+  saveState();
+  closeModal('modal-edit');
+  renderHistory();
+  showToast(appState.history.length < before ? 'הרישום נמחק ✓' : 'לא נמחק – נסי שוב');
+}
+function exportData() {
+  if (!appState.history.length) { showToast('אין נתונים לייצוא'); return; }
+
+  const ONAH_NAMES = { beinonit:'עונה בינונית', hodesh:'עונת החודש', haflaga:'עונת הפלגה', orzarua:'אור זרוע' };
+  const fmtG = (g) => g ? `${String(g.day).padStart(2,'0')}/${String(g.month).padStart(2,'0')}/${g.year}` : '';
+
+  // BOM for Excel to recognize Hebrew UTF-8
+  let csv = '\uFEFF';
+  csv += 'תאריך ראיה (לועזי),תאריך ראיה (עברי),עונה,סוג וסת,עונה בינונית,עונת החודש,עונת הפלגה,אור זרוע\r\n';
+
+  appState.history.forEach(entry => {
+    const [gy,gm,gd] = entry.date.split('-').map(Number);
+    const gregFmt = `${String(gd).padStart(2,'0')}/${String(gm).padStart(2,'0')}/${gy}`;
+    const hebFmt  = entry.heb0 ? fmtHeb(entry.heb0) : '';
+    const onah    = entry.onah === 'yom' ? 'יום' : 'לילה';
+    const special = entry.specialType === 'special' ? 'מיוחד' : 'רגיל';
+
+    const results = entry.results || [];
+    const getDate = (type) => {
+      const r = results.find(r => r.type === type && r.greg);
+      return r ? fmtG(r.greg) : '';
+    };
+
+    csv += [
+      `"${gregFmt}"`,
+      `"${hebFmt}"`,
+      `"${onah}"`,
+      `"${special}"`,
+      `"${getDate('beinonit')}"`,
+      `"${getDate('hodesh')}"`,
+      `"${getDate('haflaga')}"`,
+      `"${getDate('orzarua')}"`
+    ].join(',') + '\r\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'luach-tahara.csv';
+  a.click();
+  showToast('הקובץ יוצא – פתחי ב-Excel');
+}
+function sendContact() {
+  const name  = document.getElementById('contact-name').value.trim();
+  const reply = document.getElementById('contact-reply').value.trim();
+  const msg   = document.getElementById('contact-msg').value.trim();
+  if (!msg) { showToast('נא למלא הודעה'); return; }
+
+  const btn    = document.getElementById('contact-send-btn');
+  const status = document.getElementById('contact-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ שולח...';
+  status.style.display = 'none';
+
+  emailjs.send('service_jz77xj1', 'template_epmurnc', {
+    from_name: name || 'משתמשת אנונימית',
+    reply_to:  reply || '(לא צוין)',
+    message:   msg,
+    to_email:  'arye.minkov@gmail.com'
+  }).then(() => {
+    status.style.cssText = 'display:block;color:#4E8060;font-weight:600;';
+    status.textContent = '✓ ההודעה נשלחה בהצלחה!';
+    document.getElementById('contact-name').value  = '';
+    document.getElementById('contact-reply').value = '';
+    document.getElementById('contact-msg').value   = '';
+    btn.textContent = '📨 שליחה';
+    btn.disabled = false;
+  }).catch(() => {
+    status.style.cssText = 'display:block;color:#C0392B;font-weight:600;';
+    status.textContent = '✗ שגיאה בשליחה – נסי שוב';
+    btn.textContent = '📨 שליחה';
+    btn.disabled = false;
+  });
+}
+
+document.getElementById('btn-clear-history').addEventListener('click', () => {
+  if (!appState.history.length) { showToast('אין היסטוריה למחיקה'); return; }
+  document.getElementById('modal-clear-history').classList.add('open');
+});
+document.getElementById('btn-confirm-clear-history').addEventListener('click', () => {
+  appState.history = [];
+  saveState();
+  renderHistory();
+  closeModal('modal-clear-history');
+  showToast('כל ההיסטוריה נמחקה');
+});
+
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+document.getElementById('toggle-husband').addEventListener('change', function() {
+  document.getElementById('husband-email-group').style.display = this.checked ? 'block' : 'none';
+});
+
+// Show install instructions when notifications toggle is turned on
+document.getElementById('toggle-notif').addEventListener('change', function() {
+  const tip   = document.getElementById('notif-install-tip');
+  const times = document.getElementById('notif-times-group');
+  tip.style.display   = this.checked ? 'block' : 'none';
+  times.style.display = this.checked ? 'block' : 'none';
+  if (this.checked) requestNotificationPermission();
+});
+
+// PWA install prompt
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('btn-pwa-install');
+  if (btn) btn.style.display = 'block';
+});
+document.getElementById('btn-pwa-install').addEventListener('click', () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+});
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+// Schedule browser notifications for calculated onahs
+function scheduleNotifications(results) {
+  if (!appState.settings.notif) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  const ONAH_EMOJIS = { beinonit:'🌸', hodesh:'🌼', haflaga:'🌺', orzarua:'🌷' };
+  const style = appState.settings.calStyle;
+  const yomH  = (appState.settings.notifTimeYom  || '07:00').split(':').map(Number);
+  const laylaH = (appState.settings.notifTimeLayla || '19:00').split(':').map(Number);
+
+  results.filter(r => r.greg && !r.missing).forEach(r => {
+    const g = r.greg;
+    const [h, m] = r.onah === 'layla' ? laylaH : yomH;
+    const target = new Date(g.year, g.month - 1, g.day, h, m, 0);
+    const delay  = target - new Date();
+    if (delay <= 0) return;
+
+    // title: emoji-only in emoji mode, else onah name
+    const notifTitle = style === 'emoji'
+      ? (ONAH_EMOJIS[r.type] || '🌸')
+      : r.name;
+    const notifBody  = style === 'emoji' ? r.name : r.desc;
+
+    setTimeout(() => {
+      new Notification(notifTitle, {
+        body: notifBody,
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌸</text></svg>'
+      });
+    }, delay);
+  });
+}
+
+function saveSettings() {
+  appState.settings = {
+    gcal:           document.getElementById('toggle-gcal').checked,
+    notif:          document.getElementById('toggle-notif').checked,
+    notifTimeYom:   document.getElementById('notif-time-yom').value,
+    notifTimeLayla: document.getElementById('notif-time-layla').value,
+    calStyle:       document.getElementById('cal-style').value,
+    husband:        document.getElementById('toggle-husband').checked,
+    husbandEmail:   document.getElementById('husband-email').value,
+    orZarua:        document.getElementById('toggle-orzarua').checked
+  };
+  saveState(); showToast('ההגדרות נשמרו ✓');
+}
+
+// ════════════════════════════════════════════════════════
+// GOOGLE CALENDAR
+// ════════════════════════════════════════════════════════
+function addToGoogleCalendar(results) {
+  const style  = appState.settings.calStyle;
+  const valid  = results.filter(r => r.greg && !r.missing);
+  if (!valid.length) return;
+
+  const ONAH_TITLES = { beinonit:'עונה בינונית', hodesh:'עונת החודש', haflaga:'עונת הפלגה', orzarua:'אור זרוע' };
+  const ONAH_EMOJIS = { beinonit:'🌸', hodesh:'🌼', haflaga:'🌺', orzarua:'🌷' };
+
+  const titleFor = (r) => {
+    if (style === 'emoji') return ONAH_EMOJIS[r.type] || '🌸';
+    return ONAH_TITLES[r.type] || r.name; // text
+  };
+
+  const detailsFor = (r) => `${r.name} | ${r.desc}`; // always include name in description
+
+  const husbandParam = (appState.settings.husband && appState.settings.husbandEmail)
+    ? `&add=${encodeURIComponent(appState.settings.husbandEmail)}` : '';
+
+  const links = valid.map(r => {
+    const g = r.greg;
+    const title = titleFor(r);
+    const ds  = `${g.year}${String(g.month).padStart(2,'0')}${String(g.day).padStart(2,'0')}`;
+    const ng  = HebCal.addDaysToGreg(g.year, g.month, g.day, 1);
+    const de  = `${ng.year}${String(ng.month).padStart(2,'0')}${String(ng.day).padStart(2,'0')}`;
+    return { url:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${ds}/${de}&details=${encodeURIComponent(detailsFor(r))}${husbandParam}`, name:r.name, icon:r.icon };
+  });
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay open';
+  modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.remove(); });
+  modal.innerHTML = `<div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">הוספה ליומן Google</div>
+
+    <button class="btn-primary" id="gcal-save-all" style="margin-bottom:14px;">📥 שמירת כל העונות בבת אחת</button>
+
+    <div id="gcal-import-steps" style="display:none; background:var(--green-pale); border:1px solid #BFE0CC; border-radius:12px; padding:14px; margin-bottom:18px;">
+      <p style="font-size:13px; font-weight:600; color:#2E5E3E; margin-bottom:8px;">הקובץ ירד ✓ עכשיו שני צעדים קטנים:</p>
+      <p style="font-size:13px; color:#2E5E3E; line-height:1.8; margin-bottom:4px;">
+        <strong>1.</strong> לוחצים על הכפתור הירוק למטה — זה פותח ישירות את עמוד הייבוא ביומן Google.<br>
+        <strong>2.</strong> בעמוד שנפתח, בוחרים את הקובץ שירד (לרוב נקרא <code>imei-prisha.ics</code>, בתיקיית ההורדות) ולוחצים "ייבוא".
+      </p>
+      <a href="https://calendar.google.com/calendar/r/settings/export" target="_blank" rel="noopener"
+         style="display:block; text-align:center; margin-top:10px; padding:12px; border-radius:10px; background:#4E8060; color:#fff; text-decoration:none; font-size:14px; font-weight:600;">
+        🗓️ פתיחת עמוד הייבוא ב-Google Calendar
+      </a>
+    </div>
+
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;border-top:1px solid var(--rose-pale);padding-top:14px;">או להוסיף כל עונה בנפרד (ייפתח חלון חדש לכל אחת):</p>
+    ${links.map(l=>`<a href="${l.url}" target="_blank" rel="noopener" style="display:block;padding:13px;border-radius:10px;border:1.5px solid var(--sand);background:var(--rose-pale);text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;margin-bottom:10px;">${l.icon} ${l.name} →</a>`).join('')}
+    <div style="height:8px;"></div>
+    <button class="btn-secondary" id="gcal-modal-close">סגירה</button>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('.modal').addEventListener('click', (ev) => ev.stopPropagation());
+  modal.querySelector('#gcal-modal-close').addEventListener('click', () => modal.remove());
+  modal.querySelector('#gcal-save-all').addEventListener('click', () => {
+    downloadIcs(valid, titleFor, detailsFor);
+    const steps = modal.querySelector('#gcal-import-steps');
+    steps.style.display = 'block';
+    steps.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
+// Build and download a single .ics file containing all onah events,
+// so they can be imported into Google Calendar in one action.
+function downloadIcs(items, titleFor, detailsFor) {
+  const pad = n => String(n).padStart(2, '0');
+  const dstamp = (g) => `${g.year}${pad(g.month)}${pad(g.day)}`;
+
+  const escapeIcs = (s) => String(s).replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
+
+  const now = new Date();
+  const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+
+  const events = items.map((r, i) => {
+    const g = r.greg;
+    const next = HebCal.addDaysToGreg(g.year, g.month, g.day, 1);
+    const uid = `veset-${dstamp(g)}-${r.type}-${Date.now()}-${i}@luach-tahara`;
+    const summary = escapeIcs(titleFor(r));
+    const desc = escapeIcs(detailsFor ? detailsFor(r) : `${r.name} | ${r.desc}`);
+    const attendee = (appState.settings.husband && appState.settings.husbandEmail)
+      ? `\r\nATTENDEE:mailto:${appState.settings.husbandEmail}` : '';
+    return [
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${dstamp(g)}`,
+      `DTEND;VALUE=DATE:${dstamp(next)}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${desc}` + attendee,
+      'END:VEVENT'
+    ].join('\r\n');
+  }).join('\r\n');
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Luach Tahara//HE',
+    'CALSCALE:GREGORIAN',
+    events,
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'imei-prisha.ics';
+  a.click();
+  showToast('הקובץ הורד — ייבאי אותו ל-Google Calendar');
+}
+
+// ════════════════════════════════════════════════════════
+// CYCLE ANALYSIS
+// ════════════════════════════════════════════════════════
+function checkCyclesAfterCalculate() {
+  const findings = getCycleFindings();
+  if (!findings.length) return;
+  const fingerprint = findings.map(f => f.type + f.title).sort().join('|');
+  if (appState._lastCycleAlert === fingerprint) return;
+  appState._lastCycleAlert = fingerprint;
+  showCycleModal(findings, false);
+}
+
+function analyzeCycles() {
+  const h = appState.history.filter(e => e.specialType !== 'special');
+  if (h.length < 3) { showToast('נדרשות לפחות 3 ראיות לבדיקת מחזוריות'); return; }
+  showCycleModal(getCycleFindings(), true);
+}
+
+function getCycleFindings() {
+  const h = appState.history.filter(e => e.specialType !== 'special');
+  if (h.length < 3) return [];
+  const sorted = [...h].sort((a, b) => a.date < b.date ? -1 : 1);
+  const entries = sorted.map(e => {
+    const [gy, gm, gd] = e.date.split('-').map(Number);
+    const abs = HebCal.gregToAbs(gy, gm, gd);
+    const heb = e.heb0 || HebCal.gregToHeb(gy, gm, gd);
+    return { abs, heb, onah: e.onah, hebFmt: fmtHeb(heb) };
+  });
+  const findings = [];
+
+  // Build intervals array
+  const intervals = [];
+  for (let i = 1; i < entries.length; i++) {
+    intervals.push(entries[i].abs - entries[i-1].abs);
+  }
+
+  // ── 1. Simple haflaga: same interval repeated ≥2 times ──
+  const intervalGroups = {};
+  intervals.forEach((d, i) => {
+    if (!intervalGroups[d]) intervalGroups[d] = [];
+    intervalGroups[d].push(i);
+  });
+  Object.entries(intervalGroups).forEach(([days, idxs]) => {
+    if (idxs.length >= 2) {
+      findings.push({
+        type: 'haflaga',
+        title: `הפלגה קבועה של ${days} ימים עבריים`,
+        detail: idxs.map(i => ({
+          heb:  `${entries[i].hebFmt} ← ${entries[i+1].hebFmt}`,
+          days: `הפרש: ${days} ימים`
+        })),
+        count: idxs.length
+      });
+    }
+  });
+
+  // ── 2. Complex pattern: a sequence of intervals that repeats ≥2 times ──
+  const found = new Set();
+  for (let seqLen = 2; seqLen <= Math.floor(intervals.length / 2); seqLen++) {
+    for (let start = 0; start <= intervals.length - seqLen * 2; start++) {
+      const seq = intervals.slice(start, start + seqLen);
+      const seqKey = seq.join(',');
+      if (found.has(seqKey)) continue;
+
+      const occurrences = [];
+      let pos = start;
+      while (pos <= intervals.length - seqLen) {
+        const candidate = intervals.slice(pos, pos + seqLen);
+        if (candidate.join(',') === seqKey) { occurrences.push(pos); pos += seqLen; }
+        else pos++;
+      }
+
+      if (occurrences.length >= 2) {
+        const allSame = seq.every(d => d === seq[0]);
+        if (allSame) continue;
+        found.add(seqKey);
+        const detail = occurrences.map(pos => {
+          // Build sub-rows: one per interval in the sequence
+          const rows = seq.map((d, k) => ({
+            heb:  `${entries[pos+k].hebFmt} ← ${entries[pos+k+1].hebFmt}`,
+            days: `${d} ימים`
+          }));
+          return rows;
+        });
+        findings.push({
+          type: 'complex',
+          title: `מחזוריות מורכבת: ${seq.join(', ')} ימים (חוזרת ${occurrences.length} פעמים)`,
+          detail,       // array of arrays
+          complex: true,
+          count: occurrences.length,
+          seq
+        });
+      }
+    }
+  }
+
+  // ── 3. Hodesh: same day of Hebrew month ≥3 times ──
+  const dayGroups = {};
+  entries.forEach(e => {
+    const k = e.heb.day;
+    if (!dayGroups[k]) dayGroups[k] = [];
+    dayGroups[k].push(e);
+  });
+  Object.entries(dayGroups).forEach(([day, ents]) => {
+    if (ents.length >= 3) findings.push({
+      type: 'hodesh',
+      title: `ראיה ב${HebCal.dayLetters(Number(day))} לחודש העברי — ${ents.length} פעמים`,
+      detail: ents.map((e, i) => ({
+        heb:  e.hebFmt,
+        days: i > 0 ? `${ents[i].abs - ents[i-1].abs} ימים מהפעם הקודמת` : ''
+      })),
+      count: ents.length
+    });
+  });
+
+  return findings;
+}
+
+function showCycleModal(findings, forceShow) {
+  const el = document.getElementById('modal-cycles-content');
+  if (!findings.length) {
+    if (!forceShow) return;
+    el.innerHTML = `
+      <div class="modal-title">בדיקת מחזוריות</div>
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:40px;margin-bottom:12px;">🔍</div>
+        <p style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px;">לא נמצאה מחזוריות</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;">
+          על בסיס ${appState.history.length} ראיות, לא נמצא דפוס חוזר.
+          ${appState.history.length < 5 ? '<br>הוספת ראיות נוספות תאפשר ניתוח מדויק יותר.' : ''}
+        </p>
+      </div>`;
+  } else {
+    const TYPE_COLOR = { haflaga:'var(--rose)', hodesh:'var(--gold)', complex:'#7B5EA7' };
+    const TYPE_ICON  = { haflaga:'📏', hodesh:'📅', complex:'🔄' };
+
+    function renderDetail(f) {
+      if (f.complex) {
+        // detail is array of arrays (one per occurrence, each containing sub-rows)
+        return f.detail.map((occurrence, oi) => {
+          const subRows = occurrence.map(row =>
+            `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rose-pale);font-size:12px;color:var(--ink-soft);">
+               <span>${row.heb}</span>
+               <span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>
+             </div>`
+          ).join('');
+          return `<div style="margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:3px;">מחזור ${oi+1}:</div>
+            ${subRows}
+          </div>`;
+        }).join('');
+      } else {
+        // detail is array of {heb, days} objects
+        return f.detail.map(row =>
+          `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
+             <span>${row.heb || row}</span>
+             ${row.days ? `<span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>` : ''}
+           </div>`
+        ).join('');
+      }
+    }
+
+    const cardsHtml = findings.sort((a,b) => b.count - a.count).map(f => {
+      const color = TYPE_COLOR[f.type] || 'var(--rose)';
+      const icon  = TYPE_ICON[f.type]  || '📌';
+      return `<div style="background:var(--rose-pale);border:1px solid ${color}55;border-radius:12px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${f.title}</div>
+        ${renderDetail(f)}
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="modal-title">⚠️ נמצאה מחזוריות</div>
+      <div style="background:linear-gradient(135deg,#FFF3D6,#FFF8E7);border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:16px;">
+        <p style="font-size:14px;font-weight:700;color:#7A6020;">נמצאה מחזוריות שיכולה לקבוע וסת קבוע</p>
+      </div>
+      ${cardsHtml}
+      <div style="background:var(--green-pale);border:1px solid #BFE0CC;border-radius:12px;padding:14px;">
+        <p style="font-size:14px;color:#2E5E3E;font-weight:600;">📖 מומלץ להתייעץ עם רב</p>
+      </div>`;
+  }
+  document.getElementById('modal-cycles').classList.add('open');
+}
+function shareApp() {
+  if (navigator.share) navigator.share({ title:'לוח הטהרה', text:'אפליקציה לחישוב ימי פרישה', url:window.location.href });
+  else { navigator.clipboard.writeText(window.location.href); showToast('הקישור הועתק'); }
+}
+
+window.addEventListener('load', () => {
+  loadState();
+  // Set today's date in input-date (hidden, used as fallback)
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  document.getElementById('input-date').value = todayStr;
+  // Default mode is Hebrew — pre-fill the trigger button with today's Hebrew date
+  const todayHeb = HebCal.gregToHeb(today.getFullYear(), today.getMonth()+1, today.getDate());
+  const label = HebCal.dayLetters(todayHeb.day) + ' ' + HebCal.monthName(todayHeb.month, todayHeb.year) + ' ' + HebCal.yearLetters(todayHeb.year);
+  document.getElementById('heb-cal-trigger').textContent = '📅 ' + label;
+  document.getElementById('privacy-banner').addEventListener('click', function() { this.style.display='none'; });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('lxkM1z6vkSf1QCLg_');</script>
+</body>
+</html>
