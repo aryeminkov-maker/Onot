@@ -190,9 +190,9 @@
   <!-- CALENDAR -->
   <div class="card" id="hist-calendar-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <button onclick="calNav(1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
+      <button onclick="calNav(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
       <div style="font-size:15px;font-weight:700;color:var(--ink)" id="cal-month-title"></div>
-      <button onclick="calNav(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">‹</button>
+      <button onclick="calNav(1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">‹</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
       <span style="text-align:center;font-size:10px;font-weight:700;color:var(--ink-soft)">א׳</span>
@@ -290,14 +290,11 @@
     </div>
   </div>
 
-  <!-- Install to home screen card -->
-  <div class="card" id="install-card">
-    <div class="card-title">הוספה למסך הבית</div>
-    <button class="btn-primary" id="btn-pwa-install-2" style="display:none;">📲 התקני כאפליקציה</button>
-    <p id="install-manual-text" style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
-      <strong>אנדרואיד (Chrome):</strong> תפריט ⋮ ← <em>הוסף למסך הבית</em><br>
-      <strong>iPhone (Safari):</strong> כפתור שתף 📤 ← <em>הוסף למסך הבית</em>
-    </p>
+  <!-- Install to home screen -->
+  <div class="card" id="install-card" style="display:none;">
+    <button class="btn-primary" id="btn-pwa-install-2" onclick="triggerInstall()" style="font-size:15px;">
+      📲 הוספה למסך הבית
+    </button>
   </div>
 
   <div class="card">
@@ -1411,27 +1408,25 @@ document.getElementById('toggle-notif').addEventListener('change', function() {
 let deferredInstallPrompt = null;
 
 function setInstalled(yes) {
-  const toggle = document.getElementById('toggle-notif');
-  const desc   = document.getElementById('notif-desc');
-  const ic     = document.getElementById('install-card');
-  const navBtn = document.getElementById('nav-install-btn');
+  const toggle  = document.getElementById('toggle-notif');
+  const desc    = document.getElementById('notif-desc');
+  const ic      = document.getElementById('install-card');
+  const navBtn  = document.getElementById('nav-install-btn');
   if (yes) {
     toggle.disabled = false;
-    if (desc) desc.textContent = 'תזכורת ביום כל עונה';
-    if (ic) ic.style.display = 'none';
+    if (desc)   desc.textContent = 'תזכורת ביום כל עונה';
+    if (ic)     ic.style.display = 'none';
     if (navBtn) navBtn.style.display = 'none';
-  } else {
-    if (navBtn) navBtn.style.display = 'none'; // only show when prompt available
   }
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
+  const ic     = document.getElementById('install-card');
   const navBtn = document.getElementById('nav-install-btn');
-  const btn2   = document.getElementById('btn-pwa-install-2');
+  if (ic)     ic.style.display = 'block';
   if (navBtn) navBtn.style.display = 'flex';
-  if (btn2)   btn2.style.display = 'block';
 });
 
 window.addEventListener('appinstalled', () => {
@@ -1520,8 +1515,8 @@ function addToGoogleCalendar(results) {
     ? `&add=${encodeURIComponent(appState.settings.husbandEmail)}` : '';
 
   const pad = n => String(n).padStart(2,'0');
-  const yomTime   = (appState.settings.notifTimeYom   || '07:00').replace(':','');
-  const laylaTime = (appState.settings.notifTimeLayla || '19:00').replace(':','');
+  const yomTime   = (document.getElementById('notif-time-yom-vis')?.value || appState.settings.notifTimeYom || '07:00').replace(':','');
+  const laylaTime = (document.getElementById('notif-time-layla-vis')?.value || appState.settings.notifTimeLayla || '19:00').replace(':','');
 
   function makeUrl(g, onah, title, desc) {
     const startTime = onah === 'layla' ? laylaTime : yomTime;
