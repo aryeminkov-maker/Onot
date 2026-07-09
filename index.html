@@ -163,7 +163,7 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">זמן הוסת</label>
+      <label class="form-label">זמן הוסת <button class="tooltip-btn" onclick="openTooltip('onah-explain')">?</button></label>
       <div class="toggle-group">
         <button class="toggle-btn active" id="btn-yom" onclick="setOnah('yom')">☀️ יום</button>
         <button class="toggle-btn" id="btn-layla" onclick="setOnah('layla')">🌙 לילה</button>
@@ -388,6 +388,21 @@
     <div id="modal-cycles-content"></div>
     <div style="height:12px;"></div>
     <button class="btn-primary" onclick="closeModal('modal-cycles')">סגירה</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-onah-explain" onclick="closeModal('modal-onah-explain')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">יום ולילה בהלכה</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:14px;">
+      <strong>יום</strong> — מהזריחה עד השקיעה.<br>
+      <strong>לילה</strong> — מהשקיעה עד הזריחה.<br><br>
+      לפי ההלכה, היממה העברית מתחילה בלילה.<br>
+      לכן <strong>בחירת לילה</strong> משמעותה שהוסת היה בלילה שבין יום לועזי אחד לבא אחריו — ומבחינת הלוח העברי זהו <strong>היום הבא</strong>.<br><br>
+      לדוגמה: ראיה בליל י"ד תמוז (=ליל מוצאי י"ג) נחשבת ל<strong>י"ד תמוז</strong>.
+    </p>
+    <button class="btn-primary" onclick="closeModal('modal-onah-explain')">הבנתי</button>
   </div>
 </div>
 
@@ -883,8 +898,9 @@ function fmtHeb(h)    { return HebCal.formatHeb(h); }
 // ════════════════════════════════════════════════════════
 function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeOrZarua) {
   const [gy, gm, gd] = dateStr.split('-').map(Number);
-  const heb0 = HebCal.gregToHeb(gy, gm, gd);
-  const abs0 = HebCal.gregToAbs(gy, gm, gd);
+  // לפי ההלכה: לילה שייך ליום העברי הבא (היום מתחיל מהשקיעה)
+  const abs0 = HebCal.gregToAbs(gy, gm, gd) + (onah === 'layla' ? 1 : 0);
+  const heb0 = HebCal.absToHeb(abs0);
   const results = [];
 
   // 1. BEINONIT – 30 Hebrew days later, same onah
