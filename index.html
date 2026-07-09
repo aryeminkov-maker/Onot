@@ -390,6 +390,30 @@
   </div>
 </div>
 
+<!-- BETA WELCOME MODAL -->
+<div class="modal-overlay open" id="modal-beta" onclick="if(event.target===this)closeBeta()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;font-size:28px;margin-bottom:8px;">🌸</div>
+    <div class="modal-title" style="text-align:center;">ברוכות הבאות!</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">
+      האפליקציה בתקופת הרצה.<br>
+      מוזמנות להשתמש, ויחד עם זאת לשים לב שלא כל הפונקציות פעילות עדיין.<br><br>
+      נשמח לקבל משוב והצעות לשיפור או ייעול 🙏
+    </p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <a href="https://wa.me/972526883228" target="_blank" rel="noopener"
+        style="display:block;padding:13px;border-radius:var(--radius);background:#25D366;color:#fff;text-decoration:none;font-size:15px;font-weight:600;text-align:center;">
+        💬 שליחת ווטסאפ
+      </a>
+      <button class="btn-secondary" onclick="closeBeta();setTimeout(()=>openAbout(),200)">
+        ✉️ טופס יצירת קשר (אודות)
+      </button>
+    </div>
+    <button class="btn-primary" onclick="closeBeta()">הבנתי, נתחיל!</button>
+  </div>
+</div>
+
 <!-- ABOUT MODAL -->
 <div class="modal-overlay" id="modal-about" onclick="if(event.target===this)closeModal('modal-about')">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
@@ -1956,6 +1980,10 @@ function showCycleModal(findings, forceShow) {
   }
   document.getElementById('modal-cycles').classList.add('open');
 }
+function closeBeta() {
+  document.getElementById('modal-beta').classList.remove('open');
+  sessionStorage.setItem('beta_seen', '1');
+}
 function openAbout() {
   document.getElementById('modal-about').classList.add('open');
 }
@@ -1973,6 +2001,10 @@ function shareApp() {
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Onot/sw.js').catch(() => {});
+  }
+  // Hide beta popup if already seen this session
+  if (sessionStorage.getItem('beta_seen')) {
+    document.getElementById('modal-beta').classList.remove('open');
   }
   loadState();
   // Check if already running as installed PWA
