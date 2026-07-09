@@ -1,0 +1,25 @@
+{
+  "name": "לוח הטהרה",
+  "short_name": "לוח הטהרה",
+  "description": "חישוב ימי פרישה לפי הלכה",
+  "start_url": "/Onot/",
+  "scope": "/Onot/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF3F5",
+  "theme_color": "#C17B8A",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
