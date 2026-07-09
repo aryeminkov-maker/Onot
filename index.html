@@ -196,9 +196,9 @@
   <!-- CALENDAR -->
   <div class="card" id="hist-calendar-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <button onclick="calNav(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
-      <div style="font-size:15px;font-weight:700;color:var(--ink)" id="cal-month-title"></div>
       <button onclick="calNav(1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">‹</button>
+      <div style="font-size:15px;font-weight:700;color:var(--ink)" id="cal-month-title"></div>
+      <button onclick="calNav(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
       <span style="text-align:center;font-size:10px;font-weight:700;color:var(--ink-soft)">א׳</span>
@@ -1116,14 +1116,19 @@ function renderHistory() {
 var CAL_VIEW_YEAR = 0, CAL_VIEW_MONTH = 0;
 
 function calNav(dir) {
-  const order = HebCal.monthOrder(CAL_VIEW_YEAR);
+  if (!CAL_VIEW_YEAR) {
+    const t = new Date();
+    const h = HebCal.gregToHeb(t.getFullYear(), t.getMonth()+1, t.getDate());
+    CAL_VIEW_YEAR = h.year; CAL_VIEW_MONTH = h.month;
+  }
+  const order = HebCal._monthOrder(CAL_VIEW_YEAR);
   const idx   = order.indexOf(CAL_VIEW_MONTH);
   if (dir === 1) {
     if (idx < order.length-1) CAL_VIEW_MONTH = order[idx+1];
-    else { CAL_VIEW_YEAR++; CAL_VIEW_MONTH = HebCal.monthOrder(CAL_VIEW_YEAR)[0]; }
+    else { CAL_VIEW_YEAR++; CAL_VIEW_MONTH = HebCal._monthOrder(CAL_VIEW_YEAR)[0]; }
   } else {
     if (idx > 0) CAL_VIEW_MONTH = order[idx-1];
-    else { CAL_VIEW_YEAR--; const o=HebCal.monthOrder(CAL_VIEW_YEAR); CAL_VIEW_MONTH=o[o.length-1]; }
+    else { CAL_VIEW_YEAR--; const o=HebCal._monthOrder(CAL_VIEW_YEAR); CAL_VIEW_MONTH=o[o.length-1]; }
   }
   renderHistoryCalendar();
 }
