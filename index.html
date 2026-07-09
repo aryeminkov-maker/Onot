@@ -1956,6 +1956,9 @@ function shareApp() {
 }
 
 window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Onot/sw.js').catch(() => {});
+  }
   loadState();
   // Check if already running as installed PWA
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
