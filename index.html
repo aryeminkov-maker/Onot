@@ -126,9 +126,10 @@
 
 <!-- PAGE: HOME -->
 <div class="page active" id="page-home">
-  <div class="page-header">
+  <div class="page-header" style="position:relative;">
     <h1>לוח הטהרה</h1>
     <p>חישוב ימי הפרישה לפי הלכה</p>
+    <button onclick="openAbout()" style="position:absolute;left:20px;top:52px;background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">אודות</button>
   </div>
   <div class="privacy-banner" id="privacy-banner">
     <div class="icon">🔒</div>
@@ -140,8 +141,8 @@
       <label class="form-label">תאריך הראיה</label>
       <!-- Toggle -->
       <div style="display:flex;gap:0;margin-bottom:8px;border:1.5px solid var(--sand);border-radius:var(--radius-sm);overflow:hidden;">
-        <button class="dmt-btn" id="dmt-greg" onclick="setDateMode('greg')">לועזי</button>
         <button class="dmt-btn active" id="dmt-heb" onclick="setDateMode('heb')">עברי</button>
+        <button class="dmt-btn" id="dmt-greg" onclick="setDateMode('greg')">לועזי</button>
       </div>
       <!-- Gregorian input -->
       <div id="date-greg-wrap" style="display:none;">
@@ -288,6 +289,33 @@
     </div>
   </div>
 
+  <!-- Standalone notification times card -->
+  <div class="card">
+    <div class="card-title">זמני התראה</div>
+    <div class="settings-item" style="padding-bottom:8px;">
+      <div><div class="settings-label">☀️ עונת יום</div></div>
+      <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;"
+        onchange="document.getElementById('notif-time-yom').value=this.value">
+    </div>
+    <div class="settings-item" style="border-bottom:none;">
+      <div><div class="settings-label">🌙 עונת לילה</div></div>
+      <input type="time" class="form-input" id="notif-time-layla-vis" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;"
+        onchange="document.getElementById('notif-time-layla').value=this.value">
+    </div>
+  </div>
+
+  <!-- Install to home screen card -->
+  <div class="card">
+    <div class="card-title">הוספה למסך הבית</div>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:12px;">
+      התקיני את האפליקציה על מסך הבית לגישה מהירה:<br>
+      <strong>אנדרואיד (Chrome):</strong> תפריט ⋮ ← <em>הוסף למסך הבית</em><br>
+      <strong>iPhone (Safari):</strong> כפתור שתף 📤 ← <em>הוסף למסך הבית</em>
+    </p>
+    <button class="btn-primary" id="btn-pwa-install-2" style="display:none;">📲 התקני כאפליקציה</button>
+    <button class="btn-secondary" id="btn-install-manual" onclick="showInstallSteps()">📱 הוראות התקנה</button>
+  </div>
+
   <div class="card">
     <div class="card-title">הלכה</div>
     <div class="settings-item">
@@ -317,45 +345,48 @@
       <div class="info-link-text"><div class="info-link-title">בית ההוראה – אתר ישיבה</div><div class="info-link-desc">שאלות ותשובות בדיני טהרה</div></div>
       <div style="color:var(--ink-soft)">‹</div>
     </a>
+    <a class="info-link" href="https://www.darcheitohara.co.il" target="_blank" rel="noopener">
+      <div class="info-link-icon">💧</div>
+      <div class="info-link-text"><div class="info-link-title">דרכי טהרה</div><div class="info-link-desc">מדריך הלכתי לחיי משפחה</div></div>
+      <div style="color:var(--ink-soft)">‹</div>
+    </a>
+    <a class="info-link" href="https://ph.yhb.org.il" target="_blank" rel="noopener">
+      <div class="info-link-icon">📗</div>
+      <div class="info-link-text"><div class="info-link-title">פניני הלכה – טהרת המשפחה</div><div class="info-link-desc">הרב אליעזר מלמד, גרסה מקוונת</div></div>
+      <div style="color:var(--ink-soft)">‹</div>
+    </a>
   </div>
 
   <div class="card">
     <div class="card-title">עקרונות החישוב</div>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:10px;">
-      האפליקציה מחשבת את ימי הפרישה לפי שיטת <strong>לוח השנה העברי</strong> על פי אלגוריתם דרשוביץ–ריינגולד, המחשב כל תאריך עברי מתוך נוסחת המולד (חשבון ה<em>חלקים</em>).<br><br>
-      <strong>עונה בינונית</strong> – 30 ימים עבריים מלאים מיום הראיה, באותה עונה (יום/לילה).<br>
-      <strong>עונת החודש</strong> – אותו יום בחודש העברי הבא, באותה עונה. כשהחודש הבא חסר ואין בו את היום, נלקח היום האחרון של אותו חודש.<br>
-      <strong>עונת הפלגה</strong> – הפרש הימים העבריים (בחישוב עונות, כל עונה = חצי יום) בין הוסת הקודם לנוכחי, והוספתו מיום הנוכחי.<br>
-      <strong>עונת אור זרוע</strong> – העונה שלפני עונת הבינונית (29 ימים), בעונה ההפוכה. נחשבת רק לפי שיטת הרמ"א.
+      האפליקציה מחשבת את ימי הפרישה לפי שיטת <strong>לוח השנה העברי</strong> על פי אלגוריתם דרשוביץ–ריינגולד.<br><br>
+      <strong>עונה בינונית</strong> – 30 ימים עבריים מלאים מיום הראיה, באותה עונה.<br>
+      <strong>עונת החודש</strong> – אותו יום בחודש העברי הבא, באותה עונה. כשהחודש חסר — נלקח היום האחרון.<br>
+      <strong>עונת הפלגה</strong> – הפרש הימים העבריים בין הוסת הקודם לנוכחי, מוסף על הנוכחי.<br>
+      <strong>עונת אור זרוע</strong> – העונה שלפני הבינונית (29 ימים), בעונה ההפוכה. לפי שיטת הרמ"א.
     </p>
-    <p style="font-size:12px;color:#aaa;line-height:1.6;">
-      הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לשאול רב מוסמך.
-    </p>
+    <p style="font-size:12px;color:#aaa;line-height:1.6;">הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לשאול רב מוסמך.</p>
   </div>
 
   <div class="card">
-    <div class="card-title">יצירת קשר – הערות ופרטים</div>
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:14px;">שאלות, הערות, או בקשות שיפור? נשמח לשמוע.</p>
-    <div class="form-group">
-      <label class="form-label">שם (אופציונלי)</label>
-      <input type="text" class="form-input" id="contact-name" placeholder="שמך">
+    <div class="card-title">מדריך למשתמש</div>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🏠 מסך ראשי</p>
+      מזינים תאריך ועונה (יום/לילה) ולוחצים "חשבי ימי פרישה". מוצגות כל ארבע העונות עם האימוג'י הייחודי לכל אחת.
+      <br><br>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">📅 שמירה ביומן</p>
+      לחיצה על "שמירה ביומן Google" פותחת חלונית. אפשר לשמור כל עונה בנפרד, או את כולן יחד (קובץ ICS). אם קיימת מחזוריות — מופיעה גם אפשרות לשמור את הראיה הצפויה.
+      <br><br>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🕐 היסטוריה</p>
+      כל הראיות שהוזנו. כולל לוח שנה עברי עם סימון צבעוני לכל עונה, גרף מחזוריות, ובדיקת מחזוריות אוטומטית.
+      <br><br>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🔍 מחזוריות</p>
+      האפליקציה מזהה אוטומטית מחזוריות פשוטה (הפרש קבוע) ומורכבת (סדרה חוזרת). אם נמצאת — תקפוץ התראה עם הסבר ותאריך הצפוי הבא.
+      <br><br>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">⚙️ הגדרות</p>
+      שליטה על סגנון היומן, שעות התראה, שיתוף עם הבעל, וחשש לאור זרוע.
     </div>
-    <div class="form-group">
-      <label class="form-label">מייל או טלפון לתשובה (אופציונלי)</label>
-      <input type="text" class="form-input" id="contact-reply" placeholder="your@email.com / 05x-xxxxxxx" dir="ltr">
-    </div>
-    <div class="form-group">
-      <label class="form-label">הודעה</label>
-      <textarea class="form-input" id="contact-msg" rows="3" placeholder="כתבי כאן..." style="resize:vertical;min-height:80px;"></textarea>
-    </div>
-    <button class="btn-primary" id="contact-send-btn" onclick="sendContact()">📨 שליחה</button>
-    <div id="contact-status" style="display:none;margin-top:10px;font-size:13px;text-align:center;"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">אודות</div>
-    <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:14px;">אפליקציה זו נועדה לסייע בחישוב ימי הפרישה בלבד. אין היא תחליף לפסיקת רב. בכל שאלה הלכתית יש לפנות לרב המשפחה.</p>
-    <button class="btn-secondary" onclick="shareApp()">📤 שיתוף האפליקציה</button>
   </div>
 </div>
 
@@ -365,6 +396,43 @@
     <div id="modal-cycles-content"></div>
     <div style="height:12px;"></div>
     <button class="btn-primary" onclick="closeModal('modal-cycles')">סגירה</button>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal-overlay" id="modal-about" onclick="if(event.target===this)closeModal('modal-about')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">אודות לוח הטהרה</div>
+
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">
+      כלי זה נועד לסייע בחישוב ימי הפרישה בלבד.<br>
+      <strong>השימוש בכלי הוא באחריות המשתמש בלבד</strong> — הן מבחינה הלכתית והן מכל בחינה אחרת. הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לפנות לרב המשפחה.
+    </p>
+
+    <div style="border-top:1px solid var(--rose-pale);padding-top:16px;margin-bottom:16px;">
+      <p style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px;">יצירת קשר – הערות ופרטים</p>
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:12px;">שאלות, הערות, או בקשות שיפור? נשמח לשמוע.</p>
+      <div class="form-group">
+        <label class="form-label">שם (אופציונלי)</label>
+        <input type="text" class="form-input" id="contact-name" placeholder="שמך">
+      </div>
+      <div class="form-group">
+        <label class="form-label">מייל או טלפון לתשובה (אופציונלי)</label>
+        <input type="text" class="form-input" id="contact-reply" placeholder="your@email.com / 05x-xxxxxxx" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">הודעה</label>
+        <textarea class="form-input" id="contact-msg" rows="3" placeholder="כתבי כאן..." style="resize:vertical;min-height:80px;"></textarea>
+      </div>
+      <button class="btn-primary" id="contact-send-btn" onclick="sendContact()">📨 שליחה</button>
+      <div id="contact-status" style="display:none;margin-top:10px;font-size:13px;text-align:center;"></div>
+    </div>
+
+    <div style="border-top:1px solid var(--rose-pale);padding-top:14px;display:flex;gap:10px;">
+      <button class="btn-secondary" onclick="shareApp();closeModal('modal-about')" style="flex:1;">📤 שיתוף</button>
+      <button class="btn-primary" onclick="closeModal('modal-about')" style="flex:1;">סגירה</button>
+    </div>
   </div>
 </div>
 
@@ -877,6 +945,8 @@ function applySettings() {
   document.getElementById('toggle-notif').checked  = appState.settings.notif;
   document.getElementById('notif-time-yom').value   = appState.settings.notifTimeYom   || '07:00';
   document.getElementById('notif-time-layla').value = appState.settings.notifTimeLayla || '19:00';
+  document.getElementById('notif-time-yom-vis').value   = appState.settings.notifTimeYom   || '07:00';
+  document.getElementById('notif-time-layla-vis').value = appState.settings.notifTimeLayla || '19:00';
   document.getElementById('cal-style').value        = appState.settings.calStyle || 'text';
   document.getElementById('toggle-husband').checked = appState.settings.husband;
   document.getElementById('husband-email').value    = appState.settings.husbandEmail || '';
@@ -970,6 +1040,17 @@ function renderResults(calc, dateStr) {
       return aa - bb;
     });
 
+  // Veset onah row (the actual sighting)
+  const vesetRow = `
+    <div class="onah-row" style="background:linear-gradient(135deg,#FAF0F2,#fff);border-bottom:2px solid var(--rose-light);">
+      <div class="onah-icon">🌑</div>
+      <div class="onah-info">
+        <div class="onah-name" style="color:var(--rose);font-size:15px;">עונת הוסת</div>
+        <div class="onah-date">${fmtGreg({year:gy,month:gm,day:gd})} <span class="badge" style="background:var(--rose)22;color:var(--rose)">עונת ${onahLabel(calc.onah)}</span></div>
+        <div class="onah-hebrew">${fmtHeb(calc.heb0)}</div>
+      </div>
+    </div>`;
+
   let rows = sorted.map(r => {
     const c = colorMap[r.color] || '#bbb';
     return `
@@ -997,9 +1078,10 @@ function renderResults(calc, dateStr) {
   document.getElementById('results-area').innerHTML = `
     <div class="summary-card">
       <div class="summary-header">
-        <div>ראיה: ${fmtGreg({year:gy,month:gm,day:gd})} | ${onahLabel(calc.onah)}</div>
+        <div>ימי פרישה</div>
         <div class="date-display">${fmtHeb(calc.heb0)}</div>
       </div>
+      ${vesetRow}
       ${rows}
       <div style="padding:16px 20px;">
         <button class="btn-primary" onclick="addToGoogleCalendar(appState._lastResults)"
@@ -1345,14 +1427,17 @@ let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  const btn = document.getElementById('btn-pwa-install');
-  if (btn) btn.style.display = 'block';
+  ['btn-pwa-install','btn-pwa-install-2'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.style.display = 'block';
+  });
 });
-document.getElementById('btn-pwa-install').addEventListener('click', () => {
+function triggerInstall() {
   if (!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
   deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
-});
+}
+document.getElementById('btn-pwa-install').addEventListener('click', triggerInstall);
 
 async function requestNotificationPermission() {
   if (!('Notification' in window)) return;
@@ -1848,6 +1933,15 @@ function showCycleModal(findings, forceShow) {
   }
   document.getElementById('modal-cycles').classList.add('open');
 }
+function openAbout() {
+  document.getElementById('modal-about').classList.add('open');
+}
+
+function showInstallSteps() {
+  document.getElementById('notif-install-tip').style.display = 'block';
+  document.getElementById('notif-install-tip').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
 function shareApp() {
   if (navigator.share) navigator.share({ title:'לוח הטהרה', text:'אפליקציה לחישוב ימי פרישה', url:window.location.href });
   else { navigator.clipboard.writeText(window.location.href); showToast('הקישור הועתק'); }
@@ -1855,6 +1949,7 @@ function shareApp() {
 
 window.addEventListener('load', () => {
   loadState();
+  document.getElementById('btn-pwa-install-2').addEventListener('click', triggerInstall);
   // Set today's date in input-date (hidden, used as fallback)
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
