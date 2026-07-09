@@ -277,21 +277,15 @@
       </div>
       <button class="btn-primary" id="btn-pwa-install" style="margin-top:12px;padding:11px;font-size:14px;display:none;">📲 התקני כאפליקציה</button>
     </div>
-    <div id="notif-times-group" style="display:none;">
-      <div class="settings-item" style="padding-bottom:8px;">
-        <div><div class="settings-label">☀️ עונת יום – שעת התראה</div></div>
-        <input type="time" class="form-input" id="notif-time-yom" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;">
-      </div>
-      <div class="settings-item" style="border-bottom:none;">
-        <div><div class="settings-label">🌙 עונת לילה – שעת התראה</div></div>
-        <input type="time" class="form-input" id="notif-time-layla" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;">
-      </div>
-    </div>
+    <!-- Hidden inputs used by saveSettings and scheduleNotifications -->
+    <input type="hidden" id="notif-time-yom" value="07:00">
+    <input type="hidden" id="notif-time-layla" value="19:00">
   </div>
 
   <!-- Standalone notification times card -->
   <div class="card">
     <div class="card-title">זמני התראה</div>
+    <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">משפיע על התראות במכשיר ועל שמירה ביומן Google</p>
     <div class="settings-item" style="padding-bottom:8px;">
       <div><div class="settings-label">☀️ עונת יום</div></div>
       <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;"
@@ -474,6 +468,9 @@
   </button>
   <button class="nav-btn" id="nav-info" onclick="navigate('info')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>מידע
+  </button>
+  <button class="nav-btn" id="nav-install-btn" onclick="triggerInstall()" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>התקנה
   </button>
 </nav>
 
@@ -952,7 +949,7 @@ function applySettings() {
   document.getElementById('husband-email').value    = appState.settings.husbandEmail || '';
   document.getElementById('toggle-orzarua').checked = appState.settings.orZarua !== false;
   if (appState.settings.husband) document.getElementById('husband-email-group').style.display = 'block';
-  if (appState.settings.notif)  { document.getElementById('notif-install-tip').style.display = 'block'; document.getElementById('notif-times-group').style.display = 'block'; }
+  if (appState.settings.notif)  { document.getElementById('notif-install-tip').style.display = 'block'; }
 }
 
 // ════════════════════════════════════════════════════════
@@ -1415,10 +1412,8 @@ document.getElementById('toggle-husband').addEventListener('change', function() 
 
 // Show install instructions when notifications toggle is turned on
 document.getElementById('toggle-notif').addEventListener('change', function() {
-  const tip   = document.getElementById('notif-install-tip');
-  const times = document.getElementById('notif-times-group');
-  tip.style.display   = this.checked ? 'block' : 'none';
-  times.style.display = this.checked ? 'block' : 'none';
+  const tip = document.getElementById('notif-install-tip');
+  tip.style.display = this.checked ? 'block' : 'none';
   if (this.checked) requestNotificationPermission();
 });
 
@@ -1427,17 +1422,24 @@ let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  ['btn-pwa-install','btn-pwa-install-2'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.style.display = 'block';
+  ['btn-pwa-install','btn-pwa-install-2','nav-install-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === 'nav-install-btn' ? 'flex' : 'block';
   });
+});
+window.addEventListener('appinstalled', () => {
+  ['btn-pwa-install','btn-pwa-install-2','nav-install-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  deferredInstallPrompt = null;
+  showToast('האפליקציה הותקנה בהצלחה 🎉');
 });
 function triggerInstall() {
   if (!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
   deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
 }
-document.getElementById('btn-pwa-install').addEventListener('click', triggerInstall);
 
 async function requestNotificationPermission() {
   if (!('Notification' in window)) return;
@@ -1949,6 +1951,7 @@ function shareApp() {
 
 window.addEventListener('load', () => {
   loadState();
+  document.getElementById('btn-pwa-install').addEventListener('click', triggerInstall);
   document.getElementById('btn-pwa-install-2').addEventListener('click', triggerInstall);
   // Set today's date in input-date (hidden, used as fallback)
   const today = new Date();
