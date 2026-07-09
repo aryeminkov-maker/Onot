@@ -297,10 +297,14 @@
   </div>
 
   <!-- Install to home screen -->
-  <div class="card" id="install-card" style="display:none;">
+  <div class="card" id="install-card">
     <button class="btn-primary" id="btn-pwa-install-2" onclick="triggerInstall()" style="font-size:15px;">
       📲 הוספה למסך הבית
     </button>
+    <div id="install-manual-hint" style="display:none;margin-top:10px;font-size:13px;color:var(--ink-soft);line-height:1.8;text-align:center;">
+      <strong>אנדרואיד:</strong> תפריט ⋮ ← הוסף למסך הבית<br>
+      <strong>iPhone:</strong> כפתור שתף 📤 ← הוסף למסך הבית
+    </div>
   </div>
 
   <div class="card">
@@ -1434,10 +1438,11 @@ function setInstalled(yes) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  const ic     = document.getElementById('install-card');
   const navBtn = document.getElementById('nav-install-btn');
-  if (ic)     ic.style.display = 'block';
   if (navBtn) navBtn.style.display = 'flex';
+  // Hide manual hint if prompt is available
+  const hint = document.getElementById('install-manual-hint');
+  if (hint) hint.style.display = 'none';
 });
 
 window.addEventListener('appinstalled', () => {
@@ -1447,9 +1452,14 @@ window.addEventListener('appinstalled', () => {
 });
 
 function triggerInstall() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+  } else {
+    // No prompt available — show manual instructions
+    const hint = document.getElementById('install-manual-hint');
+    if (hint) hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 async function requestNotificationPermission() {
