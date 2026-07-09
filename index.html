@@ -241,6 +241,21 @@
 <div class="page" id="page-settings">
   <div class="page-header"><h1>הגדרות</h1><p>התאמה אישית</p></div>
 
+  <!-- 0. כללי -->
+  <div class="card">
+    <div class="card-title">כללי</div>
+    <div class="settings-item" style="border-bottom:none;">
+      <div>
+        <div class="settings-label">סגנון כיתוב</div>
+        <div class="settings-desc">משפיע על התראות ביומן Google ובאפליקציה</div>
+      </div>
+      <select class="form-select" style="width:auto;font-size:13px;padding:8px 32px 8px 10px;" id="cal-style">
+        <option value="text">טקסט מלא</option>
+        <option value="emoji">פרחים 🌸🌼🌺🌷</option>
+      </select>
+    </div>
+  </div>
+
   <!-- 1. זמני התראה -->
   <div class="card">
     <div class="card-title">זמני התראה</div>
@@ -257,6 +272,7 @@
     </div>
     <input type="hidden" id="notif-time-yom" value="07:00">
     <input type="hidden" id="notif-time-layla" value="19:00">
+    <input type="hidden" id="toggle-notif" value="false">
   </div>
 
   <!-- 2. יומן Google -->
@@ -265,16 +281,6 @@
     <div class="settings-item">
       <div><div class="settings-label">הוספה ליומן Google</div><div class="settings-desc">הצעת הוספה אחרי כל חישוב</div></div>
       <label class="switch"><input type="checkbox" id="toggle-gcal" checked><span class="slider"></span></label>
-    </div>
-    <div class="settings-item">
-      <div>
-        <div class="settings-label">סגנון כיתוב ביומן</div>
-        <div class="settings-desc">איך יופיע שם האירוע ביומן Google</div>
-      </div>
-      <select class="form-select" style="width:auto;font-size:13px;padding:8px 32px 8px 10px;" id="cal-style">
-        <option value="text">טקסט מלא</option>
-        <option value="emoji">פרחים 🌸🌼🌺🌷</option>
-      </select>
     </div>
     <div class="settings-item">
       <div><div class="settings-label">שיתוף עם הבעל</div><div class="settings-desc">הוספת הבעל כמשתתף בכל אירוע ביומן</div></div>
@@ -294,14 +300,11 @@
   </div>
 
   <div class="card">
-    <div class="card-title">התראות במכשיר</div>
-    <div class="settings-item" style="border-bottom:none;">
-      <div>
-        <div class="settings-label">הפעלת התראות</div>
-        <div class="settings-desc" id="notif-desc">כדי להפעיל את ההתראות, יש להתקין את האפליקציה על מסך הבית</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="toggle-notif" disabled><span class="slider"></span></label>
-    </div>
+    <div class="card-title">התראות</div>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
+      התראות נשלחות דרך <strong>יומן Google</strong> — לאחר שמירת העונות ביומן, יומן Google ישלח תזכורת בשעה שהגדרת בזמני ההתראה.<br><br>
+      לקבלת התראות: שמרי את העונות ביומן Google לאחר כל חישוב.
+    </p>
   </div>
 
   <!-- 4. הלכה -->
@@ -958,7 +961,6 @@ function saveState() {
 }
 function applySettings() {
   document.getElementById('toggle-gcal').checked   = appState.settings.gcal;
-  document.getElementById('toggle-notif').checked  = appState.settings.notif;
   document.getElementById('notif-time-yom').value   = appState.settings.notifTimeYom   || '07:00';
   document.getElementById('notif-time-layla').value = appState.settings.notifTimeLayla || '19:00';
   document.getElementById('notif-time-yom-vis').value   = appState.settings.notifTimeYom   || '07:00';
@@ -1033,7 +1035,6 @@ function calculate() {
     // store last results for the calendar button
     appState._lastResults = calc.results;
 
-    if (appState.settings.notif) scheduleNotifications(calc.results);
     setTimeout(() => document.getElementById('results-area').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 
     // Auto-check cycles after each entry (with slight delay so results are visible first)
@@ -1435,23 +1436,15 @@ document.getElementById('toggle-husband').addEventListener('change', function() 
 });
 
 // Show install instructions when notifications toggle is turned on
-document.getElementById('toggle-notif').addEventListener('change', function() {
-  const tip = document.getElementById('notif-install-tip');
-  tip.style.display = this.checked ? 'block' : 'none';
-  if (this.checked) requestNotificationPermission();
-});
+// Notifications handled via Google Calendar
 
 // PWA install prompt
 let deferredInstallPrompt = null;
 
 function setInstalled(yes) {
-  const toggle = document.getElementById('toggle-notif');
-  const desc   = document.getElementById('notif-desc');
   const ic     = document.getElementById('install-card');
   const navBtn = document.getElementById('nav-install-btn');
   if (yes) {
-    if (toggle) toggle.disabled = false;
-    if (desc)   desc.textContent = 'תזכורת ביום כל עונה';
     if (ic)     ic.style.display = 'none';
     if (navBtn) navBtn.style.display = 'none';
   }
@@ -1536,7 +1529,7 @@ function scheduleNotifications(results) {
 function saveSettings() {
   appState.settings = {
     gcal:           document.getElementById('toggle-gcal').checked,
-    notif:          document.getElementById('toggle-notif').checked,
+    notif:          false,
     notifTimeYom:   document.getElementById('notif-time-yom').value,
     notifTimeLayla: document.getElementById('notif-time-layla').value,
     calStyle:       document.getElementById('cal-style').value,
