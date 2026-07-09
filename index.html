@@ -134,7 +134,7 @@
 <div class="page active" id="page-home">
   <div class="page-header" style="position:relative;">
     <h1>לוח הטהרה</h1>
-    <p>חישוב ימי הפרישה לפי הלכה</p>
+    <p>חישוב ימי פרישה לפי ההלכה</p>
     <button onclick="openAbout()" style="position:absolute;left:20px;top:52px;background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">אודות</button>
   </div>
   <div class="privacy-banner" id="privacy-banner">
@@ -163,7 +163,7 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">עונה</label>
+      <label class="form-label">זמן הוסת</label>
       <div class="toggle-group">
         <button class="toggle-btn active" id="btn-yom" onclick="setOnah('yom')">☀️ יום</button>
         <button class="toggle-btn" id="btn-layla" onclick="setOnah('layla')">🌙 לילה</button>
@@ -241,6 +241,25 @@
 <div class="page" id="page-settings">
   <div class="page-header"><h1>הגדרות</h1><p>התאמה אישית</p></div>
 
+  <!-- 1. זמני התראה -->
+  <div class="card">
+    <div class="card-title">זמני התראה</div>
+    <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">משפיע על התראות במכשיר ועל שמירה ביומן Google</p>
+    <div class="settings-item" style="padding-bottom:8px;">
+      <div><div class="settings-label">☀️ עונת יום</div></div>
+      <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;"
+        onchange="document.getElementById('notif-time-yom').value=this.value">
+    </div>
+    <div class="settings-item" style="border-bottom:none;">
+      <div><div class="settings-label">🌙 עונת לילה</div></div>
+      <input type="time" class="form-input" id="notif-time-layla-vis" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;"
+        onchange="document.getElementById('notif-time-layla').value=this.value">
+    </div>
+    <input type="hidden" id="notif-time-yom" value="07:00">
+    <input type="hidden" id="notif-time-layla" value="19:00">
+  </div>
+
+  <!-- 2. יומן Google -->
   <div class="card">
     <div class="card-title">יומן Google</div>
     <div class="settings-item">
@@ -266,47 +285,30 @@
     </div>
   </div>
 
+  <!-- 3. הוספה למסך הבית + התראות -->
+  <div class="card" id="install-card">
+    <div class="card-title">הוספה למסך הבית</div>
+    <button class="btn-primary" id="btn-pwa-install-2" style="font-size:15px;margin-bottom:8px;">
+      📲 הוספה למסך הבית
+    </button>
+    <div id="install-manual-hint" style="display:none;margin-top:4px;font-size:13px;color:var(--ink-soft);line-height:1.8;">
+      <strong>אנדרואיד:</strong> תפריט ⋮ ← הוסף למסך הבית<br>
+      <strong>iPhone:</strong> כפתור שתף 📤 ← הוסף למסך הבית
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">התראות במכשיר</div>
-    <div class="settings-item">
+    <div class="settings-item" style="border-bottom:none;">
       <div>
         <div class="settings-label">הפעלת התראות</div>
         <div class="settings-desc" id="notif-desc">כדי להפעיל את ההתראות, יש להתקין את האפליקציה על מסך הבית</div>
       </div>
       <label class="switch"><input type="checkbox" id="toggle-notif" disabled><span class="slider"></span></label>
     </div>
-    <!-- Hidden inputs used by saveSettings and scheduleNotifications -->
-    <input type="hidden" id="notif-time-yom" value="07:00">
-    <input type="hidden" id="notif-time-layla" value="19:00">
   </div>
 
-  <!-- Standalone notification times card -->
-  <div class="card">
-    <div class="card-title">זמני התראה</div>
-    <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">משפיע על התראות במכשיר ועל שמירה ביומן Google</p>
-    <div class="settings-item" style="padding-bottom:8px;">
-      <div><div class="settings-label">☀️ עונת יום</div></div>
-      <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;"
-        onchange="document.getElementById('notif-time-yom').value=this.value">
-    </div>
-    <div class="settings-item" style="border-bottom:none;">
-      <div><div class="settings-label">🌙 עונת לילה</div></div>
-      <input type="time" class="form-input" id="notif-time-layla-vis" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;"
-        onchange="document.getElementById('notif-time-layla').value=this.value">
-    </div>
-  </div>
-
-  <!-- Install to home screen -->
-  <div class="card" id="install-card">
-    <button class="btn-primary" id="btn-pwa-install-2" onclick="triggerInstall()" style="font-size:15px;">
-      📲 הוספה למסך הבית
-    </button>
-    <div id="install-manual-hint" style="display:none;margin-top:10px;font-size:13px;color:var(--ink-soft);line-height:1.8;text-align:center;">
-      <strong>אנדרואיד:</strong> תפריט ⋮ ← הוסף למסך הבית<br>
-      <strong>iPhone:</strong> כפתור שתף 📤 ← הוסף למסך הבית
-    </div>
-  </div>
-
+  <!-- 4. הלכה -->
   <div class="card">
     <div class="card-title">הלכה</div>
     <div class="settings-item">
@@ -1447,12 +1449,12 @@ document.getElementById('toggle-notif').addEventListener('change', function() {
 let deferredInstallPrompt = null;
 
 function setInstalled(yes) {
-  const toggle  = document.getElementById('toggle-notif');
-  const desc    = document.getElementById('notif-desc');
-  const ic      = document.getElementById('install-card');
-  const navBtn  = document.getElementById('nav-install-btn');
+  const toggle = document.getElementById('toggle-notif');
+  const desc   = document.getElementById('notif-desc');
+  const ic     = document.getElementById('install-card');
+  const navBtn = document.getElementById('nav-install-btn');
   if (yes) {
-    toggle.disabled = false;
+    if (toggle) toggle.disabled = false;
     if (desc)   desc.textContent = 'תזכורת ביום כל עונה';
     if (ic)     ic.style.display = 'none';
     if (navBtn) navBtn.style.display = 'none';
@@ -1464,7 +1466,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredInstallPrompt = e;
   const navBtn = document.getElementById('nav-install-btn');
   if (navBtn) navBtn.style.display = 'flex';
-  // Hide manual hint if prompt is available
   const hint = document.getElementById('install-manual-hint');
   if (hint) hint.style.display = 'none';
 });
@@ -1480,7 +1481,6 @@ function triggerInstall() {
     deferredInstallPrompt.prompt();
     deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
   } else {
-    // No prompt available — show manual instructions
     const hint = document.getElementById('install-manual-hint');
     if (hint) hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
   }
@@ -2002,22 +2002,21 @@ window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Onot/sw.js').catch(() => {});
   }
-  // Hide beta popup if already seen this session
   if (sessionStorage.getItem('beta_seen')) {
     document.getElementById('modal-beta').classList.remove('open');
   }
   loadState();
-  // Check if already running as installed PWA
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   setInstalled(isStandalone);
 
-  document.getElementById('btn-pwa-install-2').addEventListener('click', triggerInstall);
-  // Set today's date in input-date (hidden, used as fallback)
+  // Wire install button — single listener, no onclick in HTML
+  const installBtn = document.getElementById('btn-pwa-install-2');
+  if (installBtn) installBtn.addEventListener('click', triggerInstall);
+
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   document.getElementById('input-date').value = todayStr;
-  // Default mode is Hebrew — pre-fill the trigger button with today's Hebrew date
   const todayHeb = HebCal.gregToHeb(today.getFullYear(), today.getMonth()+1, today.getDate());
   const label = HebCal.dayLetters(todayHeb.day) + ' ' + HebCal.monthName(todayHeb.month, todayHeb.year) + ' ' + HebCal.yearLetters(todayHeb.year);
   document.getElementById('heb-cal-trigger').textContent = '📅 ' + label;
