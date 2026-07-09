@@ -288,13 +288,9 @@
   <!-- 3. הוספה למסך הבית + התראות -->
   <div class="card" id="install-card">
     <div class="card-title">הוספה למסך הבית</div>
-    <button class="btn-primary" id="btn-pwa-install-2" style="font-size:15px;margin-bottom:8px;">
+    <button class="btn-primary" id="btn-pwa-install-2" style="font-size:15px;">
       📲 הוספה למסך הבית
     </button>
-    <div id="install-manual-hint" style="display:none;margin-top:4px;font-size:13px;color:var(--ink-soft);line-height:1.8;">
-      <strong>אנדרואיד:</strong> תפריט ⋮ ← הוסף למסך הבית<br>
-      <strong>iPhone:</strong> כפתור שתף 📤 ← הוסף למסך הבית
-    </div>
   </div>
 
   <div class="card">
@@ -1481,8 +1477,20 @@ function triggerInstall() {
     deferredInstallPrompt.prompt();
     deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
   } else {
-    const hint = document.getElementById('install-manual-hint');
-    if (hint) hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+    // Show why and how to install manually
+    const existing = document.getElementById('install-fallback-msg');
+    if (existing) { existing.remove(); return; }
+    const msg = document.createElement('div');
+    msg.id = 'install-fallback-msg';
+    msg.style.cssText = 'margin-top:10px;padding:12px;background:var(--rose-pale);border:1px solid var(--rose-light);border-radius:10px;font-size:13px;color:var(--ink-soft);line-height:1.8;';
+    msg.innerHTML = `
+      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">⚠️ לא ניתן להתקין אוטומטית כרגע</p>
+      <p style="margin-bottom:8px;">הסיבה: הדפדפן טרם הציע התקנה — בדרך כלל קורה אחרי 2-3 ביקורים באתר, או שהאפליקציה כבר מותקנת.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">התקנה ידנית:</p>
+      <p><strong>אנדרואיד (Chrome):</strong><br>תפריט ⋮ (שלוש נקודות) ← <em>"הוסף למסך הבית"</em></p>
+      <p style="margin-top:6px;"><strong>iPhone (Safari):</strong><br>כפתור שתף 📤 ← <em>"הוסף למסך הבית"</em></p>
+      <p style="margin-top:8px;font-size:12px;color:var(--rose);">✓ התקנה ידנית מאפשרת גם קבלת התראות</p>`;
+    document.getElementById('install-card').appendChild(msg);
   }
 }
 
