@@ -265,17 +265,9 @@
     <div class="settings-item">
       <div>
         <div class="settings-label">הפעלת התראות</div>
-        <div class="settings-desc">תזכורת ביום כל עונה</div>
+        <div class="settings-desc" id="notif-desc">כדי להפעיל את ההתראות, יש להתקין את האפליקציה על מסך הבית</div>
       </div>
-      <label class="switch"><input type="checkbox" id="toggle-notif"><span class="slider"></span></label>
-    </div>
-    <div id="notif-install-tip" style="display:none; background:var(--rose-pale); border:1px solid var(--rose-light); border-radius:10px; padding:12px 14px; margin-bottom:4px;">
-      <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:10px;">כדי לקבל התראות, יש להתקין את האפליקציה על מסך הבית:</p>
-      <div style="font-size:13px;color:var(--ink);line-height:1.9;">
-        <strong>אנדרואיד (Chrome):</strong><br>תפריט ⋮ ← <em>הוסף למסך הבית</em><br><br>
-        <strong>iPhone (Safari):</strong><br>כפתור שתף 📤 ← <em>הוסף למסך הבית</em>
-      </div>
-      <button class="btn-primary" id="btn-pwa-install" style="margin-top:12px;padding:11px;font-size:14px;display:none;">📲 התקני כאפליקציה</button>
+      <label class="switch"><input type="checkbox" id="toggle-notif" disabled><span class="slider"></span></label>
     </div>
     <!-- Hidden inputs used by saveSettings and scheduleNotifications -->
     <input type="hidden" id="notif-time-yom" value="07:00">
@@ -299,15 +291,13 @@
   </div>
 
   <!-- Install to home screen card -->
-  <div class="card">
+  <div class="card" id="install-card">
     <div class="card-title">הוספה למסך הבית</div>
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:12px;">
-      התקיני את האפליקציה על מסך הבית לגישה מהירה:<br>
+    <button class="btn-primary" id="btn-pwa-install-2" style="display:none;">📲 התקני כאפליקציה</button>
+    <p id="install-manual-text" style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
       <strong>אנדרואיד (Chrome):</strong> תפריט ⋮ ← <em>הוסף למסך הבית</em><br>
       <strong>iPhone (Safari):</strong> כפתור שתף 📤 ← <em>הוסף למסך הבית</em>
     </p>
-    <button class="btn-primary" id="btn-pwa-install-2" style="display:none;">📲 התקני כאפליקציה</button>
-    <button class="btn-secondary" id="btn-install-manual" onclick="showInstallSteps()">📱 הוראות התקנה</button>
   </div>
 
   <div class="card">
@@ -339,12 +329,12 @@
       <div class="info-link-text"><div class="info-link-title">בית ההוראה – אתר ישיבה</div><div class="info-link-desc">שאלות ותשובות בדיני טהרה</div></div>
       <div style="color:var(--ink-soft)">‹</div>
     </a>
-    <a class="info-link" href="https://www.darcheitohara.co.il" target="_blank" rel="noopener">
+    <a class="info-link" href="https://harav.org/sefer/%D7%93%D7%A8%D7%9B%D7%99-%D7%98%D7%94%D7%A8%D7%94/" target="_blank" rel="noopener">
       <div class="info-link-icon">💧</div>
       <div class="info-link-text"><div class="info-link-title">דרכי טהרה</div><div class="info-link-desc">מדריך הלכתי לחיי משפחה</div></div>
       <div style="color:var(--ink-soft)">‹</div>
     </a>
-    <a class="info-link" href="https://ph.yhb.org.il" target="_blank" rel="noopener">
+    <a class="info-link" href="https://ph.yhb.org.il/category/%D7%98%D7%94%D7%A8%D7%AA-%D7%94%D7%9E%D7%A9%D7%A4%D7%97%D7%94/" target="_blank" rel="noopener">
       <div class="info-link-icon">📗</div>
       <div class="info-link-text"><div class="info-link-title">פניני הלכה – טהרת המשפחה</div><div class="info-link-desc">הרב אליעזר מלמד, גרסה מקוונת</div></div>
       <div style="color:var(--ink-soft)">‹</div>
@@ -1419,22 +1409,37 @@ document.getElementById('toggle-notif').addEventListener('change', function() {
 
 // PWA install prompt
 let deferredInstallPrompt = null;
+
+function setInstalled(yes) {
+  const toggle = document.getElementById('toggle-notif');
+  const desc   = document.getElementById('notif-desc');
+  const ic     = document.getElementById('install-card');
+  const navBtn = document.getElementById('nav-install-btn');
+  if (yes) {
+    toggle.disabled = false;
+    if (desc) desc.textContent = 'תזכורת ביום כל עונה';
+    if (ic) ic.style.display = 'none';
+    if (navBtn) navBtn.style.display = 'none';
+  } else {
+    if (navBtn) navBtn.style.display = 'none'; // only show when prompt available
+  }
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  ['btn-pwa-install','btn-pwa-install-2','nav-install-btn'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === 'nav-install-btn' ? 'flex' : 'block';
-  });
+  const navBtn = document.getElementById('nav-install-btn');
+  const btn2   = document.getElementById('btn-pwa-install-2');
+  if (navBtn) navBtn.style.display = 'flex';
+  if (btn2)   btn2.style.display = 'block';
 });
+
 window.addEventListener('appinstalled', () => {
-  ['btn-pwa-install','btn-pwa-install-2','nav-install-btn'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
   deferredInstallPrompt = null;
+  setInstalled(true);
   showToast('האפליקציה הותקנה בהצלחה 🎉');
 });
+
 function triggerInstall() {
   if (!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
@@ -1454,7 +1459,7 @@ function scheduleNotifications(results) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   const ONAH_EMOJIS = { beinonit:'🌸', hodesh:'🌼', haflaga:'🌺', orzarua:'🌷' };
-  const style = appState.settings.calStyle;
+  const style = document.getElementById('cal-style')?.value || appState.settings.calStyle || 'text';
   const yomH  = (appState.settings.notifTimeYom  || '07:00').split(':').map(Number);
   const laylaH = (appState.settings.notifTimeLayla || '19:00').split(':').map(Number);
 
@@ -1498,7 +1503,7 @@ function saveSettings() {
 // GOOGLE CALENDAR
 // ════════════════════════════════════════════════════════
 function addToGoogleCalendar(results) {
-  const style  = appState.settings.calStyle;
+  const style  = document.getElementById('cal-style')?.value || appState.settings.calStyle || 'text';
   const valid  = results.filter(r => r.greg && !r.missing);
   if (!valid.length) return;
 
@@ -1951,7 +1956,11 @@ function shareApp() {
 
 window.addEventListener('load', () => {
   loadState();
-  document.getElementById('btn-pwa-install').addEventListener('click', triggerInstall);
+  // Check if already running as installed PWA
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  setInstalled(isStandalone);
+
   document.getElementById('btn-pwa-install-2').addEventListener('click', triggerInstall);
   // Set today's date in input-date (hidden, used as fallback)
   const today = new Date();
