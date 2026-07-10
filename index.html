@@ -680,15 +680,18 @@ function openVesetCal(){
 function closeVesetCal(){document.getElementById('hcal-overlay').classList.remove('open');}
 function confirmVesetCal(){
   if(VCSF===null){closeVesetCal();return;}
-  // Get Hebrew date from picker engine
-  var h=pG2H(VCSF);
-  // Convert Hebrew→Gregorian using HebCal (the authoritative engine)
-  var g=HebCal.hebToGreg(h.year, h.month, h.day);
-  var ds=g.year+'-'+String(g.month).padStart(2,'0')+'-'+String(g.day).padStart(2,'0');
-  // Display label using picker's Hebrew date (what user selected)
-  var label=HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
-  document.getElementById('input-date').value=ds;
-  document.getElementById('heb-cal-trigger').textContent='📅 '+label;
+  // Picker engine has abs offset of +1 vs HebCal. Correct by subtracting 1.
+  var correctedAbs = VCSF - 1;
+  // Get Hebrew date using picker display (for label - what user sees in picker)
+  var h = pG2H(VCSF);
+  // Convert to Gregorian using HebCal (correct engine, with offset correction)
+  var heb = HebCal.absToHeb(correctedAbs);
+  var g = HebCal.hebToGreg(heb.year, heb.month, heb.day);
+  var ds = g.year+'-'+String(g.month).padStart(2,'0')+'-'+String(g.day).padStart(2,'0');
+  // Label: use what picker showed the user
+  var label = HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
+  document.getElementById('input-date').value = ds;
+  document.getElementById('heb-cal-trigger').textContent = '📅 '+label;
   closeVesetCal();
 }
 function renderVesetCal(){
