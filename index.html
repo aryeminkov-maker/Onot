@@ -680,16 +680,15 @@ function openVesetCal(){
 function closeVesetCal(){document.getElementById('hcal-overlay').classList.remove('open');}
 function confirmVesetCal(){
   if(VCSF===null){closeVesetCal();return;}
-  // Convert absolute day → Gregorian for input-date
-  var g=pH2G(VCSF);
-  var ds=g.y+'-'+String(g.m).padStart(2,'0')+'-'+String(g.d).padStart(2,'0');
-  // Get Hebrew date directly from the picker's absolute day (same engine, no double-conversion)
+  // Get Hebrew date from picker engine
   var h=pG2H(VCSF);
+  // Convert Hebrew→Gregorian using HebCal (the authoritative engine)
+  var g=HebCal.hebToGreg(h.year, h.month, h.day);
+  var ds=g.year+'-'+String(g.month).padStart(2,'0')+'-'+String(g.day).padStart(2,'0');
+  // Display label using picker's Hebrew date (what user selected)
   var label=HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
   document.getElementById('input-date').value=ds;
   document.getElementById('heb-cal-trigger').textContent='📅 '+label;
-  // Store the Hebrew date from picker engine to avoid mismatch in calcPrishut
-  window._pickerHebDate = { year: h.year, month: h.month, day: h.day };
   closeVesetCal();
 }
 function renderVesetCal(){
@@ -961,13 +960,9 @@ function fmtHeb(h)    { return HebCal.formatHeb(h); }
 function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeOrZarua) {
   const [gy, gm, gd] = dateStr.split('-').map(Number);
   const abs0 = HebCal.gregToAbs(gy, gm, gd);
-  // Use picker's Hebrew date if available (avoids engine mismatch between pG2H and HebCal)
-  const hebBase = window._pickerHebDate || HebCal.absToHeb(abs0);
-  window._pickerHebDate = null; // consume once
-  // heb0 = displayed Hebrew date: for layla, shift one day forward
-  const heb0 = onah === 'layla'
-    ? HebCal.absToHeb(HebCal.hebToAbs(hebBase.year, hebBase.month, hebBase.day) + 1)
-    : hebBase;
+  // heb0 = התאריך העברי של הראיה
+  // ביום: אותו יום עברי; בלילה: יום עברי הבא (היממה מתחילה בלילה)
+  const heb0 = HebCal.absToHeb(abs0 + (onah === 'layla' ? 1 : 0));
   const results = [];
 
   // 1. BEINONIT – 30 Hebrew days later, same onah
@@ -1182,10 +1177,9 @@ function renderResults(calc, dateStr) {
   document.getElementById('results-area').innerHTML = `
     <div class="summary-card">
       <div class="summary-header">
-        <div>ימי פרישה</div>
-        <div class="date-display">${fmtHeb(calc.heb0)}</div>
+        <div>חישוב ימי הפרישה לפי ראיה בתאריך</div>
+        <div class="date-display">${fmtHeb(calc.heb0)} | ${onahLabel(calc.onah)}</div>
       </div>
-      ${vesetRow}
       ${rows}
       <div style="padding:16px 20px;">
         <button class="btn-primary" onclick="addToGoogleCalendar(appState._lastResults)"
