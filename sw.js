@@ -1,4 +1,4 @@
-const CACHE = 'luach-tahara-v2';
+const CACHE = 'luach-tahara-v3';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
