@@ -680,12 +680,16 @@ function openVesetCal(){
 function closeVesetCal(){document.getElementById('hcal-overlay').classList.remove('open');}
 function confirmVesetCal(){
   if(VCSF===null){closeVesetCal();return;}
+  // Convert absolute day → Gregorian for input-date
   var g=pH2G(VCSF);
   var ds=g.y+'-'+String(g.m).padStart(2,'0')+'-'+String(g.d).padStart(2,'0');
+  // Get Hebrew date directly from the picker's absolute day (same engine, no double-conversion)
   var h=pG2H(VCSF);
   var label=HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
   document.getElementById('input-date').value=ds;
   document.getElementById('heb-cal-trigger').textContent='📅 '+label;
+  // Store the Hebrew date from picker engine to avoid mismatch in calcPrishut
+  window._pickerHebDate = { year: h.year, month: h.month, day: h.day };
   closeVesetCal();
 }
 function renderVesetCal(){
@@ -812,7 +816,7 @@ const HebCal = {
 
   // Hebrew date → absolute day (days since proleptic 1 Jan 1 CE Gregorian)
   // We use the Hebrew epoch offset: Hebrew abs day 1 = absolute day -1373428
-  _HEBREW_EPOCH: -1373428,
+  _HEBREW_EPOCH: -1373427,
 
   hebToAbs(year, month, day) {
     let abs = this._HEBREW_EPOCH
@@ -956,9 +960,14 @@ function fmtHeb(h)    { return HebCal.formatHeb(h); }
 // ════════════════════════════════════════════════════════
 function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeOrZarua) {
   const [gy, gm, gd] = dateStr.split('-').map(Number);
-  // לפי ההלכה: לילה שייך ליום העברי הבא (היום מתחיל מהשקיעה)
-  const abs0 = HebCal.gregToAbs(gy, gm, gd) + (onah === 'layla' ? 1 : 0);
-  const heb0 = HebCal.absToHeb(abs0);
+  const abs0 = HebCal.gregToAbs(gy, gm, gd);
+  // Use picker's Hebrew date if available (avoids engine mismatch between pG2H and HebCal)
+  const hebBase = window._pickerHebDate || HebCal.absToHeb(abs0);
+  window._pickerHebDate = null; // consume once
+  // heb0 = displayed Hebrew date: for layla, shift one day forward
+  const heb0 = onah === 'layla'
+    ? HebCal.absToHeb(HebCal.hebToAbs(hebBase.year, hebBase.month, hebBase.day) + 1)
+    : hebBase;
   const results = [];
 
   // 1. BEINONIT – 30 Hebrew days later, same onah
