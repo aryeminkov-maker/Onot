@@ -152,8 +152,7 @@
       </div>
       <!-- Gregorian input -->
       <div id="date-greg-wrap" style="display:none;">
-        <input type="date" class="form-input" id="input-date" />
-      </div>
+        <input type="date" class="form-input" id="input-date" />      </div>
       <!-- Hebrew picker trigger -->
       <div id="date-heb-wrap">
         <button type="button" id="heb-cal-trigger" onclick="openVesetCal()"
@@ -173,7 +172,7 @@
       <label class="form-label">סוג וסת</label>
       <select class="form-select" id="input-type">
         <option value="regular">וסת רגיל</option>
-        <option value="special">וסת מיוחד (רק בינונית)</option>
+        <option value="special">וסת מיוחד (עונה בינונית בלבד)</option>
       </select>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
@@ -262,16 +261,12 @@
     <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">משפיע על התראות במכשיר ועל שמירה ביומן Google</p>
     <div class="settings-item" style="padding-bottom:8px;">
       <div><div class="settings-label">☀️ עונת יום</div></div>
-      <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;"
-        onchange="document.getElementById('notif-time-yom').value=this.value">
+      <input type="time" class="form-input" id="notif-time-yom-vis" value="07:00" style="width:110px;padding:8px 10px;font-size:14px;">
     </div>
     <div class="settings-item" style="border-bottom:none;">
       <div><div class="settings-label">🌙 עונת לילה</div></div>
-      <input type="time" class="form-input" id="notif-time-layla-vis" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;"
-        onchange="document.getElementById('notif-time-layla').value=this.value">
+      <input type="time" class="form-input" id="notif-time-layla-vis" value="19:00" style="width:110px;padding:8px 10px;font-size:14px;">
     </div>
-    <input type="hidden" id="notif-time-yom" value="07:00">
-    <input type="hidden" id="notif-time-layla" value="19:00">
     <input type="hidden" id="toggle-notif" value="false">
   </div>
 
@@ -361,23 +356,44 @@
     <p style="font-size:12px;color:#aaa;line-height:1.6;">הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לשאול רב מוסמך.</p>
   </div>
 
-  <div class="card">
+  <div class="card" id="user-guide">
     <div class="card-title">מדריך למשתמש</div>
     <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
-      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🏠 מסך ראשי</p>
-      מזינים תאריך ועונה (יום/לילה) ולוחצים "חשבי ימי פרישה". מוצגות כל ארבע העונות עם האימוג'י הייחודי לכל אחת.
+
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🏠 מסך ראשי — הזנת וסת</p>
+      בוחרים תאריך (עברי או לועזי) וזמן הוסת (יום/לילה). לחיצה על ? מסביר את ההבדל. לוחצים "חשבי ימי פרישה" — מוצגות כל ארבע העונות עם תאריך, אימוג'י ייחודי וכיתוב.<br>
+      ניתן לבחור גם <em>וסת מיוחד</em> (עונה בינונית בלבד) למקרים כגון אחרי גלולות או לידה.
       <br><br>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">📅 שמירה ביומן</p>
-      לחיצה על "שמירה ביומן Google" פותחת חלונית. אפשר לשמור כל עונה בנפרד, או את כולן יחד (קובץ ICS). אם קיימת מחזוריות — מופיעה גם אפשרות לשמור את הראיה הצפויה.
+
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">📅 שמירה ביומן Google</p>
+      לחיצה על "שמירה ביומן Google" פותחת חלונית עם שתי אפשרויות:
+      <br>• שמירת כל העונות יחד (קובץ ICS) — במכשיר נייד לחצי על הקובץ שהורד.
+      <br>• שמירת כל עונה בנפרד בלחיצה אחת.
+      <br>אם נמצאה מחזוריות — מופיעה גם אפשרות לשמור את הראיה הצפויה.
       <br><br>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🕐 היסטוריה</p>
-      כל הראיות שהוזנו. כולל לוח שנה עברי עם סימון צבעוני לכל עונה, גרף מחזוריות, ובדיקת מחזוריות אוטומטית.
+
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🕐 היסטוריה</p>
+      כל הראיות שהוזנו, עם לוח שנה עברי הכולל:
+      <br>• 🔴 ראיה • ורוד בינונית • צהוב עונת חודש • ירוק הפלגה • סגול ראיה צפויה לפי מחזוריות
+      <br>גרף מחזוריות מוצג מתחת ללוח כשיש 2+ ראיות.
       <br><br>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">🔍 מחזוריות</p>
-      האפליקציה מזהה אוטומטית מחזוריות פשוטה (הפרש קבוע) ומורכבת (סדרה חוזרת). אם נמצאת — תקפוץ התראה עם הסבר ותאריך הצפוי הבא.
+
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔍 זיהוי מחזוריות</p>
+      האפליקציה מזהה אוטומטית אחרי כל הזנה את סוגי הוסת הקבוע הבאים:
+      <br>• <strong>הפלגה קבועה</strong> — הפרש קבוע בין ראיות
+      <br>• <strong>וסת החודש</strong> — יום קבוע בחודש העברי
+      <br>• <strong>וסת השבוע</strong> — יום קבוע בשבוע (כפולות של 7)
+      <br>• <strong>וסת דילוג</strong> — יום החודש עולה/יורד בצורה קבועה
+      <br>• <strong>מחזוריות מורכבת</strong> — סדרת הפרשים חוזרת (נתון במחלוקת)
+      <br>• <strong>חודש לועזי</strong> — תאריך לועזי קבוע (נתון במחלוקת)
+      <br>ממצאים הנתונים במחלוקת הפוסקים מסומנים בכתום עם הסבר והנחיה לשאול רב.
       <br><br>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:6px;">⚙️ הגדרות</p>
-      שליטה על סגנון היומן, שעות התראה, שיתוף עם הבעל, וחשש לאור זרוע.
+
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">⚙️ הגדרות</p>
+      • <strong>סגנון כיתוב</strong> — טקסט מלא / פרחים (משפיע על יומן ועל הצגה)
+      <br>• <strong>זמני התראה</strong> — שעת היומן לעונת יום ועונת לילה
+      <br>• <strong>יומן Google</strong> — הפעלה ושיתוף עם הבעל
+      <br>• <strong>אור זרוע</strong> — הפעלת חישוב עונת אור זרוע (לפי שיטת הרמ"א)
     </div>
   </div>
 </div>
@@ -418,6 +434,10 @@
       נשמח לקבל משוב והצעות לשיפור או ייעול 🙏
     </p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <button class="btn-secondary" onclick="closeBeta();navigate('info');setTimeout(()=>{const g=document.getElementById('user-guide');if(g)g.scrollIntoView({behavior:'smooth'})},200)"
+        style="color:var(--rose);border-color:var(--rose);">
+        📖 מדריך למשתמש
+      </button>
       <a href="https://wa.me/972526883228" target="_blank" rel="noopener"
         style="display:block;padding:13px;border-radius:var(--radius);background:#25D366;color:#fff;text-decoration:none;font-size:15px;font-weight:600;text-align:center;">
         💬 שליחת ווטסאפ
@@ -427,6 +447,12 @@
       </button>
     </div>
     <button class="btn-primary" onclick="closeBeta()">הבנתי, נתחיל!</button>
+    <div style="margin-top:14px;text-align:center;">
+      <label style="font-size:12px;color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="beta-dont-show" style="width:14px;height:14px;">
+        אל תציג שוב
+      </label>
+    </div>
   </div>
 </div>
 
@@ -671,7 +697,12 @@ function renderVesetCal(){
     if(f===VCTF)btn.classList.add('today');
     if(VCSF!==null&&f===VCSF)btn.classList.add('selected');
     btn.setAttribute('data-f',f);
-    btn.onclick=function(){VCSF=parseInt(this.getAttribute('data-f'));renderVesetCal();};
+    if(f>VCTF){
+      btn.disabled=true;
+      btn.style.cssText='color:#ccc;cursor:not-allowed;';
+    } else {
+      btn.onclick=function(){VCSF=parseInt(this.getAttribute('data-f'));renderVesetCal();};
+    }
     grid.appendChild(btn);
   }
 }
@@ -689,11 +720,24 @@ function setDateMode(mode){
   document.getElementById('dmt-heb').classList.toggle('active', mode==='heb');
   document.getElementById('date-greg-wrap').style.display = mode==='greg' ? '' : 'none';
   document.getElementById('date-heb-wrap').style.display  = mode==='heb'  ? '' : 'none';
-  // Clear the date when switching modes to avoid confusion
-  if(mode==='greg'){
+
+  const existing = document.getElementById('input-date').value;
+  if (mode === 'greg' && existing) {
+    // Already in input-date as gregorian — keep as is, just update display
+    const [y,m,d] = existing.split('-').map(Number);
+    // nothing to convert, input-date is already gregorian
+  } else if (mode === 'heb' && existing) {
+    // Convert current gregorian date to Hebrew label
+    const [y,m,d] = existing.split('-').map(Number);
+    const h = HebCal.gregToHeb(y,m,d);
+    const label = HebCal.dayLetters(h.day)+' '+HebCal.monthName(h.month,h.year)+' '+HebCal.yearLetters(h.year);
+    document.getElementById('heb-cal-trigger').textContent = '📅 '+label;
+    // Also sync Hebrew picker state
+    VCY=h.year; VCM=h.month;
+    VCSF=pFG(y,m,d);
+  } else if (mode === 'heb') {
     document.getElementById('heb-cal-trigger').textContent='📅 בחרי תאריך עברי';
   }
-  document.getElementById('input-date').value='';
 }
 
 // ════════════════════════════════════════════════════════
@@ -977,8 +1021,6 @@ function saveState() {
 }
 function applySettings() {
   document.getElementById('toggle-gcal').checked   = appState.settings.gcal;
-  document.getElementById('notif-time-yom').value   = appState.settings.notifTimeYom   || '07:00';
-  document.getElementById('notif-time-layla').value = appState.settings.notifTimeLayla || '19:00';
   document.getElementById('notif-time-yom-vis').value   = appState.settings.notifTimeYom   || '07:00';
   document.getElementById('notif-time-layla-vis').value = appState.settings.notifTimeLayla || '19:00';
   document.getElementById('cal-style').value        = appState.settings.calStyle || 'text';
@@ -1545,8 +1587,8 @@ function saveSettings() {
   appState.settings = {
     gcal:           document.getElementById('toggle-gcal').checked,
     notif:          false,
-    notifTimeYom:   document.getElementById('notif-time-yom').value,
-    notifTimeLayla: document.getElementById('notif-time-layla').value,
+    notifTimeYom:   document.getElementById('notif-time-yom-vis').value,
+    notifTimeLayla: document.getElementById('notif-time-layla-vis').value,
     calStyle:       document.getElementById('cal-style').value,
     husband:        document.getElementById('toggle-husband').checked,
     husbandEmail:   document.getElementById('husband-email').value,
@@ -1578,7 +1620,6 @@ function addToGoogleCalendar(results) {
   const pad = n => String(n).padStart(2,'0');
   const yomTime   = (document.getElementById('notif-time-yom-vis')?.value || appState.settings.notifTimeYom || '07:00').replace(':','');
   const laylaTime = (document.getElementById('notif-time-layla-vis')?.value || appState.settings.notifTimeLayla || '19:00').replace(':','');
-
   function makeUrl(g, onah, title, desc) {
     const startTime = onah === 'layla' ? laylaTime : yomTime;
     const startH = parseInt(startTime.slice(0,2));
@@ -1671,15 +1712,11 @@ function addToGoogleCalendar(results) {
     <button class="btn-primary" id="gcal-save-all" style="margin-bottom:10px;">📥 שמירת כל העונות הרגילות בבת אחת</button>
 
     <div id="gcal-import-steps" style="display:none; background:var(--green-pale); border:1px solid #BFE0CC; border-radius:12px; padding:14px; margin-bottom:14px;">
-      <p style="font-size:13px; font-weight:600; color:#2E5E3E; margin-bottom:8px;">הקובץ ירד ✓ עכשיו שני צעדים קטנים:</p>
-      <p style="font-size:13px; color:#2E5E3E; line-height:1.8; margin-bottom:4px;">
-        <strong>1.</strong> לוחצים על הכפתור הירוק למטה — זה פותח ישירות את עמוד הייבוא ביומן Google.<br>
-        <strong>2.</strong> בעמוד שנפתח, בוחרים את הקובץ שירד (לרוב נקרא <code>imei-prisha.ics</code>, בתיקיית ההורדות) ולוחצים "ייבוא".
+      <p style="font-size:13px; font-weight:600; color:#2E5E3E; margin-bottom:8px;">הקובץ ירד ✓</p>
+      <p style="font-size:13px; color:#2E5E3E; line-height:1.8;">
+        במכשיר נייד — <strong>לחצי על הקובץ שהורד</strong> בתיקיית ההורדות. הוא יפתח ישירות באפליקציית היומן שלך לשמירה בלחיצה אחת.<br><br>
+        במחשב — <a href="https://calendar.google.com/calendar/r/settings/export" target="_blank" rel="noopener" style="color:#2E5E3E;font-weight:600;">פתחי את עמוד הייבוא ביומן Google ←</a> ובחרי את הקובץ <code>yemei-prisha.ics</code>.
       </p>
-      <a href="https://calendar.google.com/calendar/r/settings/export" target="_blank" rel="noopener"
-         style="display:block; text-align:center; margin-top:10px; padding:12px; border-radius:10px; background:#4E8060; color:#fff; text-decoration:none; font-size:14px; font-weight:600;">
-        🗓️ פתיחת עמוד הייבוא ב-Google Calendar
-      </a>
     </div>
 
     <div style="height:8px;"></div>
@@ -1751,7 +1788,7 @@ function downloadIcs(items, titleFor, detailsFor) {
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'imei-prisha.ics';
+  a.download = 'yemei-prisha.ics';
   a.click();
   showToast('הקובץ הורד — ייבאי אותו ל-Google Calendar');
 }
@@ -1782,77 +1819,71 @@ function getCycleFindings() {
     const [gy, gm, gd] = e.date.split('-').map(Number);
     const abs = HebCal.gregToAbs(gy, gm, gd);
     const heb = e.heb0 || HebCal.gregToHeb(gy, gm, gd);
-    return { abs, heb, onah: e.onah, hebFmt: fmtHeb(heb) };
+    const jsDate = new Date(gy, gm-1, gd);
+    return { abs, heb, onah: e.onah, hebFmt: fmtHeb(heb),
+             gregDay: gd, gregMonth: gm, gregYear: gy,
+             dowJS: jsDate.getDay() }; // 0=Sun
   });
   const findings = [];
 
+  const DOW_HEB = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+
   // Build intervals array
   const intervals = [];
-  for (let i = 1; i < entries.length; i++) {
+  for (let i = 1; i < entries.length; i++)
     intervals.push(entries[i].abs - entries[i-1].abs);
-  }
 
-  // ── 1. Simple haflaga: same interval repeated ≥2 times ──
+  // ── 1. הפלגה פשוטה ──
   const intervalGroups = {};
   intervals.forEach((d, i) => {
     if (!intervalGroups[d]) intervalGroups[d] = [];
     intervalGroups[d].push(i);
   });
   Object.entries(intervalGroups).forEach(([days, idxs]) => {
-    if (idxs.length >= 2) {
-      findings.push({
-        type: 'haflaga',
-        title: `הפלגה קבועה של ${days} ימים עבריים`,
-        detail: idxs.map(i => ({
-          heb:  `${entries[i].hebFmt} ← ${entries[i+1].hebFmt}`,
-          days: `הפרש: ${days} ימים`
-        })),
-        count: idxs.length
-      });
-    }
+    if (idxs.length >= 2) findings.push({
+      type: 'haflaga', disputed: false,
+      title: `הפלגה קבועה של ${days} ימים עבריים`,
+      detail: idxs.map(i => ({
+        heb: `${entries[i].hebFmt} ← ${entries[i+1].hebFmt}`,
+        days: `הפרש: ${days} ימים`
+      })),
+      count: idxs.length
+    });
   });
 
-  // ── 2. Complex pattern: a sequence of intervals that repeats ≥2 times ──
+  // ── 2. מחזוריות מורכבת (סדרת הפרשים חוזרת) ──
   const found = new Set();
   for (let seqLen = 2; seqLen <= Math.floor(intervals.length / 2); seqLen++) {
     for (let start = 0; start <= intervals.length - seqLen * 2; start++) {
       const seq = intervals.slice(start, start + seqLen);
       const seqKey = seq.join(',');
       if (found.has(seqKey)) continue;
-
       const occurrences = [];
       let pos = start;
       while (pos <= intervals.length - seqLen) {
-        const candidate = intervals.slice(pos, pos + seqLen);
-        if (candidate.join(',') === seqKey) { occurrences.push(pos); pos += seqLen; }
-        else pos++;
+        if (intervals.slice(pos, pos + seqLen).join(',') === seqKey) {
+          occurrences.push(pos); pos += seqLen;
+        } else pos++;
       }
-
-      if (occurrences.length >= 2) {
-        const allSame = seq.every(d => d === seq[0]);
-        if (allSame) continue;
+      if (occurrences.length >= 2 && !seq.every(d => d === seq[0])) {
         found.add(seqKey);
-        const detail = occurrences.map(pos => {
-          // Build sub-rows: one per interval in the sequence
-          const rows = seq.map((d, k) => ({
-            heb:  `${entries[pos+k].hebFmt} ← ${entries[pos+k+1].hebFmt}`,
-            days: `${d} ימים`
-          }));
-          return rows;
-        });
         findings.push({
-          type: 'complex',
+          type: 'complex', disputed: true,
           title: `מחזוריות מורכבת: ${seq.join(', ')} ימים (חוזרת ${occurrences.length} פעמים)`,
-          detail,       // array of arrays
-          complex: true,
-          count: occurrences.length,
-          seq
+          detail: occurrences.map(pos =>
+            seq.map((d, k) => ({
+              heb: `${entries[pos+k].hebFmt} ← ${entries[pos+k+1].hebFmt}`,
+              days: `${d} ימים`
+            }))
+          ),
+          complex: true, count: occurrences.length, seq,
+          disputeNote: 'קביעת וסת קבוע על פי סדרה מורכבת אינה מוסכמת על כל הדעות בהלכה ויש בה הבדלים בין מנהגי העדות והפוסקים השונים. חובה להתייעץ עם רב כדי לקבוע האם וכיצד לפרוש לפיה.'
         });
       }
     }
   }
 
-  // ── 3. Hodesh: same day of Hebrew month ≥3 times ──
+  // ── 3. וסת החודש (יום קבוע בחודש עברי) ──
   const dayGroups = {};
   entries.forEach(e => {
     const k = e.heb.day;
@@ -1861,13 +1892,95 @@ function getCycleFindings() {
   });
   Object.entries(dayGroups).forEach(([day, ents]) => {
     if (ents.length >= 3) findings.push({
-      type: 'hodesh',
+      type: 'hodesh', disputed: false,
       title: `ראיה ב${HebCal.dayLetters(Number(day))} לחודש העברי — ${ents.length} פעמים`,
       detail: ents.map((e, i) => ({
-        heb:  e.hebFmt,
+        heb: e.hebFmt,
         days: i > 0 ? `${ents[i].abs - ents[i-1].abs} ימים מהפעם הקודמת` : ''
       })),
       count: ents.length
+    });
+  });
+
+  // ── 4. וסת השבוע (יום קבוע בשבוע, מרווחים כפולות של 7) ──
+  // בדיקה: לפחות 3 ראיות רצופות באותו יום בשבוע, עם מרווחים כפולות של 7
+  for (let dow = 0; dow <= 6; dow++) {
+    const dowEntries = entries.filter(e => e.dowJS === dow);
+    if (dowEntries.length < 3) continue;
+    // בדוק שהמרווחים בין הראיות ביום זה הם כפולות של 7
+    let consecutive = [dowEntries[0]];
+    for (let i = 1; i < dowEntries.length; i++) {
+      const diff = dowEntries[i].abs - dowEntries[i-1].abs;
+      if (diff % 7 === 0) {
+        consecutive.push(dowEntries[i]);
+      } else {
+        if (consecutive.length >= 3) break;
+        consecutive = [dowEntries[i]];
+      }
+    }
+    if (consecutive.length >= 3) {
+      findings.push({
+        type: 'shavua', disputed: false,
+        title: `וסת השבוע — ראיה קבועה ביום ${DOW_HEB[dow]} (${consecutive.length} פעמים)`,
+        detail: consecutive.map((e, i) => ({
+          heb: e.hebFmt,
+          days: i > 0 ? `${consecutive[i].abs - consecutive[i-1].abs} ימים (${Math.round((consecutive[i].abs - consecutive[i-1].abs)/7)} שבועות)` : ''
+        })),
+        count: consecutive.length
+      });
+    }
+  }
+
+  // ── 5. וסת דילוג בימי החודש העברי ──
+  // בדיקה: יום החודש עולה או יורד ב-delta קבוע 3 פעמים רצופות
+  if (entries.length >= 3) {
+    for (let i = 0; i <= entries.length - 3; i++) {
+      const d1 = entries[i].heb.day;
+      const d2 = entries[i+1].heb.day;
+      const d3 = entries[i+2].heb.day;
+      const delta1 = d2 - d1;
+      const delta2 = d3 - d2;
+      if (delta1 !== 0 && delta1 === delta2) {
+        // Check if pattern continues
+        let streak = [entries[i], entries[i+1], entries[i+2]];
+        for (let j = i+3; j < entries.length; j++) {
+          const prev = streak[streak.length-1];
+          if (entries[j].heb.day - prev.heb.day === delta1) streak.push(entries[j]);
+          else break;
+        }
+        if (streak.length >= 3) {
+          const dir = delta1 > 0 ? 'עולה' : 'יורד';
+          findings.push({
+            type: 'dilog', disputed: false,
+            title: `וסת דילוג — יום החודש ${dir} ב-${Math.abs(delta1)} בכל פעם (${streak.length} פעמים)`,
+            detail: streak.map((e, idx) => ({
+              heb: e.hebFmt,
+              days: idx > 0 ? `יום ${e.heb.day} בחודש (שינוי: ${delta1 > 0 ? '+' : ''}${delta1})` : `יום ${e.heb.day} בחודש`
+            })),
+            count: streak.length
+          });
+        }
+      }
+    }
+  }
+
+  // ── 6. וסת החודש הלועזי (במחלוקת) ──
+  const gregDayGroups = {};
+  entries.forEach(e => {
+    const k = e.gregDay;
+    if (!gregDayGroups[k]) gregDayGroups[k] = [];
+    gregDayGroups[k].push(e);
+  });
+  Object.entries(gregDayGroups).forEach(([day, ents]) => {
+    if (ents.length >= 3) findings.push({
+      type: 'greg_hodesh', disputed: true,
+      title: `ראיה ב-${day} לחודש הלועזי — ${ents.length} פעמים`,
+      detail: ents.map((e, i) => ({
+        heb: `${e.gregDay}/${e.gregMonth}/${e.gregYear} | ${e.hebFmt}`,
+        days: i > 0 ? `${ents[i].abs - ents[i-1].abs} ימים מהפעם הקודמת` : ''
+      })),
+      count: ents.length,
+      disputeNote: 'על פי עיקר ההלכה, חוקי הפרישה נקבעים אך ורק לפי לוח השנה העברי. עם זאת, פוסקי זמננו דנו רבות בנשים שגופן מגיב לגלולות או לשעון הלועזי וקובעות בכך וסת. מאחר שמדובר בנושא הנתון במחלוקת הפוסקים, יש לשאול רב מוסמך כיצד לנהוג.'
     });
   });
 
@@ -1888,116 +2001,161 @@ function showCycleModal(findings, forceShow) {
           ${appState.history.length < 5 ? '<br>הוספת ראיות נוספות תאפשר ניתוח מדויק יותר.' : ''}
         </p>
       </div>`;
-  } else {
-    const TYPE_COLOR = { haflaga:'var(--rose)', hodesh:'var(--gold)', complex:'#7B5EA7' };
-    const TYPE_ICON  = { haflaga:'📏', hodesh:'📅', complex:'🔄' };
+    document.getElementById('modal-cycles').classList.add('open');
+    return;
+  }
 
-    function renderDetail(f) {
-      if (f.complex) {
-        // detail is array of arrays (one per occurrence, each containing sub-rows)
-        return f.detail.map((occurrence, oi) => {
-          const subRows = occurrence.map(row =>
-            `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rose-pale);font-size:12px;color:var(--ink-soft);">
-               <span>${row.heb}</span>
-               <span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>
-             </div>`
-          ).join('');
-          return `<div style="margin-bottom:8px;">
-            <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:3px;">מחזור ${oi+1}:</div>
-            ${subRows}
-          </div>`;
-        }).join('');
-      } else {
-        // detail is array of {heb, days} objects
-        return f.detail.map(row =>
-          `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
-             <span>${row.heb || row}</span>
-             ${row.days ? `<span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>` : ''}
+  // Colors and icons per type
+  const TYPE_COLOR = {
+    haflaga:'var(--rose)', hodesh:'var(--gold)', complex:'#7B5EA7',
+    shavua:'#2E7D8C', dilog:'#6B8E23', greg_hodesh:'#B8600A'
+  };
+  const TYPE_ICON = {
+    haflaga:'📏', hodesh:'📅', complex:'🔄',
+    shavua:'📆', dilog:'📈', greg_hodesh:'🗓️'
+  };
+
+  function renderDetail(f) {
+    if (f.complex) {
+      return f.detail.map((occurrence, oi) => {
+        const subRows = occurrence.map(row =>
+          `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rose-pale);font-size:12px;color:var(--ink-soft);">
+             <span>${row.heb}</span>
+             <span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>
            </div>`
         ).join('');
-      }
+        return `<div style="margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:3px;">מחזור ${oi+1}:</div>
+          ${subRows}
+        </div>`;
+      }).join('');
     }
-
-    const sorted_hist = [...appState.history.filter(e=>e.specialType!=='special')]
-      .sort((a,b) => a.date<b.date?-1:1);
-    const lastEntry = sorted_hist[sorted_hist.length-1];
-    const lastAbs   = lastEntry
-      ? HebCal.gregToAbs(...lastEntry.date.split('-').map(Number))
-      : null;
-
-    function predictNext(f) {
-      if (!lastAbs) return null;
-      if (f.type === 'haflaga') {
-        const days = parseInt(f.title.match(/(\d+)/)[1]);
-        const predAbs  = lastAbs + days;
-        const predGreg = HebCal.absToGreg(predAbs);
-        const predHeb  = HebCal.gregToHeb(predGreg.year, predGreg.month, predGreg.day);
-        return `${fmtGreg(predGreg)} | ${fmtHeb(predHeb)}`;
-      }
-      if (f.type === 'hodesh') {
-        const day = Number(Object.keys(
-          sorted_hist.reduce((acc,e)=>{
-            const k=e.heb0?e.heb0.day:(HebCal.gregToHeb(...e.date.split('-').map(Number)).day);
-            acc[k]=(acc[k]||0)+1; return acc;},{})
-        ).sort((a,b)=>b-a)[0]);
-        const lastHeb = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
-        const nm = HebCal.nextMonthDate(lastHeb.year, lastHeb.month, 1);
-        const actualDay = Math.min(day, HebCal.daysInMonth(nm.month, nm.year));
-        const predGreg  = HebCal.hebToGreg(nm.year, nm.month, actualDay);
-        const predHeb   = {year:nm.year, month:nm.month, day:actualDay};
-        return `${fmtGreg(predGreg)} | ${fmtHeb(predHeb)}`;
-      }
-      if (f.type === 'complex') {
-        // Next step in the sequence after last occurrence
-        const intervals_hist = [];
-        for (let i=1;i<sorted_hist.length;i++) {
-          const [ay,am,ad]=sorted_hist[i-1].date.split('-').map(Number);
-          const [by,bm,bd]=sorted_hist[i].date.split('-').map(Number);
-          intervals_hist.push(HebCal.gregToAbs(by,bm,bd)-HebCal.gregToAbs(ay,am,ad));
-        }
-        const seq = f.seq;
-        // find where in the cycle we are
-        const posInSeq = intervals_hist.length % seq.length;
-        const nextDays = seq[posInSeq];
-        const predAbs  = lastAbs + nextDays;
-        const predGreg = HebCal.absToGreg(predAbs);
-        const predHeb  = HebCal.gregToHeb(predGreg.year, predGreg.month, predGreg.day);
-        return `${fmtGreg(predGreg)} | ${fmtHeb(predHeb)} (${nextDays} ימים)`;
-      }
-      return null;
-    }
-
-    const cardsHtml = findings.sort((a,b) => b.count - a.count).map(f => {
-      const color = TYPE_COLOR[f.type] || 'var(--rose)';
-      const icon  = TYPE_ICON[f.type]  || '📌';
-      const pred  = predictNext(f);
-      const predHtml = pred
-        ? `<div style="margin-top:10px;padding:10px;background:#FFF8E7;border-radius:8px;border:1px solid #F0D98B;">
-            <span style="font-size:12px;color:#7A6020;font-weight:600;">📅 לפי המחזוריות הקודמת, התאריך המסתבר של הראיה הבאה:</span><br>
-            <span style="font-size:14px;font-weight:700;color:#5A4010;">${pred}</span>
-           </div>`
-        : '';
-      return `<div style="background:var(--rose-pale);border:1px solid ${color}55;border-radius:12px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${f.title}</div>
-        ${renderDetail(f)}
-        ${predHtml}
-      </div>`;
-    }).join('');
-
-    el.innerHTML = `
-      <div class="modal-title">⚠️ נמצאה מחזוריות</div>
-      <div style="background:linear-gradient(135deg,#FFF3D6,#FFF8E7);border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:16px;">
-        <p style="font-size:14px;font-weight:700;color:#7A6020;">נמצאה מחזוריות שיכולה לקבוע וסת קבוע</p>
-      </div>
-      ${cardsHtml}
-      <div style="background:var(--green-pale);border:1px solid #BFE0CC;border-radius:12px;padding:14px;">
-        <p style="font-size:14px;color:#2E5E3E;font-weight:600;">📖 מומלץ להתייעץ עם רב</p>
-      </div>`;
+    return f.detail.map(row =>
+      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
+         <span>${row.heb || row}</span>
+         ${row.days ? `<span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>` : ''}
+       </div>`
+    ).join('');
   }
+
+  // Predict next date
+  const sorted_hist = [...appState.history.filter(e=>e.specialType!=='special')].sort((a,b)=>a.date<b.date?-1:1);
+  const lastEntry = sorted_hist[sorted_hist.length-1];
+  const lastAbs = lastEntry ? HebCal.gregToAbs(...lastEntry.date.split('-').map(Number)) : null;
+
+  function predictNext(f) {
+    if (!lastAbs) return null;
+    if (f.type === 'haflaga') {
+      const days = parseInt(f.title.match(/(\d+)/)[1]);
+      const pg = HebCal.absToGreg(lastAbs + days);
+      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year, pg.month, pg.day))}`;
+    }
+    if (f.type === 'hodesh') {
+      const day = Number(Object.keys(
+        sorted_hist.reduce((acc,e)=>{const k=e.heb0?e.heb0.day:HebCal.gregToHeb(...e.date.split('-').map(Number)).day;acc[k]=(acc[k]||0)+1;return acc;},{})
+      ).sort((a,b)=>b-a)[0]);
+      const lh = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
+      const nm = HebCal.nextMonthDate(lh.year, lh.month, 1);
+      const actualDay = Math.min(day, HebCal.daysInMonth(nm.month, nm.year));
+      const pg = HebCal.hebToGreg(nm.year, nm.month, actualDay);
+      return `${fmtGreg(pg)} | ${fmtHeb({year:nm.year,month:nm.month,day:actualDay})}`;
+    }
+    if (f.type === 'complex') {
+      const ivs = [];
+      for(let i=1;i<sorted_hist.length;i++){
+        const [ay,am,ad]=sorted_hist[i-1].date.split('-').map(Number);
+        const [by,bm,bd]=sorted_hist[i].date.split('-').map(Number);
+        ivs.push(HebCal.gregToAbs(by,bm,bd)-HebCal.gregToAbs(ay,am,ad));
+      }
+      const nextDays = f.seq[ivs.length % f.seq.length];
+      const pg = HebCal.absToGreg(lastAbs + nextDays);
+      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year,pg.month,pg.day))} (${nextDays} ימים)`;
+    }
+    if (f.type === 'shavua') {
+      // Same day of week, next occurrence
+      const lastD = new Date(...lastEntry.date.split('-').map(Number).map((v,i)=>i===1?v-1:v));
+      const targetDow = lastD.getDay();
+      const daysUntil = (targetDow - lastD.getDay() + 7) % 7 || 7;
+      const pg = HebCal.absToGreg(lastAbs + daysUntil);
+      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year,pg.month,pg.day))}`;
+    }
+    if (f.type === 'dilog') {
+      const delta = f.detail.length >= 2
+        ? (f.detail[1].days.match(/[+-]?\d+/) || [0])[0] * 1
+        : 0;
+      if (!delta) return null;
+      const lastHeb = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
+      const nextDay = Math.max(1, Math.min(30, lastHeb.day + delta));
+      try {
+        const pg = HebCal.hebToGreg(lastHeb.year, lastHeb.month, nextDay);
+        return `${fmtGreg(pg)} | ${fmtHeb({year:lastHeb.year,month:lastHeb.month,day:nextDay})}`;
+      } catch(e) { return null; }
+    }
+    if (f.type === 'greg_hodesh') {
+      const lastG = lastEntry.date.split('-').map(Number);
+      const nextM = lastG[1] === 12 ? 1 : lastG[1]+1;
+      const nextY = lastG[1] === 12 ? lastG[0]+1 : lastG[0];
+      const targetDay = parseInt(f.title.match(/ב-(\d+)/)[1]);
+      const pg = {year:nextY, month:nextM, day:targetDay};
+      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(nextY,nextM,targetDay))}`;
+    }
+    return null;
+  }
+
+  // Separate findings into undisputed and disputed
+  const undisputed = findings.filter(f => !f.disputed);
+  const disputed   = findings.filter(f => f.disputed);
+
+  function buildCard(f) {
+    const color = TYPE_COLOR[f.type] || 'var(--rose)';
+    const icon  = TYPE_ICON[f.type]  || '📌';
+    const pred  = predictNext(f);
+    const bg    = f.disputed ? '#FFF4E5' : 'var(--rose-pale)';
+    const border= f.disputed ? '#E8A44060' : `${color}55`;
+    const predHtml = pred
+      ? `<div style="margin-top:10px;padding:10px;background:#FFF8E7;border-radius:8px;border:1px solid #F0D98B;">
+          <span style="font-size:12px;color:#7A6020;font-weight:600;">📅 לפי המחזוריות הקודמת, התאריך המסתבר של הראיה הבאה:</span><br>
+          <span style="font-size:14px;font-weight:700;color:#5A4010;">${pred}</span>
+         </div>` : '';
+    const disputeHtml = f.disputeNote
+      ? `<div style="margin-top:10px;padding:10px;background:#FFF4E5;border-radius:8px;border:1px solid #E8A44080;">
+          <span style="font-size:12px;color:#7A4010;font-weight:600;">⚠️ שים לב — מחלוקת הפוסקים:</span><br>
+          <span style="font-size:12px;color:#7A4010;line-height:1.6;">${f.disputeNote}</span>
+         </div>` : '';
+    return `<div style="background:${bg};border:1px solid ${border};border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${f.title}</div>
+      ${renderDetail(f)}
+      ${predHtml}
+      ${disputeHtml}
+    </div>`;
+  }
+
+  const undisputedHtml = undisputed.sort((a,b)=>b.count-a.count).map(buildCard).join('');
+  const disputedHtml   = disputed.sort((a,b)=>b.count-a.count).map(buildCard).join('');
+
+  el.innerHTML = `
+    <div class="modal-title">⚠️ נמצאה מחזוריות</div>
+    <div style="background:linear-gradient(135deg,#FFF3D6,#FFF8E7);border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:14px;font-weight:700;color:#7A6020;">נמצאה מחזוריות שיכולה לקבוע וסת קבוע</p>
+    </div>
+    ${undisputedHtml}
+    ${disputedHtml ? `
+      <div style="font-size:13px;font-weight:700;color:#B8600A;margin:14px 0 8px;border-top:1px solid #E8A44050;padding-top:12px;">
+        🔶 מחזוריות הנתונה במחלוקת הפוסקים
+      </div>
+      ${disputedHtml}` : ''}
+    <div style="background:var(--green-pale);border:1px solid #BFE0CC;border-radius:12px;padding:14px;margin-top:4px;">
+      <p style="font-size:14px;color:#2E5E3E;font-weight:600;">📖 מומלץ להתייעץ עם רב</p>
+    </div>`;
+
   document.getElementById('modal-cycles').classList.add('open');
 }
 function closeBeta() {
   document.getElementById('modal-beta').classList.remove('open');
+  const dontShow = document.getElementById('beta-dont-show')?.checked;
+  if (dontShow) {
+    try { localStorage.setItem('beta_dismissed', '1'); } catch(e) {}
+  }
   sessionStorage.setItem('beta_seen', '1');
 }
 function openAbout() {
@@ -2016,9 +2174,9 @@ function shareApp() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Onot/sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
-  if (sessionStorage.getItem('beta_seen')) {
+  if (sessionStorage.getItem('beta_seen') || localStorage.getItem('beta_dismissed')) {
     document.getElementById('modal-beta').classList.remove('open');
   }
   loadState();
@@ -2033,6 +2191,7 @@ window.addEventListener('load', () => {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   document.getElementById('input-date').value = todayStr;
+  document.getElementById('input-date').max   = todayStr;
   const todayHeb = HebCal.gregToHeb(today.getFullYear(), today.getMonth()+1, today.getDate());
   const label = HebCal.dayLetters(todayHeb.day) + ' ' + HebCal.monthName(todayHeb.month, todayHeb.year) + ' ' + HebCal.yearLetters(todayHeb.year);
   document.getElementById('heb-cal-trigger').textContent = '📅 ' + label;
