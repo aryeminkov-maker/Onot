@@ -664,75 +664,119 @@ function pMonths(y){
   return pLeap(y)?[7,8,9,10,11,12,13,1,2,3,4,5,6]:[7,8,9,10,11,12,1,2,3,4,5,6];}
 function pTodayF(){var n=new Date();return pFG(n.getFullYear(),n.getMonth()+1,n.getDate());}
 
-// Calendar state
+// Calendar state - uses HebCal abs days directly
 var VCY=5786, VCM=7, VCSF=null, VCTF=null;
 
 function openVesetCal(){
-  VCTF=pTodayF();
-  var th=pG2H(VCTF); VCY=th.year; VCM=th.month;
-  // If there's already a date selected, open there
+  var t=new Date();
+  VCTF = HebCal.gregToAbs(t.getFullYear(), t.getMonth()+1, t.getDate());
+  var th = HebCal.absToHeb(VCTF);
+  VCY=th.year; VCM=th.month;
   var ex=document.getElementById('input-date').value;
-  if(ex){var p=ex.split('-'),f=pFG(+p[0],+p[1],+p[2]),h=pG2H(f);VCY=h.year;VCM=h.month;VCSF=f;}
-  else VCSF=null;
+  if(ex){
+    var p=ex.split('-');
+    VCSF = HebCal.gregToAbs(+p[0],+p[1],+p[2]);
+    var hEx=HebCal.absToHeb(VCSF);
+    VCY=hEx.year; VCM=hEx.month;
+  } else VCSF=null;
   renderVesetCal();
   document.getElementById('hcal-overlay').classList.add('open');
 }
+
 function closeVesetCal(){document.getElementById('hcal-overlay').classList.remove('open');}
+
 function confirmVesetCal(){
   if(VCSF===null){closeVesetCal();return;}
-  // Picker engine has abs offset of +1 vs HebCal. Correct by subtracting 1.
-  var correctedAbs = VCSF - 1;
-  // Get Hebrew date using picker display (for label - what user sees in picker)
-  var h = pG2H(VCSF);
-  // Convert to Gregorian using HebCal (correct engine, with offset correction)
-  var heb = HebCal.absToHeb(correctedAbs);
-  var g = HebCal.hebToGreg(heb.year, heb.month, heb.day);
+  // Convert HebCal abs → Gregorian
+  var g = HebCal.absToGreg(VCSF);
   var ds = g.year+'-'+String(g.month).padStart(2,'0')+'-'+String(g.day).padStart(2,'0');
-  // Label: use what picker showed the user
-  var label = HD_P[h.day]+' '+HN_P[h.month]+' '+pHYS(h.year);
+  // Get Hebrew date for display
+  var h = HebCal.absToHeb(VCSF);
+  var label = HebCal.dayLetters(h.day)+' '+HebCal.monthName(h.month,h.year)+' '+HebCal.yearLetters(h.year);
   document.getElementById('input-date').value = ds;
   document.getElementById('heb-cal-trigger').textContent = '📅 '+label;
   closeVesetCal();
 }
+
 function renderVesetCal(){
-  var ms=pMonths(VCY);
-  document.getElementById('hcal-title').textContent=HN_P[VCM]+' '+pHYS(VCY);
+  var isLeap = HebCal.isLeapYear(VCY);
+  document.getElementById('hcal-title').textContent = HebCal.monthName(VCM,VCY)+' '+HebCal.yearLetters(VCY);
+
+  var ms = HebCal._monthOrder(VCY);
   var msel=document.getElementById('hcal-msel');
   msel.innerHTML='';
-  ms.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=HN_P[m];if(m===VCM)o.selected=true;msel.appendChild(o);});
+  ms.forEach(function(m){
+    var o=document.createElement('option');
+    o.value=m;
+    o.textContent=HebCal.monthName(m,VCY);
+    if(m===VCM)o.selected=true;
+    msel.appendChild(o);
+  });
+
   var ysel=document.getElementById('hcal-ysel');
   ysel.innerHTML='';
-  for(var y=5780;y<=5800;y++){var o=document.createElement('option');o.value=y;o.textContent=pHYS(y);if(y===VCY)o.selected=true;ysel.appendChild(o);}
-  var firstF=pFH(VCY,VCM,1);
-  var dow=firstF%7;
-  var total=pMD(VCM,VCY);
+  for(var y=5780;y<=5800;y++){
+    var o=document.createElement('option');
+    o.value=y;
+    o.textContent=HebCal.yearLetters(y);
+    if(y===VCY)o.selected=true;
+    ysel.appendChild(o);
+  }
+
+  // First day of month
+  var firstAbs = HebCal.hebToAbs(VCY, VCM, 1);
+  var firstGreg = HebCal.absToGreg(firstAbs);
+  var firstDow = new Date(firstGreg.year, firstGreg.month-1, firstGreg.day).getDay(); // 0=Sun
+  var daysInMonth = HebCal.daysInMonth(VCM, VCY);
+
   var grid=document.getElementById('hcal-days');
   grid.innerHTML='';
-  for(var i=0;i<dow;i++){var e=document.createElement('button');e.className='hcal-day empty';e.textContent='';grid.appendChild(e);}
-  for(var d=1;d<=total;d++){
-    var f=firstF+d-1;
+
+  // Empty cells before first day
+  for(var i=0;i<firstDow;i++){
+    var e=document.createElement('div'); grid.appendChild(e);
+  }
+
+  for(var d=1;d<=daysInMonth;d++){
+    var abs = firstAbs + d - 1;
     var btn=document.createElement('button');
     btn.className='hcal-day';
-    btn.textContent=HD_P[d];
-    if(f===VCTF)btn.classList.add('today');
-    if(VCSF!==null&&f===VCSF)btn.classList.add('selected');
-    btn.setAttribute('data-f',f);
-    if(f>VCTF){
+    btn.textContent=HebCal.dayLetters(d);
+    if(abs===VCTF) btn.classList.add('today');
+    if(VCSF!==null&&abs===VCSF) btn.classList.add('selected');
+    btn.setAttribute('data-abs', abs);
+    if(abs>VCTF){
       btn.disabled=true;
       btn.style.cssText='color:#ccc;cursor:not-allowed;';
     } else {
-      btn.onclick=function(){VCSF=parseInt(this.getAttribute('data-f'));renderVesetCal();};
+      btn.onclick=function(){
+        VCSF=parseInt(this.getAttribute('data-abs'));
+        renderVesetCal();
+      };
     }
     grid.appendChild(btn);
   }
 }
-function hcalPrev(){var ms=pMonths(VCY),i=ms.indexOf(VCM);if(i>0)VCM=ms[i-1];else{VCY--;VCM=pMonths(VCY).slice(-1)[0];}renderVesetCal();}
-function hcalNext(){var ms=pMonths(VCY),i=ms.indexOf(VCM);if(i<ms.length-1)VCM=ms[i+1];else{VCY++;VCM=pMonths(VCY)[0];}renderVesetCal();}
+
+function hcalPrev(){
+  var ms=HebCal._monthOrder(VCY), idx=ms.indexOf(VCM);
+  if(idx>0) VCM=ms[idx-1];
+  else { VCY--; ms=HebCal._monthOrder(VCY); VCM=ms[ms.length-1]; }
+  renderVesetCal();
+}
+function hcalNext(){
+  var ms=HebCal._monthOrder(VCY), idx=ms.indexOf(VCM);
+  if(idx<ms.length-1) VCM=ms[idx+1];
+  else { VCY++; VCM=HebCal._monthOrder(VCY)[0]; }
+  renderVesetCal();
+}
 function hcalGoM(){VCM=parseInt(document.getElementById('hcal-msel').value);renderVesetCal();}
 function hcalGoY(){
   VCY=parseInt(document.getElementById('hcal-ysel').value);
-  var ms=pMonths(VCY);if(ms.indexOf(VCM)===-1)VCM=ms[0];
-  renderVesetCal();}
+  var ms=HebCal._monthOrder(VCY);
+  if(ms.indexOf(VCM)===-1) VCM=ms[0];
+  renderVesetCal();
+}
 
 // Date mode toggle
 function setDateMode(mode){
@@ -2312,7 +2356,7 @@ window.addEventListener('load', () => {
   document.getElementById('input-date').value = todayStr;
   document.getElementById('input-date').max   = todayStr;
   const todayHeb = HebCal.gregToHeb(today.getFullYear(), today.getMonth()+1, today.getDate());
-  const label = HebCal.dayLetters(todayHeb.day) + ' ' + HebCal.monthName(todayHeb.month, todayHeb.year) + ' ' + HebCal.yearLetters(todayHeb.year);
+  const label = HebCal.dayLetters(todayHeb.day)+' '+HebCal.monthName(todayHeb.month,todayHeb.year)+' '+HebCal.yearLetters(todayHeb.year);
   document.getElementById('heb-cal-trigger').textContent = '📅 ' + label;
   document.getElementById('privacy-banner').addEventListener('click', function() { this.style.display='none'; });
 });
