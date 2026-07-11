@@ -1959,360 +1959,489 @@ function downloadIcs(items, titleFor, detailsFor) {
 // ════════════════════════════════════════════════════════
 // CYCLE ANALYSIS
 // ════════════════════════════════════════════════════════
-function checkCyclesAfterCalculate() {
-  const findings = getCycleFindings();
-  if (!findings.length) return;
-  const fingerprint = findings.map(f => f.type + f.title).sort().join('|');
-  if (appState._lastCycleAlert === fingerprint) return;
-  appState._lastCycleAlert = fingerprint;
-  showCycleModal(findings, false);
+// ════════════════════════════════════════════════════════
+// מנוע וסת הלכתי — לפי דרכי טהרה פרקים ו-ז (הרב מרדכי אליהו זצ"ל)
+// ════════════════════════════════════════════════════════
+
+// --- עזרי מחשוב ---
+function _reiyaFromEntry(e) {
+  const [gy,gm,gd] = e.date.split('-').map(Number);
+  const abs = HebCal.gregToAbs(gy,gm,gd);
+  const heb = e.heb0 || HebCal.absToHeb(abs);
+  const jsDate = new Date(gy,gm-1,gd);
+  return { absDate: abs, heb, onah: e.onah, dowJS: jsDate.getDay() };
 }
 
-function analyzeCycles() {
-  const h = appState.history.filter(e => e.specialType !== 'special');
-  if (h.length < 3) { showToast('נדרשות לפחות 3 ראיות לבדיקת מחזוריות'); return; }
-  showCycleModal(getCycleFindings(), true);
+function _nextHebMonth(year, month) {
+  const order = HebCal._monthOrder(year);
+  const idx = order.indexOf(month);
+  if (idx < order.length-1) return { year, month: order[idx+1] };
+  return { year: year+1, month: HebCal._monthOrder(year+1)[0] };
 }
 
-function getCycleFindings() {
-  const h = appState.history.filter(e => e.specialType !== 'special');
-  if (h.length < 3) return [];
-  const sorted = [...h].sort((a, b) => a.date < b.date ? -1 : 1);
-  const entries = sorted.map(e => {
-    const [gy, gm, gd] = e.date.split('-').map(Number);
-    const abs = HebCal.gregToAbs(gy, gm, gd);
-    const heb = e.heb0 || HebCal.gregToHeb(gy, gm, gd);
-    const jsDate = new Date(gy, gm-1, gd);
-    return { abs, heb, onah: e.onah, hebFmt: fmtHeb(heb),
-             gregDay: gd, gregMonth: gm, gregYear: gy,
-             dowJS: jsDate.getDay() }; // 0=Sun
+function _fmtAbsDate(abs) {
+  const g = HebCal.absToGreg(abs);
+  const h = HebCal.absToHeb(abs);
+  return `${fmtGreg(g)} | ${fmtHeb(h)}`;
+}
+
+// --- 2. computeChashashDates ---
+// מחשב 3 תאריכי חשש מהראיה האחרונה בהיסטוריה (סעיף י-יג)
+function computeChashashDates(reiyot) {
+  if (!reiyot.length) return [];
+  const last = reiyot[reiyot.length-1];
+  const dates = [];
+
+  // 2.1 עונה בינונית — יום 30 (סעיף י)
+  dates.push({
+    absDate: last.absDate + 30,
+    reasonType: 'onah_beinonit',
+    onah: last.onah,
+    blocksIfUnchecked: true,
+    requiresPriorOnah: true,
+    label: 'עונה בינונית',
+    source: 'דרכי טהרה פ"ז סעיף י',
+    desc: 'יום 30 מהווסת האחרון — דין חמור כווסת קבוע'
   });
+
+  // 2.2 יום החודש (סעיף יא)
+  const nm = _nextHebMonth(last.heb.year, last.heb.month);
+  let yomHchodeshDay = last.heb.day;
+  let yomHchodeshYear = nm.year;
+  let yomHchodeshMonth = nm.month;
+  const dimNext = HebCal.daysInMonth(nm.month, nm.year);
+  if (last.heb.day === 30 && dimNext < 30) {
+    // חודש הבא חסר — א' לחודש שאחריו (גם הוא ר"ח)
+    const nn = _nextHebMonth(nm.year, nm.month);
+    yomHchodeshDay = 1;
+    yomHchodeshYear = nn.year;
+    yomHchodeshMonth = nn.month;
+  }
+  const ymAbs = HebCal.hebToAbs(yomHchodeshYear, yomHchodeshMonth, yomHchodeshDay);
+  dates.push({
+    absDate: ymAbs,
+    reasonType: 'yom_hachodesh',
+    onah: last.onah,
+    blocksIfUnchecked: false,
+    requiresPriorOnah: false,
+    label: `עונת החודש — ${HebCal.dayLetters(yomHchodeshDay)} ${HebCal.monthName(yomHchodeshMonth, yomHchodeshYear)}`,
+    source: 'דרכי טהרה פ"ז סעיף יא',
+    desc: 'אותו יום עברי בחודש הבא'
+  });
+
+  // 2.3 הפלגה — דורש לפחות 2 ראיות (סעיף יב)
+  if (reiyot.length >= 2) {
+    const prev = reiyot[reiyot.length-2];
+    const gap  = last.absDate - prev.absDate;
+    dates.push({
+      absDate: last.absDate + gap,
+      reasonType: 'haflaga',
+      onah: last.onah,
+      blocksIfUnchecked: false,
+      requiresPriorOnah: false,
+      label: `עונת ההפלגה — הפרש ${gap} ימים`,
+      source: 'דרכי טהרה פ"ז סעיף יב-יג',
+      desc: `${gap} ימים מהווסת האחרון`
+    });
+  }
+
+  return dates;
+}
+
+// --- 2.4 onNewReiya — חישוב מחדש (סעיף טו-טז) ---
+function onNewReiya(reiyot, prevChashashDates) {
+  // יום החודש הקודם נשמר בנפרד (עד שייעקר)
+  const oldYomHachodesh = prevChashashDates.find(d => d.reasonType === 'yom_hachodesh');
+  if (oldYomHachodesh) {
+    oldYomHachodesh.reasonType = 'yom_hachodesh_previous';
+    oldYomHachodesh.label = oldYomHachodesh.label + ' (ישן)';
+    oldYomHachodesh.source += ' — נשמר בנפרד לאחר ראיה חדשה (סעיף טו)';
+  }
+  const newDates = computeChashashDates(reiyot);
+  return [...newDates, ...(oldYomHachodesh ? [oldYomHachodesh] : [])];
+}
+
+// --- 3. זיהוי קביעת וסת ---
+
+// 3.1 וסת הפלגה — 4 ראיות = 3 הפרשים שווים רצופים (סעיף לא)
+function checkHaflagaEstablished(reiyot) {
+  if (reiyot.length < 4) return { established: false };
+  const last4 = reiyot.slice(-4);
+  const gaps = [1,2,3].map(i => last4[i].absDate - last4[i-1].absDate);
+  if (gaps[0] === gaps[1] && gaps[1] === gaps[2]) {
+    return { established: true, value: gaps[0], consecutiveMatches: 3 };
+  }
+  return { established: false };
+}
+
+// 3.2 וסת החודש — 3 ראיות רצופות באותו יום עברי (סעיף לח)
+function checkYomHachodeshEstablished(reiyot) {
+  if (reiyot.length < 3) return { established: false };
+  const last3 = reiyot.slice(-3);
+  const day0 = last3[0].heb.day;
+  if (!last3.every(r => r.heb.day === day0)) return { established: false };
+  // בדוק שכל ראיה בחודש אחר מהקודמת
+  for (let i=1; i<last3.length; i++) {
+    if (last3[i].heb.month === last3[i-1].heb.month &&
+        last3[i].heb.year  === last3[i-1].heb.year) return { established: false };
+  }
+  return { established: true, value: day0, consecutiveMatches: 3 };
+}
+
+// 3.3 וסת השבוע — 3 ראיות רצופות באותו יום בשבוע (סעיף מב)
+function checkShavuaEstablished(reiyot) {
+  if (reiyot.length < 3) return { established: false };
+  const last3 = reiyot.slice(-3);
+  const dow0 = last3[0].dowJS;
+  if (!last3.every(r => r.dowJS === dow0)) return { established: false };
+  const gaps = [1,2].map(i => last3[i].absDate - last3[i-1].absDate);
+  if (gaps.every(g => g % 7 === 0)) {
+    return { established: true, value: dow0, consecutiveMatches: 3 };
+  }
+  return { established: false };
+}
+
+// 3.4 וסת דילוג — 4 ראיות עם דלתא קבועה (סעיף מה, "מחמירים כשתי השיטות")
+function checkDilugEstablished(reiyot, type) {
+  if (reiyot.length < 4) return { chashashOnly: false };
+  const last4 = reiyot.slice(-4);
+  let vals;
+  if (type === 'chodesh') {
+    vals = last4.map(r => r.heb.day);
+  } else { // haflaga
+    vals = [];
+    for(let i=1;i<last4.length;i++) vals.push(last4[i].absDate - last4[i-1].absDate);
+    if (vals.length < 3) return { chashashOnly: false };
+  }
+  const deltas = [];
+  for (let i=1; i<vals.length; i++) deltas.push(vals[i]-vals[i-1]);
+  if (deltas.length < 2) return { chashashOnly: false };
+  if (deltas.every(d => d === deltas[0]) && deltas[0] !== 0) {
+    const fullyEstablished = reiyot.length >= 5;
+    return { chashashOnly: true, established: fullyEstablished, delta: deltas[0], value: vals[vals.length-1] };
+  }
+  return { chashashOnly: false };
+}
+
+// 3.5 וסת הסירוג — יום קבוע + מרווח-חודשים קבוע (סעיף נט)
+function checkSerugEstablished(reiyot) {
+  if (reiyot.length < 3) return { established: false };
+  const last3 = reiyot.slice(-3);
+  const day0 = last3[0].heb.day;
+  if (!last3.every(r => r.heb.day === day0)) return { established: false };
+  // חשב מרווח חודשים בין ראיות
+  function monthDiff(a, b) {
+    const aOrder = HebCal._monthOrder(a.heb.year);
+    const bOrder = HebCal._monthOrder(b.heb.year);
+    let count = 0;
+    let y = a.heb.year; let m = a.heb.month;
+    while (y !== b.heb.year || m !== b.heb.month) {
+      const nm = _nextHebMonth(y, m); y = nm.year; m = nm.month;
+      count++;
+      if (count > 24) break;
+    }
+    return count;
+  }
+  const gap1 = monthDiff(last3[0], last3[1]);
+  const gap2 = monthDiff(last3[1], last3[2]);
+  if (gap1 === gap2 && gap1 > 1) {
+    return { established: true, dayOfMonth: day0, monthGap: gap1 };
+  }
+  return { established: false };
+}
+
+// --- getVesetStatus — עוטף הכול ---
+function getVesetStatus(history) {
+  const entries = history.filter(e => e.specialType !== 'special');
+  if (!entries.length) return { type: 'none', findings: [], chashashDates: [] };
+
+  const sorted = [...entries].sort((a,b) => a.date < b.date ? -1 : 1);
+  const reiyot = sorted.map(_reiyaFromEntry);
+
   const findings = [];
+  let kavuaStatus = { type: 'none' };
 
-  const DOW_HEB = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  // בדיקת קביעה
+  const haflagaRes = checkHaflagaEstablished(reiyot);
+  const hodeshRes  = checkYomHachodeshEstablished(reiyot);
+  const shavuaRes  = checkShavuaEstablished(reiyot);
+  const dilugChodeshRes  = checkDilugEstablished(reiyot, 'chodesh');
+  const dilugHaflagaRes  = checkDilugEstablished(reiyot, 'haflaga');
+  const serugRes   = checkSerugEstablished(reiyot);
 
-  // Build intervals array
+  // --- הפלגה פשוטה ---
   const intervals = [];
-  for (let i = 1; i < entries.length; i++)
-    intervals.push(entries[i].abs - entries[i-1].abs);
-
-  // ── 1. הפלגה פשוטה ──
+  for(let i=1;i<reiyot.length;i++) intervals.push(reiyot[i].absDate - reiyot[i-1].absDate);
   const intervalGroups = {};
-  intervals.forEach((d, i) => {
-    if (!intervalGroups[d]) intervalGroups[d] = [];
-    intervalGroups[d].push(i);
-  });
-  Object.entries(intervalGroups).forEach(([days, idxs]) => {
+  intervals.forEach((d,i) => { if(!intervalGroups[d]) intervalGroups[d]=[]; intervalGroups[d].push(i); });
+  Object.entries(intervalGroups).forEach(([days,idxs]) => {
     if (idxs.length >= 2) findings.push({
       type: 'haflaga', disputed: false,
-      title: `הפלגה קבועה של ${days} ימים עבריים`,
-      detail: idxs.map(i => ({
-        heb: `${entries[i].hebFmt} ← ${entries[i+1].hebFmt}`,
-        days: `הפרש: ${days} ימים`
-      })),
-      count: idxs.length
+      title: `הפלגה — ${days} ימים עבריים`,
+      count: idxs.length,
+      detail: idxs.map(i => ({ heb:`${reiyot[i].hebFmt||fmtHeb(reiyot[i].heb)} ← ${reiyot[i+1].hebFmt||fmtHeb(reiyot[i+1].heb)}`, days:`הפרש: ${days} ימים` })),
+      source: 'דרכי טהרה פ"ז סעיף יב',
+      kavua: haflagaRes.established && parseInt(days) === haflagaRes.value
     });
   });
 
-  // ── 2. מחזוריות מורכבת (סדרת הפרשים חוזרת) ──
-  const found = new Set();
-  for (let seqLen = 2; seqLen <= Math.floor(intervals.length / 2); seqLen++) {
-    for (let start = 0; start <= intervals.length - seqLen * 2; start++) {
-      const seq = intervals.slice(start, start + seqLen);
-      const seqKey = seq.join(',');
-      if (found.has(seqKey)) continue;
-      const occurrences = [];
-      let pos = start;
-      while (pos <= intervals.length - seqLen) {
-        if (intervals.slice(pos, pos + seqLen).join(',') === seqKey) {
-          occurrences.push(pos); pos += seqLen;
-        } else pos++;
+  if (haflagaRes.established) {
+    kavuaStatus = { type: 'kavua', kavuaKind: 'haflaga', kavuaValue: haflagaRes.value };
+    findings.push({
+      type: 'kavua_haflaga', disputed: false, kavua: true,
+      title: `✅ נקבע וסת קבוע — הפלגה של ${haflagaRes.value} ימים`,
+      count: 3, detail: [],
+      source: 'דרכי טהרה פ"ז סעיף כב, לא',
+      uiKey: 'veset_kavua_established',
+      tooltip: 'וסת נחשב קבוע לאחר 3 פעמים זהות רצופות (סעיף כב). מעיקר הדין מספיק לפרוש בעונה עצמה; יש נוהגים להחמיר ולפרוש גם עונה קודם (פרק ו סעיף ב).'
+    });
+  }
+
+  // --- וסת החודש ---
+  const dayGroups = {};
+  reiyot.forEach(r => { const k=r.heb.day; if(!dayGroups[k])dayGroups[k]=[]; dayGroups[k].push(r); });
+  Object.entries(dayGroups).forEach(([day,ents]) => {
+    if (ents.length >= 3) {
+      const kavua = hodeshRes.established && parseInt(day) === hodeshRes.value;
+      findings.push({
+        type: 'hodesh', disputed: false,
+        title: `${kavua?'✅ נקבע ':''}וסת החודש — ${HebCal.dayLetters(parseInt(day))} לחודש העברי (${ents.length} פעמים)`,
+        count: ents.length, detail: ents.map((e,i) => ({ heb: fmtHeb(e.heb), days: i>0?`${ents[i].absDate-ents[i-1].absDate} ימים`:''})),
+        source: 'דרכי טהרה פ"ז סעיף לח',
+        kavua,
+        uiKey: kavua ? 'veset_kavua_established' : 'yom_hachodesh_active',
+        tooltip: kavua ? 'נקבע וסת החודש לאחר 3 חזרות רצופות (סעיף לח).' : 'אותו יום עברי בחודש — עונת חשש כל עוד לא נקבע וסת קבוע.'
+      });
+    }
+  });
+
+  // --- וסת השבוע ---
+  const DOW_HEB = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  for (let dow=0; dow<=6; dow++) {
+    const dowEnts = reiyot.filter(r=>r.dowJS===dow);
+    if (dowEnts.length >= 3) {
+      let consecutive = [dowEnts[0]];
+      for(let i=1;i<dowEnts.length;i++){
+        if((dowEnts[i].absDate-dowEnts[i-1].absDate)%7===0) consecutive.push(dowEnts[i]);
+        else if(consecutive.length<3) consecutive=[dowEnts[i]];
       }
-      if (occurrences.length >= 2 && !seq.every(d => d === seq[0])) {
-        found.add(seqKey);
+      if (consecutive.length >= 3) {
+        const kavua = shavuaRes.established && shavuaRes.value === dow;
+        // בדיקה לקונפליקט עם הפלגה (סעיף מד)
+        const haflagaConflict = haflagaRes.established || findings.some(f=>f.type==='haflaga');
         findings.push({
-          type: 'complex', disputed: true,
-          title: `מחזוריות מורכבת: ${seq.join(', ')} ימים (חוזרת ${occurrences.length} פעמים)`,
-          detail: occurrences.map(pos =>
-            seq.map((d, k) => ({
-              heb: `${entries[pos+k].hebFmt} ← ${entries[pos+k+1].hebFmt}`,
-              days: `${d} ימים`
-            }))
-          ),
-          complex: true, count: occurrences.length, seq,
-          disputeNote: 'קביעת וסת קבוע על פי סדרה מורכבת אינה מוסכמת על כל הדעות בהלכה ויש בה הבדלים בין מנהגי העדות והפוסקים השונים. חובה להתייעץ עם רב כדי לקבוע האם וכיצד לפרוש לפיה.'
+          type: 'shavua', disputed: haflagaConflict,
+          title: `${kavua?'✅ נקבע ':''}וסת השבוע — יום ${DOW_HEB[dow]} (${consecutive.length} פעמים)`,
+          count: consecutive.length,
+          detail: consecutive.map((e,i) => ({ heb: fmtHeb(e.heb), days: i>0?`${consecutive[i].absDate-consecutive[i-1].absDate} ימים (${Math.round((consecutive[i].absDate-consecutive[i-1].absDate)/7)} שבועות)`:''})),
+          source: 'דרכי טהרה פ"ז סעיף מב-מג',
+          kavua, disputeNote: haflagaConflict
+            ? 'שאלת חכם: זוהה גם דפוס יום-בשבוע וגם דפוס הפלגה — דיני שינוי/עקירה של וסת השבוע כשהוא סמוך לוסת הפלגה שנויים במחלוקת הפוסקים (סעיף מד).'
+            : null,
+          uiKey: haflagaConflict ? 'shavua_haflaga_conflict' : (kavua ? 'veset_kavua_established' : null)
         });
       }
     }
   }
 
-  // ── 3. וסת החודש (יום קבוע בחודש עברי) ──
-  const dayGroups = {};
-  entries.forEach(e => {
-    const k = e.heb.day;
-    if (!dayGroups[k]) dayGroups[k] = [];
-    dayGroups[k].push(e);
-  });
-  Object.entries(dayGroups).forEach(([day, ents]) => {
-    if (ents.length >= 3) findings.push({
-      type: 'hodesh', disputed: false,
-      title: `ראיה ב${HebCal.dayLetters(Number(day))} לחודש העברי — ${ents.length} פעמים`,
-      detail: ents.map((e, i) => ({
-        heb: e.hebFmt,
-        days: i > 0 ? `${ents[i].abs - ents[i-1].abs} ימים מהפעם הקודמת` : ''
-      })),
-      count: ents.length
+  // --- וסת דילוג חודש ---
+  if (dilugChodeshRes.chashashOnly) {
+    findings.push({
+      type: 'dilog', disputed: false,
+      title: `${dilugChodeshRes.established?'✅ נקבע ':'חשש '}וסת דילוג — יום החודש ${dilugChodeshRes.delta>0?'עולה':'יורד'} ב-${Math.abs(dilugChodeshRes.delta)} מדי חודש`,
+      count: dilugChodeshRes.established ? 5 : 4,
+      detail: reiyot.slice(-4).map((e,i) => ({ heb: fmtHeb(e.heb), days: `יום ${e.heb.day} בחודש` })),
+      source: 'דרכי טהרה פ"ז סעיף מה, מח',
+      kavua: dilugChodeshRes.established,
+      disputeNote: !dilugChodeshRes.established
+        ? 'חשש בלבד לפי שיטה א׳ (מ-4 ראיות). קביעה מלאה מ-5 ראיות (שיטה ב׳). מומלץ לשאול שאלת חכם.' : null,
+      uiKey: 'dilug_haflaga_scheduling_dispute'
     });
-  });
-
-  // ── 4. וסת השבוע (יום קבוע בשבוע, מרווחים כפולות של 7) ──
-  // בדיקה: לפחות 3 ראיות רצופות באותו יום בשבוע, עם מרווחים כפולות של 7
-  for (let dow = 0; dow <= 6; dow++) {
-    const dowEntries = entries.filter(e => e.dowJS === dow);
-    if (dowEntries.length < 3) continue;
-    // בדוק שהמרווחים בין הראיות ביום זה הם כפולות של 7
-    let consecutive = [dowEntries[0]];
-    for (let i = 1; i < dowEntries.length; i++) {
-      const diff = dowEntries[i].abs - dowEntries[i-1].abs;
-      if (diff % 7 === 0) {
-        consecutive.push(dowEntries[i]);
-      } else {
-        if (consecutive.length >= 3) break;
-        consecutive = [dowEntries[i]];
-      }
-    }
-    if (consecutive.length >= 3) {
-      findings.push({
-        type: 'shavua', disputed: false,
-        title: `וסת השבוע — ראיה קבועה ביום ${DOW_HEB[dow]} (${consecutive.length} פעמים)`,
-        detail: consecutive.map((e, i) => ({
-          heb: e.hebFmt,
-          days: i > 0 ? `${consecutive[i].abs - consecutive[i-1].abs} ימים (${Math.round((consecutive[i].abs - consecutive[i-1].abs)/7)} שבועות)` : ''
-        })),
-        count: consecutive.length
-      });
-    }
   }
 
-  // ── 5. וסת דילוג בימי החודש העברי ──
-  // בדיקה: יום החודש עולה או יורד ב-delta קבוע 3 פעמים רצופות
-  if (entries.length >= 3) {
-    for (let i = 0; i <= entries.length - 3; i++) {
-      const d1 = entries[i].heb.day;
-      const d2 = entries[i+1].heb.day;
-      const d3 = entries[i+2].heb.day;
-      const delta1 = d2 - d1;
-      const delta2 = d3 - d2;
-      if (delta1 !== 0 && delta1 === delta2) {
-        // Check if pattern continues
-        let streak = [entries[i], entries[i+1], entries[i+2]];
-        for (let j = i+3; j < entries.length; j++) {
-          const prev = streak[streak.length-1];
-          if (entries[j].heb.day - prev.heb.day === delta1) streak.push(entries[j]);
-          else break;
-        }
-        if (streak.length >= 3) {
-          const dir = delta1 > 0 ? 'עולה' : 'יורד';
-          findings.push({
-            type: 'dilog', disputed: false,
-            title: `וסת דילוג — יום החודש ${dir} ב-${Math.abs(delta1)} בכל פעם (${streak.length} פעמים)`,
-            detail: streak.map((e, idx) => ({
-              heb: e.hebFmt,
-              days: idx > 0 ? `יום ${e.heb.day} בחודש (שינוי: ${delta1 > 0 ? '+' : ''}${delta1})` : `יום ${e.heb.day} בחודש`
-            })),
-            count: streak.length
-          });
-        }
-      }
-    }
+  // --- וסת הסירוג ---
+  if (serugRes.established) {
+    findings.push({
+      type: 'serug', disputed: false,
+      title: `✅ נקבע וסת הסירוג — ${HebCal.dayLetters(serugRes.dayOfMonth)} לחודש כל ${serugRes.monthGap} חודשים`,
+      count: 3,
+      detail: reiyot.slice(-3).map(e => ({ heb: fmtHeb(e.heb), days: `${HebCal.dayLetters(e.heb.day)} ${HebCal.monthName(e.heb.month,e.heb.year)}` })),
+      source: 'דרכי טהרה פ"ז סעיף נט',
+      kavua: true,
+      uiKey: 'veset_kavua_established'
+    });
   }
 
-  // ── 6. וסת החודש הלועזי (במחלוקת) ──
+  // --- חודש לועזי (ללא מקור בדרכי טהרה) ---
   const gregDayGroups = {};
+  reiyot.forEach(r => { const k=r.heb.day; }); // לא משנה
+  const gregDayG = {};
   entries.forEach(e => {
-    const k = e.gregDay;
-    if (!gregDayGroups[k]) gregDayGroups[k] = [];
-    gregDayGroups[k].push(e);
+    const d = parseInt(e.date.split('-')[2]);
+    if(!gregDayG[d]) gregDayG[d]=[];
+    gregDayG[d].push(e);
   });
-  Object.entries(gregDayGroups).forEach(([day, ents]) => {
+  Object.entries(gregDayG).forEach(([day,ents]) => {
     if (ents.length >= 3) findings.push({
       type: 'greg_hodesh', disputed: true,
       title: `ראיה ב-${day} לחודש הלועזי — ${ents.length} פעמים`,
-      detail: ents.map((e, i) => ({
-        heb: `${e.gregDay}/${e.gregMonth}/${e.gregYear} | ${e.hebFmt}`,
-        days: i > 0 ? `${ents[i].abs - ents[i-1].abs} ימים מהפעם הקודמת` : ''
-      })),
       count: ents.length,
-      disputeNote: 'על פי עיקר ההלכה, חוקי הפרישה נקבעים אך ורק לפי לוח השנה העברי. עם זאת, פוסקי זמננו דנו רבות בנשים שגופן מגיב לגלולות או לשעון הלועזי וקובעות בכך וסת. מאחר שמדובר בנושא הנתון במחלוקת הפוסקים, יש לשאול רב מוסמך כיצד לנהוג.'
+      detail: ents.map((e,i) => ({ heb: `${e.date.split('-').reverse().join('/')} | ${e.heb0?fmtHeb(e.heb0):''}`, days:'' })),
+      source: '⚠️ אין מקור בדרכי טהרה לוסת לועזי',
+      disputeNote: 'על פי עיקר ההלכה, חוקי הפרישה נקבעים אך ורק לפי לוח השנה העברי. פוסקי זמננו דנו בנשים הנוטלות גלולות שגופן מגיב ללוח הלועזי. מאחר שמדובר במחלוקת — יש לשאול רב מוסמך.',
+      kavua: false,
+      uiKey: 'dilug_haflaga_scheduling_dispute'
     });
   });
 
-  return findings;
+  // --- חישוב תאריכי חשש ---
+  const chashashDates = computeChashashDates(reiyot);
+
+  // סמן אם יש וסת קבוע — גורר חומרה נוספת
+  if (kavuaStatus.type === 'kavua') {
+    chashashDates.forEach(d => { d.blocksIfUnchecked = true; });
+  }
+
+  return { type: kavuaStatus.type, kavuaStatus, findings, chashashDates, reiyot };
 }
 
-function showCycleModal(findings, forceShow) {
+// ════════════════════════════════════════════════════════
+// UI — הצגת מנוע הווסת
+// ════════════════════════════════════════════════════════
+
+function checkCyclesAfterCalculate() {
+  const status = getVesetStatus(appState.history);
+  if (!status.findings.length && !status.chashashDates.length) return;
+  const fingerprint = status.findings.map(f=>f.type+f.title).sort().join('|');
+  if (appState._lastCycleAlert === fingerprint) return;
+  appState._lastCycleAlert = fingerprint;
+  showVesetModal(status, false);
+}
+
+function analyzeCycles() {
+  const status = getVesetStatus(appState.history);
+  showVesetModal(status, true);
+}
+
+// שמור getCycleFindings כ-wrapper לתאימות לאחור
+function getCycleFindings() {
+  return getVesetStatus(appState.history).findings;
+}
+
+function showVesetModal(status, forceShow) {
   const el = document.getElementById('modal-cycles-content');
-  if (!findings.length) {
+  const { findings, chashashDates, kavuaStatus } = status;
+
+  if (!findings.length && !chashashDates.length) {
     if (!forceShow) return;
     el.innerHTML = `
-      <div class="modal-title">בדיקת מחזוריות</div>
+      <div class="modal-title">ניתוח וסת</div>
       <div style="text-align:center;padding:20px 0;">
         <div style="font-size:40px;margin-bottom:12px;">🔍</div>
         <p style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px;">לא נמצאה מחזוריות</p>
         <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;">
           על בסיס ${appState.history.length} ראיות, לא נמצא דפוס חוזר.
-          ${appState.history.length < 5 ? '<br>הוספת ראיות נוספות תאפשר ניתוח מדויק יותר.' : ''}
+          ${appState.history.length < 4 ? '<br>הוספת ראיות נוספות תאפשר ניתוח מדויק יותר.' : ''}
         </p>
       </div>`;
     document.getElementById('modal-cycles').classList.add('open');
     return;
   }
 
-  // Colors and icons per type
-  const TYPE_COLOR = {
-    haflaga:'var(--rose)', hodesh:'var(--gold)', complex:'#7B5EA7',
-    shavua:'#2E7D8C', dilog:'#6B8E23', greg_hodesh:'#B8600A'
-  };
-  const TYPE_ICON = {
-    haflaga:'📏', hodesh:'📅', complex:'🔄',
-    shavua:'📆', dilog:'📈', greg_hodesh:'🗓️'
-  };
+  const TYPE_COLOR = { haflaga:'var(--rose)', hodesh:'var(--gold)', shavua:'#2E7D8C',
+    dilog:'#6B8E23', serug:'#5B4FCF', greg_hodesh:'#B8600A',
+    kavua_haflaga:'#2E5E3E', kavua_hodesh:'#2E5E3E' };
+  const TYPE_ICON  = { haflaga:'📏', hodesh:'📅', shavua:'📆',
+    dilog:'📈', serug:'🔁', greg_hodesh:'🗓️',
+    kavua_haflaga:'✅', kavua_hodesh:'✅' };
 
-  function renderDetail(f) {
-    if (f.complex) {
-      return f.detail.map((occurrence, oi) => {
-        const subRows = occurrence.map(row =>
-          `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rose-pale);font-size:12px;color:var(--ink-soft);">
-             <span>${row.heb}</span>
-             <span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>
-           </div>`
-        ).join('');
-        return `<div style="margin-bottom:8px;">
-          <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:3px;">מחזור ${oi+1}:</div>
-          ${subRows}
+  // תאריכי חשש
+  const chashashHtml = chashashDates.length ? `
+    <div style="background:linear-gradient(135deg,#FFF3D6,#FFF8E7);border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:#7A6020;margin-bottom:8px;">📅 תאריכי חשש הנוכחיים</p>
+      ${chashashDates.map(d => {
+        const g = HebCal.absToGreg(d.absDate);
+        const h = HebCal.absToHeb(d.absDate);
+        const icon = d.blocksIfUnchecked ? '🔴' : '🟡';
+        const onah = d.onah === 'layla' ? 'לילה' : 'יום';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F0D98B44;font-size:13px;">
+          <span>${icon} <strong>${d.label}</strong></span>
+          <span style="color:#5A4010;">${fmtGreg(g)} | ${fmtHeb(h)} | ${onah}</span>
         </div>`;
-      }).join('');
-    }
-    return f.detail.map(row =>
-      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
-         <span>${row.heb || row}</span>
-         ${row.days ? `<span style="font-weight:600;color:var(--ink);margin-right:8px;">${row.days}</span>` : ''}
-       </div>`
-    ).join('');
-  }
+      }).join('')}
+      <p style="font-size:11px;color:#7A6020;margin-top:8px;">🔴 חסימה אם לא נבדק | 🟡 תזכורת בלבד</p>
+    </div>` : '';
 
-  // Predict next date
-  const sorted_hist = [...appState.history.filter(e=>e.specialType!=='special')].sort((a,b)=>a.date<b.date?-1:1);
-  const lastEntry = sorted_hist[sorted_hist.length-1];
-  const lastAbs = lastEntry ? HebCal.gregToAbs(...lastEntry.date.split('-').map(Number)) : null;
-
-  function predictNext(f) {
-    if (!lastAbs) return null;
-    if (f.type === 'haflaga') {
-      const days = parseInt(f.title.match(/(\d+)/)[1]);
-      const pg = HebCal.absToGreg(lastAbs + days);
-      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year, pg.month, pg.day))}`;
-    }
-    if (f.type === 'hodesh') {
-      const day = Number(Object.keys(
-        sorted_hist.reduce((acc,e)=>{const k=e.heb0?e.heb0.day:HebCal.gregToHeb(...e.date.split('-').map(Number)).day;acc[k]=(acc[k]||0)+1;return acc;},{})
-      ).sort((a,b)=>b-a)[0]);
-      const lh = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
-      const nm = HebCal.nextMonthDate(lh.year, lh.month, 1);
-      const actualDay = Math.min(day, HebCal.daysInMonth(nm.month, nm.year));
-      const pg = HebCal.hebToGreg(nm.year, nm.month, actualDay);
-      return `${fmtGreg(pg)} | ${fmtHeb({year:nm.year,month:nm.month,day:actualDay})}`;
-    }
-    if (f.type === 'complex') {
-      const ivs = [];
-      for(let i=1;i<sorted_hist.length;i++){
-        const [ay,am,ad]=sorted_hist[i-1].date.split('-').map(Number);
-        const [by,bm,bd]=sorted_hist[i].date.split('-').map(Number);
-        ivs.push(HebCal.gregToAbs(by,bm,bd)-HebCal.gregToAbs(ay,am,ad));
-      }
-      const nextDays = f.seq[ivs.length % f.seq.length];
-      const pg = HebCal.absToGreg(lastAbs + nextDays);
-      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year,pg.month,pg.day))} (${nextDays} ימים)`;
-    }
-    if (f.type === 'shavua') {
-      // Same day of week, next occurrence
-      const lastD = new Date(...lastEntry.date.split('-').map(Number).map((v,i)=>i===1?v-1:v));
-      const targetDow = lastD.getDay();
-      const daysUntil = (targetDow - lastD.getDay() + 7) % 7 || 7;
-      const pg = HebCal.absToGreg(lastAbs + daysUntil);
-      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(pg.year,pg.month,pg.day))}`;
-    }
-    if (f.type === 'dilog') {
-      const delta = f.detail.length >= 2
-        ? (f.detail[1].days.match(/[+-]?\d+/) || [0])[0] * 1
-        : 0;
-      if (!delta) return null;
-      const lastHeb = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
-      const nextDay = Math.max(1, Math.min(30, lastHeb.day + delta));
-      try {
-        const pg = HebCal.hebToGreg(lastHeb.year, lastHeb.month, nextDay);
-        return `${fmtGreg(pg)} | ${fmtHeb({year:lastHeb.year,month:lastHeb.month,day:nextDay})}`;
-      } catch(e) { return null; }
-    }
-    if (f.type === 'greg_hodesh') {
-      const lastG = lastEntry.date.split('-').map(Number);
-      const nextM = lastG[1] === 12 ? 1 : lastG[1]+1;
-      const nextY = lastG[1] === 12 ? lastG[0]+1 : lastG[0];
-      const targetDay = parseInt(f.title.match(/ב-(\d+)/)[1]);
-      const pg = {year:nextY, month:nextM, day:targetDay};
-      return `${fmtGreg(pg)} | ${fmtHeb(HebCal.gregToHeb(nextY,nextM,targetDay))}`;
-    }
-    return null;
-  }
-
-  // Separate findings into undisputed and disputed
-  const undisputed = findings.filter(f => !f.disputed);
-  const disputed   = findings.filter(f => f.disputed);
+  // כרטיסי ממצאים
+  const kavuaFindings  = findings.filter(f=>f.kavua && !f.disputed);
+  const regularFindings = findings.filter(f=>!f.kavua && !f.disputed);
+  const disputedFindings = findings.filter(f=>f.disputed);
 
   function buildCard(f) {
     const color = TYPE_COLOR[f.type] || 'var(--rose)';
     const icon  = TYPE_ICON[f.type]  || '📌';
-    const pred  = predictNext(f);
-    const bg    = f.disputed ? '#FFF4E5' : 'var(--rose-pale)';
-    const border= f.disputed ? '#E8A44060' : `${color}55`;
-    const predHtml = pred
-      ? `<div style="margin-top:10px;padding:10px;background:#FFF8E7;border-radius:8px;border:1px solid #F0D98B;">
-          <span style="font-size:12px;color:#7A6020;font-weight:600;">📅 לפי המחזוריות הקודמת, התאריך המסתבר של הראיה הבאה:</span><br>
-          <span style="font-size:14px;font-weight:700;color:#5A4010;">${pred}</span>
-         </div>` : '';
-    const disputeHtml = f.disputeNote
-      ? `<div style="margin-top:10px;padding:10px;background:#FFF4E5;border-radius:8px;border:1px solid #E8A44080;">
-          <span style="font-size:12px;color:#7A4010;font-weight:600;">⚠️ שים לב — מחלוקת הפוסקים:</span><br>
-          <span style="font-size:12px;color:#7A4010;line-height:1.6;">${f.disputeNote}</span>
-         </div>` : '';
+    const bg    = f.kavua ? '#EDF7F0' : (f.disputed ? '#FFF4E5' : 'var(--rose-pale)');
+    const border= f.kavua ? '#4E8060' : (f.disputed ? '#E8A44060' : `${color}55`);
+    const rows  = f.detail.map(row =>
+      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rose-pale);font-size:12px;color:var(--ink-soft);">
+        <span>${row.heb||''}</span>
+        ${row.days?`<span style="font-weight:600;color:var(--ink);">${row.days}</span>`:''}
+       </div>`).join('');
+    const sourceHtml = f.source ? `<div style="font-size:10px;color:#aaa;margin-top:6px;">מקור: ${f.source}</div>` : '';
+    const tooltipHtml = f.tooltip ? `<div style="margin-top:8px;padding:8px;background:var(--rose-pale);border-radius:6px;font-size:12px;color:var(--ink-soft);">${f.tooltip}</div>` : '';
+    const disputeHtml = f.disputeNote ? `<div style="margin-top:8px;padding:8px;background:#FFF4E5;border-radius:6px;border:1px solid #E8A44080;font-size:12px;color:#7A4010;"><strong>⚠️ שאלת חכם נדרשת:</strong> ${f.disputeNote}</div>` : '';
+
+    // תחזית הבאה
+    let predHtml = '';
+    if (f.type === 'haflaga' && f.kavua) {
+      const sorted_hist = [...appState.history.filter(e=>e.specialType!=='special')].sort((a,b)=>a.date<b.date?-1:1);
+      const lastEntry = sorted_hist[sorted_hist.length-1];
+      if (lastEntry) {
+        const lastAbs = HebCal.gregToAbs(...lastEntry.date.split('-').map(Number));
+        const pred = HebCal.absToGreg(lastAbs + f.kavuaValue || kavuaStatus?.kavuaValue || 0);
+        if (pred) predHtml = `<div style="margin-top:8px;padding:8px;background:#EDF7F0;border-radius:6px;font-size:12px;color:#2E5E3E;"><strong>📅 חשש הבא:</strong> ${fmtGreg(pred)} | ${fmtHeb(HebCal.absToHeb(lastAbs+(kavuaStatus?.kavuaValue||f.value||0)))}</div>`;
+      }
+    }
+
     return `<div style="background:${bg};border:1px solid ${border};border-radius:12px;padding:14px;margin-bottom:12px;">
       <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:8px;">${icon} ${f.title}</div>
-      ${renderDetail(f)}
-      ${predHtml}
-      ${disputeHtml}
+      ${rows}${tooltipHtml}${predHtml}${disputeHtml}${sourceHtml}
     </div>`;
   }
 
-  const undisputedHtml = undisputed.sort((a,b)=>b.count-a.count).map(buildCard).join('');
-  const disputedHtml   = disputed.sort((a,b)=>b.count-a.count).map(buildCard).join('');
+  const kavuaHtml    = kavuaFindings.map(buildCard).join('');
+  const regularHtml  = regularFindings.map(buildCard).join('');
+  const disputedHtml = disputedFindings.length
+    ? `<div style="font-size:13px;font-weight:700;color:#B8600A;margin:14px 0 8px;border-top:1px solid #E8A44050;padding-top:12px;">🔶 נושאים הנתונים במחלוקת הפוסקים</div>${disputedFindings.map(buildCard).join('')}`
+    : '';
+
+  const headerTitle = kavuaStatus?.type === 'kavua' ? '✅ נקבע וסת קבוע' : '⚠️ נמצאה מחזוריות';
+  const headerBg    = kavuaStatus?.type === 'kavua' ? '#EDF7F0' : 'linear-gradient(135deg,#FFF3D6,#FFF8E7)';
+  const headerBorder= kavuaStatus?.type === 'kavua' ? '#4E8060' : '#F0D98B';
+  const headerColor = kavuaStatus?.type === 'kavua' ? '#2E5E3E' : '#7A6020';
 
   el.innerHTML = `
-    <div class="modal-title">⚠️ נמצאה מחזוריות</div>
-    <div style="background:linear-gradient(135deg,#FFF3D6,#FFF8E7);border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:16px;">
-      <p style="font-size:14px;font-weight:700;color:#7A6020;">נמצאה מחזוריות שיכולה לקבוע וסת קבוע</p>
+    <div class="modal-title">ניתוח וסת הלכתי</div>
+    <div style="background:${headerBg};border:1px solid ${headerBorder};border-radius:12px;padding:14px;margin-bottom:14px;">
+      <p style="font-size:14px;font-weight:700;color:${headerColor};">${headerTitle}</p>
     </div>
-    ${undisputedHtml}
-    ${disputedHtml ? `
-      <div style="font-size:13px;font-weight:700;color:#B8600A;margin:14px 0 8px;border-top:1px solid #E8A44050;padding-top:12px;">
-        🔶 מחזוריות הנתונה במחלוקת הפוסקים
-      </div>
-      ${disputedHtml}` : ''}
+    ${chashashHtml}
+    ${kavuaHtml}
+    ${regularHtml}
+    ${disputedHtml}
     <div style="background:var(--green-pale);border:1px solid #BFE0CC;border-radius:12px;padding:14px;margin-top:4px;">
       <p style="font-size:14px;color:#2E5E3E;font-weight:600;">📖 מומלץ להתייעץ עם רב</p>
+      <p style="font-size:12px;color:#4E8060;margin-top:4px;">הכלי מסייע בחישוב ואינו תחליף לפסיקת רב. בכל שאלה הלכתית — פני לרב המשפחה.</p>
     </div>`;
 
   document.getElementById('modal-cycles').classList.add('open');
 }
+
+// Alias לתאימות לאחור
+function showCycleModal(findings, forceShow) {
+  showVesetModal(getVesetStatus(appState.history), forceShow);
+}
+
 function closeBeta() {
   document.getElementById('modal-beta').classList.remove('open');
   const dontShow = document.getElementById('beta-dont-show')?.checked;
