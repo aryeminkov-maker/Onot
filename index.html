@@ -2337,6 +2337,10 @@ function shareApp() {
 
 window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
+    // Unregister all old service workers to prevent cache issues
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    });
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
   if (sessionStorage.getItem('beta_seen') || localStorage.getItem('beta_dismissed')) {
