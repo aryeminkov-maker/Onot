@@ -353,14 +353,24 @@
 
   <div class="card">
     <div class="card-title">עקרונות החישוב</div>
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:10px;">
-      האפליקציה מחשבת את ימי הפרישה לפי שיטת <strong>לוח השנה העברי</strong> על פי אלגוריתם דרשוביץ–ריינגולד.<br><br>
-      <strong>עונה בינונית</strong> – 30 ימים עבריים מלאים מיום הראיה, באותה עונה.<br>
-      <strong>עונת החודש</strong> – אותו יום בחודש העברי הבא, באותה עונה. כשהחודש חסר — נלקח היום האחרון.<br>
-      <strong>עונת הפלגה</strong> – הפרש הימים העבריים בין הווסת הקודם לנוכחי, מוסף על הנוכחי.<br>
-      <strong>עונת אור זרוע</strong> – העונה שלפני הבינונית (29 ימים), בעונה ההפוכה. לפי שיטת הרמ"א.
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
+      האפליקציה מיישמת את הכללים ההלכתיים לפי <strong>ספר דרכי טהרה</strong> (הרב מרדכי אליהו זצ"ל), פרקים ו-ז, על פי לוח השנה העברי המדויק (אלגוריתם דרשוביץ-ריינגולד).
     </p>
-    <p style="font-size:12px;color:#aaa;line-height:1.6;">הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לשאול רב מוסמך.</p>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
+      <strong>שלושה תאריכי חשש אחרי כל ראיה:</strong><br>
+      • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, באותה עונה. דין חמור (סעיף י).<br>
+      • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. בחודש חסר — יום ר"ח שאחריו (סעיף יא).<br>
+      • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות האחרונות (סעיף יב).
+    </p>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
+      <strong>זיהוי וסת קבוע (מ-4 ראיות ומעלה):</strong><br>
+      • <strong>הפלגה</strong> — 3 הפרשים שווים רצופים (סעיף לא).<br>
+      • <strong>חודש</strong> — 3 ראיות רצופות באותו יום עברי (סעיף לח).<br>
+      • <strong>שבוע</strong> — 3 ראיות באותו יום בשבוע (סעיף מב).<br>
+      • <strong>דילוג</strong> — יום החודש עולה/יורד בדלתא קבועה (סעיף מה).<br>
+      • <strong>סירוג</strong> — יום קבוע + מרווח חודשים קבוע (סעיף נט).
+    </p>
+    <p style="font-size:12px;color:#aaa;line-height:1.6;">הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לפנות לרב המשפחה.</p>
   </div>
 
   <div class="card" id="user-guide">
@@ -416,7 +426,9 @@
     <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.1</p>
     <p style="font-size:11px;color:#bbb;margin-top:4px;">מנוע חישוב זמני וסת על פי ההלכה, על פי הספר דרכי טהרה</p>
   </div>
-</div> onclick="if(event.target===this)closeModal('modal-cycles')">
+</div>
+
+<div class="modal-overlay" id="modal-cycles" onclick="if(event.target===this)closeModal('modal-cycles')">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div id="modal-cycles-content"></div>
@@ -2315,16 +2327,36 @@ function getVesetStatus(history) {
 
 function checkCyclesAfterCalculate() {
   const status = getVesetStatus(appState.history);
-  if (!status.findings.length && !status.chashashDates.length) return;
-  const fingerprint = status.findings.map(f=>f.type+f.title).sort().join('|');
+  const n = appState.history.filter(e => e.specialType !== 'special').length;
+  // סנן: קביעה רק כשיש מספיק ראיות
+  const filtered = status.findings.filter(f => {
+    if (f.type === 'kavua_haflaga' || f.type === 'kavua_hodesh') return n >= 4;
+    if (f.type === 'haflaga') return n >= 3;
+    if (f.type === 'hodesh')  return n >= 3;
+    if (f.type === 'shavua')  return n >= 3;
+    if (f.type === 'dilog')   return n >= 4;
+    if (f.type === 'serug')   return n >= 3;
+    return true;
+  });
+  if (!filtered.length && !status.chashashDates.length) return;
+  const fingerprint = filtered.map(f=>f.type+f.title).sort().join('|');
   if (appState._lastCycleAlert === fingerprint) return;
   appState._lastCycleAlert = fingerprint;
-  showVesetModal(status, false);
+  showVesetModal({ ...status, findings: filtered }, false);
 }
 
 function analyzeCycles() {
   const status = getVesetStatus(appState.history);
-  showVesetModal(status, true);
+  const n = appState.history.filter(e => e.specialType !== 'special').length;
+  if (n < 2) { showToast('נדרשות לפחות 2 ראיות לניתוח'); return; }
+  // סנן לפי מספר ראיות
+  const filtered = status.findings.filter(f => {
+    if (f.type === 'kavua_haflaga' || f.type === 'kavua_hodesh') return n >= 4;
+    if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 3;
+    if (f.type === 'dilog') return n >= 4;
+    return true;
+  });
+  showVesetModal({ ...status, findings: filtered }, true);
 }
 
 // שמור getCycleFindings כ-wrapper לתאימות לאחור
