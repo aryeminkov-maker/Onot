@@ -358,9 +358,9 @@
     </p>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
       <strong>שלושה תאריכי חשש אחרי כל ראיה:</strong><br>
-      • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, באותה עונה. דין חמור (סעיף י).<br>
+      • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, **כולל יום הראיה** (סעיף י, יג: "יום הראיה עולה לכאן ולכאן"). דין חמור.<br>
       • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. אם ראתה ב-ל' וחודש הבא חסר — עונת החודש היא א' לחודש שאחריו (סעיף יא).<br>
-      • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות האחרונות (סעיף יב).
+      • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות כולל שני ימי הראיה (סעיף יב-יג).
     </p>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
       <strong>זיהוי וסת קבוע (מ-4 ראיות ומעלה):</strong><br>
@@ -423,7 +423,7 @@
 
   <div class="card" style="text-align:center;">
     <p style="font-size:12px;color:var(--ink-soft);">לוח הטהרה</p>
-    <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.2</p>
+    <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.3</p>
     <p style="font-size:11px;color:#bbb;margin-top:4px;">מנוע חישוב זמני וסת על פי ההלכה, על פי הספר דרכי טהרה</p>
   </div>
 </div>
@@ -1037,10 +1037,11 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
   const heb0 = HebCal.absToHeb(abs0 + (onah === 'layla' ? 1 : 0));
   const results = [];
 
-  // 1. BEINONIT – 30 Hebrew days later, same onah
-  const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 30);
+  // 1. BEINONIT – יום 30 מהראיה, כולל יום הראיה עצמו (סעיף י, יג)
+  // "יום הראיה עולה לכאן ולכאן" — יום הראיה = יום 1, לכן יום 30 = abs + 29
+  const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
   const beinonit_greg = HebCal.hebToGreg(beinonit_heb.year, beinonit_heb.month, beinonit_heb.day);
-  results.push({ type:'beinonit', name:'עונה בינונית', desc:'30 ימים עבריים', icon:'📅',
+  results.push({ type:'beinonit', name:'עונה בינונית', desc:'יום 30 (כולל יום הראיה)', icon:'📅',
     onah, heb:beinonit_heb, greg:beinonit_greg, color:'rose' });
 
   // 2. HODESH – same Hebrew day next month, same onah
@@ -1058,8 +1059,8 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
     const absPrev = HebCal.gregToAbs(py, pm, pd);
     const hebPrev = HebCal.gregToHeb(py, pm, pd);
 
-    // Haflaga = abs difference in Hebrew days (abs days = Hebrew days here)
-    const dayDiff = abs0 - absPrev; // days between the two veset days
+    // הפלגה = הפרש אבסולוטי + 1 ("יום הראיה עולה לכאן ולכאן", סעיף יג)
+    const dayDiff = abs0 - absPrev + 1;
 
     // Onah offset: same onah = 0 extra, yom→layla adds half, layla→yom subtracts half
     // We treat each full day as 2 onahs; compute total onahs elapsed
@@ -1077,9 +1078,9 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
       desc:`הפרש של ${haflagaDays} ימים עבריים`,
       icon:'📏', onah:haflagaOnah, heb:haflaga_heb, greg:haflaga_greg, color:'green' });
 
-    // 4. OR ZARUA – day 29 from veset, opposite onah
+    // 4. OR ZARUA – יום 29 מהראיה, עונה הפוכה (= abs + 28 כולל יום הראיה)
     if (includeOrZarua) {
-      const orz_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
+      const orz_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 28);
       const orz_greg = HebCal.hebToGreg(orz_heb.year, orz_heb.month, orz_heb.day);
       results.push({ type:'orzarua', name:'עונת אור זרוע',
         desc:'יום כ״ט – עונה ההפוכה',
@@ -2019,9 +2020,9 @@ function computeChashashDates(reiyot) {
   const last = reiyot[reiyot.length-1];
   const dates = [];
 
-  // 2.1 עונה בינונית — יום 30 (סעיף י)
+  // 2.1 עונה בינונית — יום 30 כולל יום הראיה (= abs + 29) (סעיף י, יג)
   dates.push({
-    absDate: last.absDate + 30,
+    absDate: last.absDate + 29,
     reasonType: 'onah_beinonit',
     onah: last.onah,
     blocksIfUnchecked: true,
@@ -2059,9 +2060,9 @@ function computeChashashDates(reiyot) {
   // 2.3 הפלגה — דורש לפחות 2 ראיות (סעיף יב)
   if (reiyot.length >= 2) {
     const prev = reiyot[reiyot.length-2];
-    const gap  = last.absDate - prev.absDate;
+    const gap  = last.absDate - prev.absDate + 1; // "יום הראיה עולה לכאן ולכאן" (סעיף יג)
     dates.push({
-      absDate: last.absDate + gap,
+      absDate: last.absDate + gap - 1, // gap כולל יום הראיה, לכן אחסור 1 בהוספה
       reasonType: 'haflaga',
       onah: last.onah,
       blocksIfUnchecked: false,
