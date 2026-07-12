@@ -359,7 +359,7 @@
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
       <strong>שלושה תאריכי חשש אחרי כל ראיה:</strong><br>
       • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, באותה עונה. דין חמור (סעיף י).<br>
-      • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. בחודש חסר — יום ר"ח שאחריו (סעיף יא).<br>
+      • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. אם ראתה ב-ל' וחודש הבא חסר — עונת החודש היא א' לחודש שאחריו (סעיף יא).<br>
       • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות האחרונות (סעיף יב).
     </p>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
@@ -423,7 +423,7 @@
 
   <div class="card" style="text-align:center;">
     <p style="font-size:12px;color:var(--ink-soft);">לוח הטהרה</p>
-    <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.1</p>
+    <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.2</p>
     <p style="font-size:11px;color:#bbb;margin-top:4px;">מנוע חישוב זמני וסת על פי ההלכה, על פי הספר דרכי טהרה</p>
   </div>
 </div>
@@ -952,7 +952,16 @@ const HebCal = {
     let nextMonth, nextYear;
     if (idx === order.length - 1) { nextMonth = 7; nextYear = hebYear + 1; }
     else                          { nextMonth = order[idx + 1]; nextYear = hebYear; }
-    const maxDay    = this.daysInMonth(nextMonth, nextYear);
+    const maxDay = this.daysInMonth(nextMonth, nextYear);
+    if (hebDay === 30 && maxDay < 30) {
+      // חודש הבא חסר — לפי דרכי טהרה סעיף יא: עונת החודש = א' לחודש שאחריו (גם הוא ר"ח)
+      const nextOrder = this._monthOrder(nextYear);
+      const nextIdx   = nextOrder.indexOf(nextMonth);
+      let nnMonth, nnYear;
+      if (nextIdx === nextOrder.length - 1) { nnMonth = 7; nnYear = nextYear + 1; }
+      else { nnMonth = nextOrder[nextIdx + 1]; nnYear = nextYear; }
+      return { year: nnYear, month: nnMonth, day: 1, capped: false, roshChodesh: true };
+    }
     const actualDay = Math.min(hebDay, maxDay);
     return { year: nextYear, month: nextMonth, day: actualDay, capped: actualDay < hebDay };
   },
@@ -1038,7 +1047,9 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
   const hodesh_heb  = HebCal.nextMonthDate(heb0.year, heb0.month, heb0.day);
   const hodesh_greg = HebCal.hebToGreg(hodesh_heb.year, hodesh_heb.month, hodesh_heb.day);
   results.push({ type:'hodesh', name:'עונת החודש',
-    desc:`יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''}`,
+    desc: hodesh_heb.roshChodesh
+      ? `א' ${HebCal.monthName(hodesh_heb.month,hodesh_heb.year)} — חודש הבא חסר (סעיף יא)`
+      : `יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''}`,
     icon:'🌙', onah, heb:hodesh_heb, greg:hodesh_greg, color:'gold' });
 
   // 3. HAFLAGA + 4. OR ZARUA
