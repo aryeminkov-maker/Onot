@@ -50,7 +50,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
-    --rose:#A85F6E; --rose-light:#EDD5DC; --rose-pale:#FAF3F5;
+    --rose:#A85F6E; --rose-light:#D4B0B8; --rose-pale:#F5E8EB;
     --sand:#E8DDD0; --ink:#2D2320; --ink-soft:#6B5050;
     --white:#FFFFFF; --gold:#8B6E2E; --green:#4A7A58; --green-pale:#EDF4EF;
     --shadow:rgba(45,35,32,0.10); --radius:18px; --radius-sm:10px;
@@ -202,7 +202,7 @@
         aria-label="מה זו פרישה סמוך לווסת?"
         style="background:rgba(255,255,255,.25);border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;color:#fff;line-height:20px;padding:0;flex-shrink:0;">ⓘ</button>
     </p>
-    <button onclick="openAbout()" style="position:absolute;left:20px;top:52px;background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">אודות</button>
+    <button onclick="openAbout()" aria-label="פתח חלונית אודות" style="position:absolute;left:20px;top:52px;background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">אודות</button>
   </div>
   <div class="privacy-banner" id="privacy-banner">
     <div class="icon">🔒</div>
@@ -247,7 +247,7 @@
       <button class="btn-secondary" aria-label="הגדרות וסת מיוחד" onclick="openSpecialModal()" style="width:52px;padding:0;font-size:20px;">⚙️</button>
     </div>
   </div>
-  <div id="results-area"></div>
+  <div id="results-area" aria-live="polite" aria-atomic="true"></div>
   <div class="card" style="margin-top:16px;background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D98B;">
     <p style="font-size:13px;color:#7A6020;line-height:1.7;">
       💛 <strong>הרגשות ייחודיות:</strong> במקרה של הרגשות הגורמות לחשש וסת – יש לרשום את מועד ההרגשה ולשאול רב על קביעת וסת הגוף.
@@ -262,9 +262,9 @@
   <!-- CALENDAR -->
   <div class="card" id="hist-calendar-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <button onclick="calNav(1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">‹</button>
+      <button onclick="calNav(1)" aria-label="חודש הבא" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">‹</button>
       <div style="font-size:15px;font-weight:700;color:var(--ink)" id="cal-month-title"></div>
-      <button onclick="calNav(-1)" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
+      <button onclick="calNav(-1)" aria-label="חודש קודם" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--rose);padding:4px 10px;">›</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
       <span style="text-align:center;font-size:10px;font-weight:700;color:var(--ink-soft)">א׳</span>
@@ -1254,6 +1254,35 @@ function loadState() {
     const s = localStorage.getItem('veset_app_v2');
     if (s) { const p = JSON.parse(s); appState = { ...appState, ...p }; applySettings(); }
   } catch(e) {}
+
+  // Restore last calculation if history exists
+  if (appState.history && appState.history.length > 0) {
+    const last = [...appState.history].sort((a,b) => a.date < b.date ? 1 : -1)[0];
+    const [gy,gm,gd] = last.date.split('-').map(Number);
+
+    // Restore date input
+    document.getElementById('input-date').value = last.date;
+
+    // Restore Hebrew picker label
+    const heb = last.heb0 || HebCal.gregToHeb(gy,gm,gd);
+    const label = HebCal.dayLetters(heb.day) + ' ' + HebCal.monthName(heb.month, heb.year) + ' ' + HebCal.yearLetters(heb.year);
+    document.getElementById('heb-cal-trigger').textContent = '📅 ' + label;
+
+    // Restore onah
+    if (last.onah) setOnah(last.onah);
+
+    // Re-run calculation and show results
+    const sorted = [...appState.history].sort((a,b) => a.date < b.date ? -1 : 1);
+    const prevEntry = sorted.length > 1 ? sorted[sorted.length - 2] : null;
+    const prevDateStr = prevEntry ? prevEntry.date : null;
+    const prevOnah   = prevEntry ? prevEntry.onah  : null;
+    const calc = calcPrishut(last.date, last.onah, last.specialType || 'regular', prevDateStr, prevOnah, appState.settings.orZarua !== false);
+    renderResults(calc, last.date);
+    appState._lastResults = calc.results;
+
+    // Scroll to top smoothly
+    setTimeout(() => document.getElementById('results-area').scrollIntoView({ behavior:'smooth', block:'start' }), 300);
+  }
 }
 function saveState() {
   try { localStorage.setItem('veset_app_v2', JSON.stringify(appState)); } catch(e) {}
