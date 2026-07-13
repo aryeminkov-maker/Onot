@@ -160,7 +160,11 @@
 <!-- SKIP LINK -->
 <a href="#main-content" style="position:absolute;top:-40px;right:0;background:var(--rose);color:#fff;padding:8px 16px;z-index:10000;border-radius:0 0 8px 8px;font-size:14px;font-weight:600;text-decoration:none;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">דלג לתוכן הראשי</a>
 
-<!-- ACCESSIBILITY PANEL (hidden, opened from settings) -->
+<!-- FLOATING ACCESSIBILITY BUTTON (optional, toggled from settings) -->
+<button id="a11y-float-btn" aria-label="תפריט נגישות" onclick="document.getElementById('a11y-panel').classList.toggle('open')"
+  style="display:none;position:fixed;bottom:80px;left:12px;z-index:8000;width:36px;height:36px;border-radius:50%;background:rgba(45,35,32,0.65);color:#fff;border:none;font-size:16px;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);opacity:0.75;">♿</button>
+
+<!-- ACCESSIBILITY PANEL (hidden, opened from settings or float button) -->
 <div id="a11y-panel" role="dialog" aria-label="אפשרויות נגישות" aria-modal="true">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
     <div style="font-size:13px;font-weight:700;color:#2D2320;">נגישות</div>
@@ -381,20 +385,21 @@
     <div class="card-title">נגישות</div>
     <div class="settings-item">
       <div>
-        <div class="settings-label">הגדלת טקסט</div>
+        <div class="settings-label">כפתור נגישות צף בכל דף</div>
+        <div class="settings-desc">מציג כפתור ♿ קבוע בפינת המסך</div>
       </div>
+      <label class="switch"><input type="checkbox" id="s-a11y-floatbtn" onchange="toggleFloatA11yBtn(this.checked)"><span class="slider"></span></label>
+    </div>
+    <div class="settings-item">
+      <div><div class="settings-label">הגדלת טקסט</div></div>
       <label class="switch"><input type="checkbox" id="s-a11y-large" onchange="toggleA11y('large',this.checked);document.getElementById('a11y-large').checked=this.checked"><span class="slider"></span></label>
     </div>
     <div class="settings-item">
-      <div>
-        <div class="settings-label">ניגודיות גבוהה</div>
-      </div>
+      <div><div class="settings-label">ניגודיות גבוהה</div></div>
       <label class="switch"><input type="checkbox" id="s-a11y-contrast" onchange="toggleA11y('contrast',this.checked);document.getElementById('a11y-contrast').checked=this.checked"><span class="slider"></span></label>
     </div>
     <div class="settings-item" style="border-bottom:none;">
-      <div>
-        <div class="settings-label">ביטול אנימציות</div>
-      </div>
+      <div><div class="settings-label">ביטול אנימציות</div></div>
       <label class="switch"><input type="checkbox" id="s-a11y-anim" onchange="toggleA11y('no-anim',this.checked);document.getElementById('a11y-anim').checked=this.checked"><span class="slider"></span></label>
     </div>
   </div>
@@ -1853,17 +1858,26 @@ function toggleA11y(mode, on) {
   // close panel on mobile after change
 }
 
+function toggleFloatA11yBtn(on) {
+  const btn = document.getElementById('a11y-float-btn');
+  btn.style.display = on ? 'flex' : 'none';
+  localStorage.setItem('a11y_floatbtn', on ? '1' : '0');
+}
+
 function initA11y() {
   [['large','a11y-large','s-a11y-large'],['contrast','a11y-contrast','s-a11y-contrast'],['no-anim','a11y-anim','s-a11y-anim']].forEach(([mode, panelId, settingsId]) => {
     const stored = localStorage.getItem('a11y_' + mode);
     if (stored === '1') {
       document.body.classList.add('a11y-' + mode);
-      [panelId, settingsId].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.checked = true;
-      });
+      [panelId, settingsId].forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
     }
   });
+  // Float button
+  if (localStorage.getItem('a11y_floatbtn') === '1') {
+    document.getElementById('a11y-float-btn').style.display = 'flex';
+    const cb = document.getElementById('s-a11y-floatbtn');
+    if (cb) cb.checked = true;
+  }
 }
 
 // Close a11y panel when clicking outside
