@@ -506,12 +506,35 @@
 
   <div class="card" style="text-align:center;">
     <p style="font-size:12px;color:var(--ink-soft);">לוח הטהרה</p>
-    <p style="font-size:18px;font-weight:700;color:var(--rose);">גרסה 1.3</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <p style="font-size:18px;font-weight:700;color:var(--rose);margin:0;">גרסה 1.4</p>
+      <button onclick="document.getElementById('modal-whats-new').classList.add('open')"
+        style="background:var(--rose-pale);border:1px solid var(--rose-light);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:600;">
+        ✨ מה חדש?
+      </button>
+    </div>
     <p style="font-size:11px;color:#bbb;margin-top:4px;">מנוע חישוב זמני וסת על פי ההלכה, על פי הספר דרכי טהרה</p>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-cycles" onclick="if(event.target===this)closeModal('modal-cycles')">
+<!-- WHAT'S NEW MODAL -->
+<div class="modal-overlay" id="modal-whats-new" role="dialog" aria-modal="true" aria-label="מה חדש בגרסה 1.4" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✨ מה חדש בגרסה 1.4</div>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔧 תיקון תקלות</p>
+      <p style="margin-bottom:14px;">תוקנו מספר באגים בחישובי הפלגה ועונת החודש, וכן שיפורים בביצועים הכלליים של האפליקציה.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">♿ התאמות נגישות</p>
+      <p style="margin-bottom:14px;">האפליקציה עודכנה לעמוד בתקן הנגישות הישראלי 5568 (רמה AA): תמיכה מלאה בניווט מקלדת, כפתור נגישות עם הגדלת טקסט וניגודיות גבוהה, הצהרת נגישות, ועוד.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">📖 דיוק החישובים ההלכתיים</p>
+      <p style="margin-bottom:4px;">בוצע דיוק נוסף בחישוב עונת החודש בחודש חסר, ובחישוב ההפלגה לפי לוח שנה עברי.</p>
+    </div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="document.getElementById('modal-whats-new').classList.remove('open')">סגירה</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cycles" role="dialog" aria-modal="true" aria-label="בדיקת מחזוריות" onclick="if(event.target===this)closeModal('modal-cycles')">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div id="modal-cycles-content"></div>
@@ -520,7 +543,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-onah-explain" onclick="closeModal('modal-onah-explain')">
+<div class="modal-overlay" id="modal-onah-explain" role="dialog" aria-modal="true" aria-label="יום ולילה בהלכה" onclick="closeModal('modal-onah-explain')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">יום ולילה בהלכה</div>
@@ -536,7 +559,7 @@
 </div>
 
 <!-- BETA WELCOME MODAL -->
-<div class="modal-overlay open" id="modal-beta" onclick="if(event.target===this)closeBeta()">
+<div class="modal-overlay open" id="modal-beta" role="dialog" aria-modal="true" aria-label="ברוכות הבאות" onclick="if(event.target===this)closeBeta()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div style="text-align:center;font-size:28px;margin-bottom:8px;">🌸</div>
@@ -638,11 +661,11 @@
       <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:12px;">שאלות, הערות, או בקשות שיפור? ניתן למלא את הטופס למטה, או ליצור קשר ישירות במייל: <a href="mailto:arye.minkov@gmail.com" style="color:var(--rose);text-decoration:none;">arye.minkov@gmail.com</a></p>
       <div class="form-group">
         <label class="form-label">שם (אופציונלי)</label>
-        <input type="text" class="form-input" id="contact-name" placeholder="שמך">
+        <input type="text" class="form-input" id="contact-name" placeholder="שמך" autocomplete="name">
       </div>
       <div class="form-group">
         <label class="form-label">מייל או טלפון לתשובה (אופציונלי)</label>
-        <input type="text" class="form-input" id="contact-reply" placeholder="your@email.com / 05x-xxxxxxx" dir="ltr">
+        <input type="text" class="form-input" id="contact-reply" placeholder="your@email.com / 05x-xxxxxxx" dir="ltr" autocomplete="email">
       </div>
       <div class="form-group">
         <label class="form-label">הודעה</label>
@@ -695,26 +718,26 @@
 </div>
 
 <!-- NAV -->
-<nav class="nav">
-  <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ראשי
+<nav class="nav" role="navigation" aria-label="ניווט ראשי">
+  <button class="nav-btn active" id="nav-home" onclick="navigate('home')" aria-label="דף ראשי" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>ראשי
   </button>
-  <button class="nav-btn" id="nav-history" onclick="navigate('history')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>היסטוריה
+  <button class="nav-btn" id="nav-history" onclick="navigate('history')" aria-label="היסטוריה">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>היסטוריה
   </button>
-  <button class="nav-btn" id="nav-settings" onclick="navigate('settings')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>הגדרות
+  <button class="nav-btn" id="nav-settings" onclick="navigate('settings')" aria-label="הגדרות">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>הגדרות
   </button>
-  <button class="nav-btn" id="nav-info" onclick="navigate('info')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>מדריך
+  <button class="nav-btn" id="nav-info" onclick="navigate('info')" aria-label="מדריך למשתמשת">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>מדריך
   </button>
-  <button class="nav-btn" id="nav-install-btn" onclick="triggerInstall()" style="display:none;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>התקנה
+  <button class="nav-btn" id="nav-install-btn" onclick="triggerInstall()" aria-label="הוסף למסך הבית" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v13m0 0l-4-4m4 4l4-4"/><path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/></svg>התקנה
   </button>
 </nav>
 
 <!-- MODALS -->
-<div class="modal-overlay" id="modal-orzarua" onclick="closeModal('modal-orzarua')">
+<div class="modal-overlay" id="modal-orzarua" role="dialog" aria-modal="true" aria-label="עונת אור זרוע" onclick="closeModal('modal-orzarua')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">עונת אור זרוע</div>
@@ -725,7 +748,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-special" onclick="closeModal('modal-special')">
+<div class="modal-overlay" id="modal-special" role="dialog" aria-modal="true" aria-label="וסת מיוחד" onclick="closeModal('modal-special')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">וסת מיוחד</div>
@@ -741,7 +764,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-edit" onclick="closeModal('modal-edit')">
+<div class="modal-overlay" id="modal-edit" role="dialog" aria-modal="true" aria-label="עריכת רשומה" onclick="closeModal('modal-edit')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title" id="edit-modal-title">עריכת רישום</div>
@@ -754,7 +777,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-clear-history" onclick="closeModal('modal-clear-history')">
+<div class="modal-overlay" id="modal-clear-history" role="dialog" aria-modal="true" aria-label="מחיקת היסטוריה" onclick="closeModal('modal-clear-history')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">מחיקת כל ההיסטוריה</div>
@@ -1326,6 +1349,8 @@ function closeModal(id)  { document.getElementById(id).classList.remove('open');
 function showToast(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
+  t.setAttribute('role', 'status');
+  t.setAttribute('aria-live', 'polite');
   Object.assign(t.style, {
     position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)',
     background:'rgba(45,35,32,.9)', color:'#fff', padding:'10px 20px',
@@ -1546,8 +1571,15 @@ function renderHistoryCalendar() {
   const daysInMonth = HebCal.daysInMonth(month, year);
 
   const grid = document.getElementById('cal-grid');
+  grid.setAttribute('role', 'grid');
+  grid.setAttribute('aria-label', `לוח חודש ${HebCal.monthName(month, year)} ${HebCal.yearLetters(year)}`);
   grid.innerHTML = '';
-  for (let i=0; i<firstDow; i++) grid.appendChild(document.createElement('div'));
+  for (let i=0; i<firstDow; i++) {
+    const empty = document.createElement('div');
+    empty.setAttribute('role', 'gridcell');
+    empty.setAttribute('aria-hidden', 'true');
+    grid.appendChild(empty);
+  }
 
   for (let d=1; d<=daysInMonth; d++) {
     const greg = HebCal.hebToGreg(year, month, d);
@@ -1564,7 +1596,21 @@ function renderHistoryCalendar() {
     else if (dm.includes('cycle_pred')) { bg='#EDE0F5'; border='1.5px solid #7B5EA7'; color='#7B5EA7'; fw='600'; }
     if (isToday && !dm.includes('raiya')) border='2px solid var(--rose)';
 
+    // Build accessible label
+    const hebDateStr = `${HebCal.dayLetters(d)} ${HebCal.monthName(month, year)}`;
+    const gregDateStr = `${greg.day}/${greg.month}/${greg.year}`;
+    const markLabels = dm.filter(m => m !== 'raiya' || dm.includes('raiya'))
+      .map(m => ({
+        raiya:'ראיה', beinonit:'עונה בינונית', hodesh:'עונת החודש',
+        haflaga:'עונת הפלגה', orzarua:'אור זרוע', cycle_pred:'ראיה צפויה'
+      }[m])).filter(Boolean);
+    const todayLabel = isToday ? ', היום' : '';
+    const ariaLabel = `${hebDateStr} (${gregDateStr})${todayLabel}${markLabels.length ? ', ' + markLabels.join(', ') : ''}`;
+
     const el = document.createElement('div');
+    el.setAttribute('role', 'gridcell');
+    el.setAttribute('aria-label', ariaLabel);
+    if (markLabels.length) el.setAttribute('aria-selected', 'true');
     el.style.cssText = `text-align:center;padding:5px 2px;font-size:12px;border-radius:6px;background:${bg};border:${border};color:${color};font-weight:${fw};`;
     el.textContent = HebCal.dayLetters(d);
     grid.appendChild(el);
@@ -1588,6 +1634,19 @@ function renderCycleGraph() {
   }
 
   const canvas = document.getElementById('cycle-chart');
+  const avg  = Math.round(intervals.reduce((s,v)=>s+v,0)/intervals.length);
+  const minI = Math.min(...intervals), maxI = Math.max(...intervals);
+
+  // Accessible text summary
+  const sortedForLabel = [...h].sort((a,b)=>a.date<b.date?-1:1);
+  const intervalLabels = intervals.map((v,i) => {
+    const from = sortedForLabel[i].heb0 ? fmtHeb(sortedForLabel[i].heb0) : sortedForLabel[i].date;
+    const to   = sortedForLabel[i+1].heb0 ? fmtHeb(sortedForLabel[i+1].heb0) : sortedForLabel[i+1].date;
+    return `${from} עד ${to}: ${v} ימים`;
+  }).join('; ');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', `גרף מחזוריות. ממוצע הפרשים: ${avg} ימים. מינימום: ${minI}, מקסימום: ${maxI}. ${intervalLabels}`);
+
   const dpr = window.devicePixelRatio||1;
   const W   = canvas.parentElement.offsetWidth||300;
   const H   = 150;
@@ -1603,7 +1662,6 @@ function renderCycleGraph() {
   const gH  = H-pad.top-pad.bottom;
   const minV = Math.max(0, Math.min(...intervals)-4);
   const maxV = Math.max(35, Math.max(...intervals)+4);
-  const avg  = Math.round(intervals.reduce((s,v)=>s+v,0)/intervals.length);
 
   const xPos = i => pad.left + (intervals.length<2 ? gW/2 : i/(intervals.length-1)*gW);
   const yPos = v => pad.top + gH - ((v-minV)/(maxV-minV||1))*gH;
@@ -1871,7 +1929,54 @@ function saveSettings() {
 }
 
 // ════════════════════════════════════════════════════════
-// PRIVACY
+// KEYBOARD & FOCUS ACCESSIBILITY
+// ════════════════════════════════════════════════════════
+
+// Escape closes any open modal
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const open = document.querySelector('.modal-overlay.open');
+  if (open) {
+    const id = open.id;
+    if (id === 'modal-beta') closeBeta();
+    else closeModal(id);
+  }
+});
+
+// Focus trap inside open modals
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const open = document.querySelector('.modal-overlay.open');
+  if (!open) return;
+  const focusable = [...open.querySelectorAll(
+    'button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])'
+  )].filter(el => el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+  else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
+});
+
+// Focus first element when modal opens
+const _origCloseModal = closeModal;
+function closeModal(id) {
+  _origCloseModal(id);
+}
+function openModal(id) {
+  const el = document.getElementById(id);
+  el.classList.add('open');
+  const first = el.querySelector('button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])');
+  if (first) setTimeout(() => first.focus(), 50);
+}
+
+// aria-current on nav
+const _origNavigate = navigate;
+function navigate(page) {
+  _origNavigate(page);
+  document.querySelectorAll('.nav-btn').forEach(b => b.removeAttribute('aria-current'));
+  const btn = document.getElementById('nav-' + page);
+  if (btn) btn.setAttribute('aria-current', 'page');
+}
 // ════════════════════════════════════════════════════════
 function showPrivacyPolicy() {
   closeModal('modal-about');
@@ -1929,7 +2034,8 @@ function addToGoogleCalendar(results) {
     if (style === 'emoji') return ONAH_EMOJIS[r.type] || '🌸';
     return ONAH_TITLES[r.type] || r.name;
   };
-  const detailsFor = (r) => `${r.name} | ${r.desc}\n\nיש לבצע בדיקה ולנהוג על פי דיני ימי הפרישה\nאפליקציית לוח הטהרה: https://did.li/Onot-app`;
+  const REMINDER_TEXT = '\n\nיש לבצע בדיקה ולנהוג על פי דיני ימי הפרישה\nאפליקציית לוח הטהרה: https://did.li/Onot-app';
+  const detailsFor = (r) => `${r.name} | ${r.desc}${REMINDER_TEXT}`;
 
   const husbandParam = (appState.settings.husband && appState.settings.husbandEmail)
     ? `&add=${encodeURIComponent(appState.settings.husbandEmail)}` : '';
@@ -1969,7 +2075,7 @@ function addToGoogleCalendar(results) {
       const days = parseInt(f.title.match(/(\d+)/)[1]);
       predGreg  = HebCal.absToGreg(lastAbs + days);
       predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (הפלגה קבועה)';
-      predDesc  = `ראיה צפויה לפי מחזוריות הפלגה קבועה של ${days} ימים`;
+      predDesc  = `ראיה צפויה לפי מחזוריות הפלגה קבועה של ${days} ימים${REMINDER_TEXT}`;
     } else if (f.type === 'hodesh') {
       const lastHeb = HebCal.gregToHeb(...lastEntry.date.split('-').map(Number));
       const nm = HebCal.nextMonthDate(lastHeb.year, lastHeb.month, 1);
@@ -1977,7 +2083,7 @@ function addToGoogleCalendar(results) {
       const actualDay = Math.min(day, HebCal.daysInMonth(nm.month, nm.year));
       predGreg  = HebCal.hebToGreg(nm.year, nm.month, actualDay);
       predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (עונת החודש הקבועה)';
-      predDesc  = `ראיה צפויה לפי מחזוריות יום קבוע בחודש`;
+      predDesc  = `ראיה צפויה לפי מחזוריות יום קבוע בחודש${REMINDER_TEXT}`;
     } else if (f.type === 'complex') {
       const intervals_h = [];
       sorted_hist.forEach((e,i) => { if(i===0)return;
@@ -1988,7 +2094,7 @@ function addToGoogleCalendar(results) {
       const nextDays = f.seq[intervals_h.length % f.seq.length];
       predGreg  = HebCal.absToGreg(lastAbs + nextDays);
       predTitle = style === 'emoji' ? '🌻🔄' : 'ראיה צפויה (מחזוריות)';
-      predDesc  = `ראיה צפויה לפי מחזוריות מורכבת (${nextDays} ימים)`;
+      predDesc  = `ראיה צפויה לפי מחזוריות מורכבת (${nextDays} ימים)${REMINDER_TEXT}`;
     }
     if (predGreg) {
       cycleLinks.push({
@@ -2034,7 +2140,11 @@ function addToGoogleCalendar(results) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
         התחברות ושמירת כל העונות יחד
       </button>
-      <p style="font-size:11px;color:var(--ink-soft);text-align:center;margin-bottom:10px;">מתחבר לחשבון Google שלך ושומר את כל העונות בלחיצה אחת</p>
+      <p style="font-size:11px;color:var(--ink-soft);text-align:center;margin-bottom:6px;">מתחבר לחשבון Google שלך ושומר את כל העונות בלחיצה אחת</p>
+      <div style="background:#FFF8E7;border:1px solid #F0D98B;border-radius:10px;padding:10px 12px;font-size:12px;color:#7A6020;line-height:1.7;">
+        ⚠️ <strong>אם מופיעה אזהרה של Google לאחר לחיצה על כפתור ההתחברות</strong> — זה תקין לחלוטין, האפליקציה נמצאת בתקופת הרצה.<br>
+        לחצי על <strong>"מתקדם"</strong> ← <strong>"עבור לאתר"</strong> והמשיכי.
+      </div>
     </div>
 
     <button class="btn-secondary" id="gcal-save-all" style="margin-bottom:10px;">📥 הורדת קובץ ICS (ללא התחברות)</button>
