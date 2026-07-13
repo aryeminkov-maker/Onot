@@ -485,7 +485,7 @@
       <br>גרף מחזוריות מוצג מתחת ללוח כשיש 2+ ראיות.
       <br><br>
 
-      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔍 זיהוי מחזוריות</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔍 זיהוי מחזוריות וווסת חצי קבוע</p>
       האפליקציה מזהה אוטומטית אחרי כל הזנה את סוגי הווסת הקבוע הבאים:
       <br>• <strong>הפלגה קבועה</strong> — הפרש קבוע בין ראיות
       <br>• <strong>וסת החודש</strong> — יום קבוע בחודש העברי
@@ -494,6 +494,8 @@
       <br>• <strong>מחזוריות מורכבת</strong> — סדרת הפרשים חוזרת (נתון במחלוקת)
       <br>• <strong>חודש לועזי</strong> — תאריך לועזי קבוע (נתון במחלוקת)
       <br>ממצאים הנתונים במחלוקת הפוסקים מסומנים בכתום עם הסבר והנחיה לשאול רב.
+      <br><br>
+      <strong>ווסת חצי קבוע</strong> — אחרי 3 ראיות שכולן מחוץ לטווח 28-31 ימים (כולן מעל 31 או כולן מתחת ל-28), תקפוץ התראה מיוחדת על דין ווסת חצי קבוע (דרכי טהרה פרק ו' סעיף ו') — כולל הסבר שאין צורך לחשוש לבינונית ולחודש, אך יש לחשוש לעונת ההפלגה ותאריכה.
       <br><br>
 
       <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">⚙️ הגדרות</p>
@@ -1556,7 +1558,6 @@ function renderHistoryCalendar() {
     }
     if (f.type === 'hodesh' && appState.history.length >= 1) {
       const day = parseInt(f.title.match(/\d+/) || [0]);
-      // mark same day in current view month
       if (day >= 1 && day <= HebCal.daysInMonth(month, year)) {
         const predGreg = HebCal.hebToGreg(year, month, day);
         const predAbs  = HebCal.gregToAbs(predGreg.year, predGreg.month, predGreg.day);
@@ -1565,6 +1566,14 @@ function renderHistoryCalendar() {
       }
     }
   });
+
+  // ווסת חצי קבוע — סמן עונת ההפלגה בלוח
+  const chatzi = checkChatziKavua();
+  if (chatzi) {
+    const predAbs = HebCal.gregToAbs(chatzi.haflagaGreg.year, chatzi.haflagaGreg.month, chatzi.haflagaGreg.day);
+    if (!marks[predAbs]) marks[predAbs] = [];
+    marks[predAbs].push('chatzi_haflaga');
+  }
 
   const t2 = new Date();
   const todayAbs = HebCal.gregToAbs(t2.getFullYear(), t2.getMonth()+1, t2.getDate());
@@ -1590,12 +1599,13 @@ function renderHistoryCalendar() {
     const isToday = abs === todayAbs;
 
     let bg='transparent', border='none', color='var(--ink)', fw='400';
-    if      (dm.includes('raiya'))      { bg='var(--rose)'; color='#fff'; fw='700'; }
-    else if (dm.includes('beinonit'))   { bg='var(--rose-light)'; border='1.5px solid var(--rose)'; }
-    else if (dm.includes('hodesh'))     { bg='#F5EDD8'; border='1.5px solid var(--gold)'; }
-    else if (dm.includes('haflaga'))    { bg='var(--green-pale)'; border='1.5px solid var(--green)'; }
-    else if (dm.includes('orzarua'))    { bg='#F0EAE3'; border='1.5px solid #C4A98A'; }
-    else if (dm.includes('cycle_pred')) { bg='#EDE0F5'; border='1.5px solid #7B5EA7'; color='#7B5EA7'; fw='600'; }
+    if      (dm.includes('raiya'))          { bg='var(--rose)'; color='#fff'; fw='700'; }
+    else if (dm.includes('beinonit'))       { bg='var(--rose-light)'; border='1.5px solid var(--rose)'; }
+    else if (dm.includes('hodesh'))         { bg='#F5EDD8'; border='1.5px solid var(--gold)'; }
+    else if (dm.includes('haflaga'))        { bg='var(--green-pale)'; border='1.5px solid var(--green)'; }
+    else if (dm.includes('orzarua'))        { bg='#F0EAE3'; border='1.5px solid #C4A98A'; }
+    else if (dm.includes('cycle_pred'))     { bg='#EDE0F5'; border='1.5px solid #7B5EA7'; color='#7B5EA7'; fw='600'; }
+    else if (dm.includes('chatzi_haflaga')) { bg='var(--green-pale)'; border='1.5px solid var(--green)'; }
     if (isToday && !dm.includes('raiya')) border='2px solid var(--rose)';
 
     // Build accessible label
@@ -1604,7 +1614,8 @@ function renderHistoryCalendar() {
     const markLabels = dm.filter(m => m !== 'raiya' || dm.includes('raiya'))
       .map(m => ({
         raiya:'ראיה', beinonit:'עונה בינונית', hodesh:'עונת החודש',
-        haflaga:'עונת הפלגה', orzarua:'אור זרוע', cycle_pred:'ראיה צפויה'
+        haflaga:'עונת הפלגה', orzarua:'אור זרוע', cycle_pred:'ראיה צפויה',
+        chatzi_haflaga:'עונת הפלגה'
       }[m])).filter(Boolean);
     const todayLabel = isToday ? ', היום' : '';
     const ariaLabel = `${hebDateStr} (${gregDateStr})${todayLabel}${markLabels.length ? ', ' + markLabels.join(', ') : ''}`;
@@ -1697,6 +1708,24 @@ function renderCycleGraph() {
   });
 
   document.getElementById('graph-avg').textContent = `ממוצע: ${avg} ימים`;
+
+  // ווסת חצי קבוע — הוסף נקודת ההפלגה הצפויה לגרף
+  const chatzi = checkChatziKavua();
+  if (chatzi) {
+    const nextX = W - pad.right;
+    const nextY = yPos(Math.min(chatzi.haflagaDays, maxV));
+    // קו מקווקו ירוק עד הנקודה הצפויה
+    ctx.strokeStyle = '#4A7A58'; ctx.setLineDash([5,4]); ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(xPos(intervals.length-1), yPos(intervals[intervals.length-1]));
+    ctx.lineTo(nextX, nextY);
+    ctx.stroke(); ctx.setLineDash([]);
+    // נקודה ירוקה (כמו הפלגה רגילה)
+    ctx.fillStyle='var(--green-pale)'; ctx.beginPath(); ctx.arc(nextX,nextY,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#4A7A58'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(nextX,nextY,5,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#4A7A58'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(chatzi.haflagaDays, nextX, nextY-9);
+  }
 }
 
 let editingId = null;
@@ -2655,19 +2684,123 @@ function getVesetStatus(history) {
 // UI — הצגת מנוע הווסת
 // ════════════════════════════════════════════════════════
 
+function checkChatziKavua() {
+  const h = appState.history.filter(e => e.specialType !== 'special')
+    .sort((a,b) => a.date < b.date ? -1 : 1);
+  if (h.length < 4) return null; // צריך לפחות 4 ראיות (3 הפרשים)
+
+  // חשב הפרשים בין ראיות עבריות
+  const intervals = [];
+  for (let i = 1; i < h.length; i++) {
+    const [ay,am,ad] = h[i-1].date.split('-').map(Number);
+    const [by,bm,bd] = h[i].date.split('-').map(Number);
+    intervals.push(HebCal.gregToAbs(by,bm,bd) - HebCal.gregToAbs(ay,am,ad));
+  }
+
+  // בדוק את 3 ההפרשים האחרונים
+  const last3 = intervals.slice(-3);
+  const allBelow28 = last3.every(d => d < 28);
+  const allAbove31 = last3.every(d => d > 31);
+
+  if (!allBelow28 && !allAbove31) return null;
+
+  // חשב תאריך ההפלגה הבא
+  const lastEntry = h[h.length - 1];
+  const prevEntry = h[h.length - 2];
+  const [ly,lm,ld] = lastEntry.date.split('-').map(Number);
+  const [py,pm,pd] = prevEntry.date.split('-').map(Number);
+  const haflagaDays = HebCal.gregToAbs(ly,lm,ld) - HebCal.gregToAbs(py,pm,pd);
+  const haflagaAbs  = HebCal.gregToAbs(ly,lm,ld) + haflagaDays;
+  const haflagaGreg = HebCal.absToGreg(haflagaAbs);
+  const haflagaHeb  = HebCal.gregToHeb(haflagaGreg.year, haflagaGreg.month, haflagaGreg.day);
+
+  return {
+    side: allBelow28 ? 'below' : 'above',
+    last3,
+    haflagaDays,
+    haflagaGreg,
+    haflagaHeb,
+    lastOnah: lastEntry.onah
+  };
+}
+
+function showChatziKavuaModal(data) {
+  const haflagaDateStr = `${fmtGreg(data.haflagaGreg)} | ${fmtHeb(data.haflagaHeb)} | עונת ${onahLabel(data.lastOnah)}`;
+  const sideExplain = data.side === 'below'
+    ? 'כל 3 ההפרשים האחרונים היו פחות מ-28 ימים'
+    : 'כל 3 ההפרשים האחרונים היו יותר מ-31 ימים';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay open';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'וסת חצי קבוע');
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.innerHTML = `<div class="modal" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚠️ דין ווסת חצי קבוע</div>
+
+    <div style="background:#FFF8E7;border:1px solid #F0D98B;border-radius:12px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:14px;font-weight:700;color:#7A6020;margin-bottom:6px;">נמצא דין ווסת חצי קבוע</p>
+      <p style="font-size:13px;color:#7A6020;line-height:1.7;">${sideExplain} — ישנם ימים שבהם ודאי לא תראי.</p>
+    </div>
+
+    <div style="background:var(--rose-pale);border:1px solid var(--rose-light);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;">📋 המשמעות המעשית:</p>
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
+        • <strong>עונה בינונית ועונת החודש</strong> — אין צורך לחשוש להן, מכיוון שהן חלות בטווח ימים שבו ודאי לא תראי.<br>
+        • <strong>עונת ההפלגה</strong> — <u>יש לחשוש לה גם כעת</u>, לפי ההלכה.
+      </p>
+    </div>
+
+    <div style="background:var(--green-pale);border:1px solid #BFE0CC;border-radius:12px;padding:14px;margin-bottom:12px;">
+      <p style="font-size:13px;font-weight:600;color:#2E5E3E;margin-bottom:6px;">📅 עונת ההפלגה הבאה:</p>
+      <p style="font-size:14px;font-weight:700;color:#1A4030;">${haflagaDateStr}</p>
+      <p style="font-size:12px;color:#4E8060;margin-top:4px;">(${data.haflagaDays} ימים עבריים מהראיה האחרונה)</p>
+    </div>
+
+    <div style="background:#F5F0FB;border:1px solid #C4B0E0;border-radius:12px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:600;color:#5A3A8A;margin-bottom:4px;">📖 מקור:</p>
+      <p style="font-size:13px;color:#5A3A8A;line-height:1.7;">דרכי טהרה, פרק ו' סעיף ו'</p>
+      <a href="https://harav.org/books/darcitaara-6/#_ftn12" target="_blank" rel="noopener"
+        style="font-size:12px;color:#7B5EA7;text-decoration:underline;">לסעיף המלא ←</a>
+    </div>
+
+    <div style="background:#FFF3D6;border:1px solid #F0D98B;border-radius:12px;padding:12px;margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:600;color:#7A6020;">📖 מומלץ להתייעץ עם רב</p>
+    </div>
+
+    <button class="btn-primary" onclick="this.closest('.modal-overlay').remove()">הבנתי</button>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
 function checkCyclesAfterCalculate() {
   const status = getVesetStatus(appState.history);
   const n = appState.history.filter(e => e.specialType !== 'special').length;
+
+  // בדיקת ווסת חצי קבוע (אחרי 3 ראיות = בפעם הרביעית)
+  if (n >= 4) {
+    const chatzi = checkChatziKavua();
+    if (chatzi) {
+      const fp = 'chatzi_' + chatzi.side + '_' + chatzi.last3.join(',');
+      if (appState._lastCycleAlert !== fp) {
+        appState._lastCycleAlert = fp;
+        setTimeout(() => showChatziKavuaModal(chatzi), 700);
+        return;
+      }
+    }
+  }
 
   // הצג חלונית רק כשיש מחזוריות ממשית — לא רק תאריכי חשש בסיסיים
   const filtered = status.findings.filter(f => {
     if (f.type === 'kavua_haflaga' || f.type === 'kavua_hodesh') return n >= 4;
     if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 3;
     if (f.type === 'dilog') return n >= 4;
-    return false; // greg_hodesh וכו' — רק אם עוברים סף
+    return false;
   });
 
-  if (!filtered.length) return; // אין מה להציג
+  if (!filtered.length) return;
 
   const fingerprint = filtered.map(f=>f.type+f.title).sort().join('|');
   if (appState._lastCycleAlert === fingerprint) return;
