@@ -519,7 +519,7 @@
 
 <!-- WHAT'S NEW MODAL -->
 <div class="modal-overlay" id="modal-whats-new" role="dialog" aria-modal="true" aria-label="מה חדש בגרסה 1.4" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto;">
+  <div class="modal" style="max-height:88vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div class="modal-title">✨ מה חדש בגרסה 1.4</div>
     <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
@@ -535,7 +535,7 @@
 </div>
 
 <div class="modal-overlay" id="modal-cycles" role="dialog" aria-modal="true" aria-label="בדיקת מחזוריות" onclick="if(event.target===this)closeModal('modal-cycles')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto;">
+  <div class="modal" style="max-height:85vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div id="modal-cycles-content"></div>
     <div style="height:12px;"></div>
@@ -543,8 +543,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-onah-explain" role="dialog" aria-modal="true" aria-label="יום ולילה בהלכה" onclick="closeModal('modal-onah-explain')">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal-onah-explain" role="dialog" aria-modal="true" aria-label="יום ולילה בהלכה" onclick="if(event.target===this)closeModal('modal-onah-explain')">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">יום ולילה בהלכה</div>
     <p style="font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:14px;">
@@ -560,7 +560,7 @@
 
 <!-- BETA WELCOME MODAL -->
 <div class="modal-overlay" id="modal-beta" role="dialog" aria-modal="true" aria-label="ברוכות הבאות" onclick="if(event.target===this)closeBeta()">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div style="text-align:center;font-size:28px;margin-bottom:8px;">🌸</div>
     <div class="modal-title" style="text-align:center;">ברוכות הבאות!</div>
@@ -590,7 +590,7 @@
 
 <!-- PRIVACY POLICY MODAL -->
 <div class="modal-overlay" id="modal-privacy" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div class="modal-title">מדיניות פרטיות</div>
     <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
@@ -608,7 +608,7 @@
 
 <!-- ACCESSIBILITY DECLARATION MODAL -->
 <div class="modal-overlay" id="modal-a11y-decl" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div class="modal-title">הצהרת נגישות</div>
     <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
@@ -634,7 +634,7 @@
 
 <!-- PRISHA INFO MODAL -->
 <div class="modal-overlay" id="modal-prisha-info" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">מה זו פרישה סמוך לוסת?</div>
     <p style="font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:20px;">
@@ -647,7 +647,7 @@
 
 <!-- ABOUT MODAL -->
 <div class="modal-overlay" id="modal-about" onclick="if(event.target===this)closeModal('modal-about')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div class="modal-title">אודות לוח הטהרה</div>
 
@@ -737,8 +737,8 @@
 </nav>
 
 <!-- MODALS -->
-<div class="modal-overlay" id="modal-orzarua" role="dialog" aria-modal="true" aria-label="עונת אור זרוע" onclick="closeModal('modal-orzarua')">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal-orzarua" role="dialog" aria-modal="true" aria-label="עונת אור זרוע" onclick="if(event.target===this)closeModal('modal-orzarua')">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">עונת אור זרוע</div>
     <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:12px;"><strong>מהי עונת אור זרוע?</strong> העונה שלפני עונת הבינונית – כלומר, ל׳-1=כ״ט ימים אחרי הווסת, בעונה ההפוכה.</p>
@@ -748,8 +748,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-special" role="dialog" aria-modal="true" aria-label="וסת מיוחד" onclick="closeModal('modal-special')">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal-special" role="dialog" aria-modal="true" aria-label="וסת מיוחד" onclick="if(event.target===this)closeModal('modal-special')">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">וסת מיוחד</div>
     <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">בסוגים אלו מחשבים <strong>בינונית בלבד</strong> (ללא הפלגה וחודש):</p>
@@ -761,11 +761,12 @@
     <div style="background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D98B;border-radius:10px;padding:14px;font-size:13px;color:#7A6020;line-height:1.6;margin-top:14px;">
       💛 זכרי לרשום הרגשות ייחודיות לפני הראיה ולשאול רב על קביעת וסת הגוף.
     </div>
+    <button class="btn-secondary" onclick="closeModal('modal-special')" style="margin-top:14px;">סגירה</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-edit" role="dialog" aria-modal="true" aria-label="עריכת רשומה" onclick="closeModal('modal-edit')">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal-edit" role="dialog" aria-modal="true" aria-label="עריכת רשומה" onclick="if(event.target===this)closeModal('modal-edit')">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="edit-modal-title">עריכת רישום</div>
     <div id="edit-modal-content"></div>
@@ -777,8 +778,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-clear-history" role="dialog" aria-modal="true" aria-label="מחיקת היסטוריה" onclick="closeModal('modal-clear-history')">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal-clear-history" role="dialog" aria-modal="true" aria-label="מחיקת היסטוריה" onclick="if(event.target===this)closeModal('modal-clear-history')">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">מחיקת כל ההיסטוריה</div>
     <p style="font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:18px;">
@@ -1958,11 +1959,6 @@ document.addEventListener('keydown', e => {
   else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
 });
 
-// Focus first element when modal opens
-const _origCloseModal = closeModal;
-function closeModal(id) {
-  _origCloseModal(id);
-}
 function openModal(id) {
   const el = document.getElementById(id);
   el.classList.add('open');
