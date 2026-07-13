@@ -19,13 +19,69 @@
 <meta name="twitter:title" content="לוח הטהרה - חישוב עונות פרישה">
 <meta name="twitter:description" content="הדרך הקלה והנוחה לחישוב עונות פרישה סמוך לווסת">
 <meta name="twitter:image" content="https://aryeminkov-maker.github.io/Onot/logo.jpg">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QDPE9LSQG5"></script>
+<!-- Google Analytics — נטען רק לאחר הסכמת המשתמש -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-QDPE9LSQG5');
+  function loadGA() {
+    if (window._gaLoaded) return;
+    window._gaLoaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-QDPE9LSQG5';
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', 'G-QDPE9LSQG5', { anonymize_ip: true });
+  }
+  if (localStorage.getItem('cookie_consent') === 'yes') loadGA();
 </script>
+<style>
+  /* ── COOKIE BANNER ── */
+  #cookie-banner {
+    position:fixed;bottom:0;left:0;right:0;z-index:9999;
+    background:#2D2320;color:#fff;padding:14px 18px;
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    font-size:13px;line-height:1.6;
+  }
+  #cookie-banner p { flex:1;min-width:200px;margin:0; }
+  #cookie-banner a { color:#EDD5DC;text-decoration:underline; }
+  .cookie-btn { padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
+  .cookie-btn-accept { background:#C17B8A;color:#fff; }
+  .cookie-btn-decline { background:transparent;color:#ccc;border:1px solid #666; }
+
+  /* ── ACCESSIBILITY WIDGET ── */
+  #a11y-btn {
+    position:fixed;bottom:80px;left:16px;z-index:8000;
+    width:44px;height:44px;border-radius:50%;
+    background:#2D2320;color:#fff;border:none;
+    font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.35);
+  }
+  #a11y-panel {
+    display:none;position:fixed;bottom:135px;left:16px;z-index:8000;
+    background:#fff;border-radius:14px;padding:16px;width:200px;
+    box-shadow:0 4px 20px rgba(0,0,0,.2);border:1px solid #eee;
+  }
+  #a11y-panel.open { display:block; }
+  .a11y-item { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:13px;color:#2D2320; }
+  .a11y-item:last-child { border-bottom:none; }
+  .a11y-switch { position:relative;width:40px;height:22px; }
+  .a11y-switch input { opacity:0;width:0;height:0; }
+  .a11y-knob { position:absolute;inset:0;background:#ccc;border-radius:22px;cursor:pointer;transition:.3s; }
+  .a11y-knob:before { content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s; }
+  .a11y-switch input:checked + .a11y-knob { background:#C17B8A; }
+  .a11y-switch input:checked + .a11y-knob:before { transform:translateX(18px); }
+
+  /* Accessibility modes */
+  body.a11y-large { font-size:18px !important; }
+  body.a11y-large .nav-btn { font-size:13px; }
+  body.a11y-contrast { filter:contrast(1.5) !important; }
+  body.a11y-no-anim * { animation:none !important;transition:none !important; }
+
+  /* Focus outline for keyboard nav */
+  :focus-visible { outline:3px solid #C17B8A !important;outline-offset:2px !important; }
+</style>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
   :root {
@@ -137,6 +193,36 @@
 </head>
 <body>
 
+<!-- COOKIE BANNER -->
+<div id="cookie-banner" role="dialog" aria-label="הסכמה לעוגיות" style="display:none;">
+  <p>אנו משתמשים ב-Google Analytics לצורך שיפור השירות. <a href="#" onclick="event.preventDefault();showPrivacyPolicy()">מדיניות פרטיות</a></p>
+  <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">אישור</button>
+  <button class="cookie-btn cookie-btn-decline" onclick="declineCookies()">דחייה</button>
+</div>
+
+<!-- ACCESSIBILITY WIDGET -->
+<button id="a11y-btn" aria-label="תפריט נגישות" onclick="document.getElementById('a11y-panel').classList.toggle('open')">♿</button>
+<div id="a11y-panel" role="dialog" aria-label="אפשרויות נגישות">
+  <div style="font-size:13px;font-weight:700;color:#2D2320;margin-bottom:8px;">נגישות</div>
+  <div class="a11y-item">
+    <span>הגדלת טקסט</span>
+    <label class="a11y-switch"><input type="checkbox" id="a11y-large" onchange="toggleA11y('large',this.checked)"><span class="a11y-knob"></span></label>
+  </div>
+  <div class="a11y-item">
+    <span>ניגודיות גבוהה</span>
+    <label class="a11y-switch"><input type="checkbox" id="a11y-contrast" onchange="toggleA11y('contrast',this.checked)"><span class="a11y-knob"></span></label>
+  </div>
+  <div class="a11y-item">
+    <span>ביטול אנימציות</span>
+    <label class="a11y-switch"><input type="checkbox" id="a11y-anim" onchange="toggleA11y('no-anim',this.checked)"><span class="a11y-knob"></span></label>
+  </div>
+  <div style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;font-size:11px;color:#888;">
+    לפניות נגישות:<br>
+    אריה מינקוב<br>
+    <a href="mailto:arye.minkov@gmail.com" style="color:#C17B8A;">arye.minkov@gmail.com</a>
+  </div>
+</div>
+
 <!-- PAGE: HOME -->
 <div class="page active" id="page-home">
   <div class="page-header" style="position:relative;">
@@ -144,6 +230,7 @@
     <p style="display:flex;align-items:center;justify-content:center;gap:6px;">
       חישוב ימי פרישה לפי ההלכה
       <button onclick="document.getElementById('modal-prisha-info').classList.add('open')"
+        aria-label="מה זו פרישה סמוך לווסת?"
         style="background:rgba(255,255,255,.25);border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;color:#fff;line-height:20px;padding:0;flex-shrink:0;">ⓘ</button>
     </p>
     <button onclick="openAbout()" style="position:absolute;left:20px;top:52px;background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">אודות</button>
@@ -188,7 +275,7 @@
     </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
       <button class="btn-primary" onclick="calculate()" style="flex:1">חשבי ימי פרישה</button>
-      <button class="btn-secondary" onclick="openSpecialModal()" style="width:52px;padding:0;font-size:20px;">⚙️</button>
+      <button class="btn-secondary" aria-label="הגדרות וסת מיוחד" onclick="openSpecialModal()" style="width:52px;padding:0;font-size:20px;">⚙️</button>
     </div>
   </div>
   <div id="results-area"></div>
@@ -486,6 +573,50 @@
   </div>
 </div>
 
+<!-- PRIVACY POLICY MODAL -->
+<div class="modal-overlay" id="modal-privacy" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">מדיניות פרטיות</div>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
+      <p><strong>עדכון אחרון:</strong> יולי 2026</p>
+      <p><strong>מה נאסף:</strong> שם, כתובת מייל או טלפון — אם הוזנו בטופס יצירת הקשר. כל שאר הנתונים (תאריכי וסת, הגדרות) נשמרים <strong>במכשיר שלך בלבד</strong> ואינם מועברים לשרת.</p>
+      <p><strong>לשם מה:</strong> פרטי יצירת הקשר משמשים למענה על פניות בלבד.</p>
+      <p><strong>עוגיות:</strong> אנו משתמשים ב-Google Analytics לסטטיסטיקות שימוש אנונימיות, בכפוף להסכמתך. ניתן לסרב בכל עת.</p>
+      <p><strong>שיתוף מידע:</strong> המידע אינו נמכר ואינו משותף עם צדדים שלישיים, למעט Formspree (שירות שליחת הטופס) ו-Google Calendar — אם בחרת בשילוב זה.</p>
+      <p><strong>אבטחה:</strong> כל הנתונים מוצפנים בתעבורה (HTTPS). נתוני הטופס מועברים ל-Formspree בלבד.</p>
+      <p><strong>זכויותיך:</strong> ניתן לבקש מחיקה או עיון בכל מידע שנאסף עליך. לפנייה: <a href="mailto:arye.minkov@gmail.com" style="color:var(--rose);">arye.minkov@gmail.com</a></p>
+    </div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="document.getElementById('modal-privacy').classList.remove('open')">סגירה</button>
+  </div>
+</div>
+
+<!-- ACCESSIBILITY DECLARATION MODAL -->
+<div class="modal-overlay" id="modal-a11y-decl" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">הצהרת נגישות</div>
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
+      <p>אנו פועלים להנגיש את האפליקציה לכלל המשתמשים, בהתאם לתקן ישראלי 5568 (רמה AA) וחוק שוויון זכויות לאנשים עם מוגבלות.</p>
+      <p><strong>מה בוצע:</strong></p>
+      <ul style="margin:4px 0 12px 0;padding-right:18px;">
+        <li>תמיכה בשפה עברית וכיוון RTL</li>
+        <li>כפתורי נגישות: הגדלת טקסט, ניגודיות גבוהה, ביטול אנימציות</li>
+        <li>תגיות ARIA על כפתורים ומודלים</li>
+        <li>ניווט מלא במקלדת (focus-visible)</li>
+        <li>אתר פועל ללא עכבר</li>
+      </ul>
+      <p><strong>פערים ידועים:</strong> חלק מהרכיבים הדינמיים עשויים להיות בלתי נגישים לחלוטין לקוראי מסך. אנו עובדים על שיפור מתמיד.</p>
+      <p><strong>תאריך עדכון:</strong> יולי 2026</p>
+      <p><strong>רכז נגישות:</strong><br>
+        אריה מינקוב<br>
+        <a href="mailto:arye.minkov@gmail.com" style="color:var(--rose);">arye.minkov@gmail.com</a>
+      </p>
+    </div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="document.getElementById('modal-a11y-decl').classList.remove('open')">סגירה</button>
+  </div>
+</div>
+
 <!-- PRISHA INFO MODAL -->
 <div class="modal-overlay" id="modal-prisha-info" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" onclick="event.stopPropagation()">
@@ -525,13 +656,23 @@
         <label class="form-label">הודעה</label>
         <textarea class="form-input" id="contact-msg" rows="3" placeholder="כתבי כאן..." style="resize:vertical;min-height:80px;"></textarea>
       </div>
-      <button class="btn-primary" id="contact-send-btn" onclick="sendContact()">📨 שליחה</button>
+      <div class="form-group" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;">
+        <input type="checkbox" id="contact-privacy" required style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--rose);">
+        <label for="contact-privacy" style="font-size:13px;color:var(--ink-soft);line-height:1.6;cursor:pointer;">
+          קראתי ואני מסכימ/ה ל<a href="#" onclick="event.preventDefault();showPrivacyPolicy()" style="color:var(--rose);">מדיניות הפרטיות</a>
+        </label>
+      </div>
+      <button class="btn-primary" id="contact-send-btn" onclick="sendContactWithConsent()">📨 שליחה</button>
       <div id="contact-status" style="display:none;margin-top:10px;font-size:13px;text-align:center;"></div>
     </div>
 
     <div style="border-top:1px solid var(--rose-pale);padding-top:14px;display:flex;gap:10px;">
       <button class="btn-secondary" onclick="shareApp();closeModal('modal-about')" style="flex:1;">📤 שיתוף</button>
       <button class="btn-primary" onclick="closeModal('modal-about')" style="flex:1;">סגירה</button>
+    </div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:12px;">
+      <a href="#" onclick="event.preventDefault();showPrivacyPolicy()" style="color:var(--rose);">מדיניות פרטיות</a>
+      <a href="#" onclick="event.preventDefault();document.getElementById('modal-a11y-decl').classList.add('open')" style="color:var(--rose);">הצהרת נגישות</a>
     </div>
   </div>
 </div>
@@ -1709,7 +1850,65 @@ function saveSettings() {
 }
 
 // ════════════════════════════════════════════════════════
-// GOOGLE CALENDAR
+// COOKIES & PRIVACY
+// ════════════════════════════════════════════════════════
+function initCookieBanner() {
+  const consent = localStorage.getItem('cookie_consent');
+  if (!consent) {
+    document.getElementById('cookie-banner').style.display = 'flex';
+  }
+}
+
+function acceptCookies() {
+  localStorage.setItem('cookie_consent', 'yes');
+  document.getElementById('cookie-banner').style.display = 'none';
+  loadGA();
+}
+
+function declineCookies() {
+  localStorage.setItem('cookie_consent', 'no');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+function showPrivacyPolicy() {
+  document.getElementById('modal-privacy').classList.add('open');
+}
+
+function sendContactWithConsent() {
+  const cb = document.getElementById('contact-privacy');
+  if (!cb.checked) { showToast('יש לאשר את מדיניות הפרטיות לפני השליחה'); return; }
+  sendContact();
+}
+
+// ════════════════════════════════════════════════════════
+// ACCESSIBILITY WIDGET
+// ════════════════════════════════════════════════════════
+function toggleA11y(mode, on) {
+  document.body.classList.toggle('a11y-' + mode, on);
+  localStorage.setItem('a11y_' + mode, on ? '1' : '0');
+  // close panel on mobile after change
+}
+
+function initA11y() {
+  ['large','contrast','no-anim'].forEach(mode => {
+    const key = mode === 'no-anim' ? 'anim' : mode;
+    const stored = localStorage.getItem('a11y_' + mode);
+    if (stored === '1') {
+      document.body.classList.add('a11y-' + mode);
+      const el = document.getElementById('a11y-' + key);
+      if (el) el.checked = true;
+    }
+  });
+}
+
+// Close a11y panel when clicking outside
+document.addEventListener('click', e => {
+  const panel = document.getElementById('a11y-panel');
+  const btn   = document.getElementById('a11y-btn');
+  if (panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) {
+    panel.classList.remove('open');
+  }
+});
 // ════════════════════════════════════════════════════════
 function addToGoogleCalendar(results) {
   const style  = document.getElementById('cal-style')?.value || appState.settings.calStyle || 'text';
@@ -2546,6 +2745,8 @@ window.addEventListener('load', () => {
     document.getElementById('modal-beta').classList.remove('open');
   }
   loadState();
+  initCookieBanner();
+  initA11y();
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   setInstalled(isStandalone);
