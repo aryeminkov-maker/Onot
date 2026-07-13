@@ -1929,7 +1929,7 @@ function addToGoogleCalendar(results) {
     if (style === 'emoji') return ONAH_EMOJIS[r.type] || '🌸';
     return ONAH_TITLES[r.type] || r.name;
   };
-  const detailsFor = (r) => `${r.name} | ${r.desc}`;
+  const detailsFor = (r) => `${r.name} | ${r.desc}\n\nיש לבצע בדיקה ולנהוג על פי דיני ימי הפרישה\nאפליקציית לוח הטהרה: https://did.li/Onot-app`;
 
   const husbandParam = (appState.settings.husband && appState.settings.husbandEmail)
     ? `&add=${encodeURIComponent(appState.settings.husbandEmail)}` : '';
