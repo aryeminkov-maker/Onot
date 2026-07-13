@@ -559,7 +559,7 @@
 </div>
 
 <!-- BETA WELCOME MODAL -->
-<div class="modal-overlay open" id="modal-beta" role="dialog" aria-modal="true" aria-label="ברוכות הבאות" onclick="if(event.target===this)closeBeta()">
+<div class="modal-overlay" id="modal-beta" role="dialog" aria-modal="true" aria-label="ברוכות הבאות" onclick="if(event.target===this)closeBeta()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div style="text-align:center;font-size:28px;margin-bottom:8px;">🌸</div>
@@ -2856,6 +2856,10 @@ window.addEventListener('load', () => {
   }
   loadState();
   initA11y();
+  // Show welcome modal only if not previously dismissed
+  if (!sessionStorage.getItem('beta_seen') && !localStorage.getItem('beta_dismissed')) {
+    document.getElementById('modal-beta').classList.add('open');
+  }
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   setInstalled(isStandalone);
