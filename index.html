@@ -1343,17 +1343,21 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
   // 3. HAFLAGA + 4. OR ZARUA
   if (prevDateStr && prevOnah) {
     const [py, pm, pd] = prevDateStr.split('-').map(Number);
-    const absPrev = HebCal.gregToAbs(py, pm, pd);
 
-    const dayDiff = abs0 - absPrev + 1;
-    let totalOnahs = dayDiff * 2;
-    if (prevOnah === 'yom'   && onah === 'layla') totalOnahs -= 1;
-    if (prevOnah === 'layla' && onah === 'yom')   totalOnahs += 1;
+    // ספירת עונות — "יום הראיה עולה לכאן ולכאן"
+    // כל יום לועזי = 2 עונות (יום=0, לילה=1)
+    const idx1 = HebCal.gregToAbs(py,pm,pd)*2 + (prevOnah==='layla'?1:0);
+    const idx2 = abs0*2                         + (onah    ==='layla'?1:0);
+    const totalOnahs  = idx2 - idx1 + 1;  // כולל שתי הקצוות
+    const haflagaDays = Math.ceil(totalOnahs / 2);
+    const haflagaOnah = totalOnahs % 2 === 1 ? onah : oppOnah(onah);
 
-    const haflagaDays = Math.floor(totalOnahs / 2);
-    const haflagaOnah = (totalOnahs % 2 === 0) ? onah : oppOnah(onah);
-
-    const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaDays);
+    // תאריך לועזי של עונת ההפלגה
+    // מוסיפים haflagaDays-1 ימים לועזיים לתאריך הלועזי הנוכחי
+    // (אם עונת ההפלגה היא לילה ועונת הנוכחית ביום, מוסיפים עוד -1)
+    const offsetExtra = (onah==='yom' && haflagaOnah==='layla') ? 0
+                      : (onah==='layla' && haflagaOnah==='yom') ? -1 : 0;
+    const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaDays - 1 + offsetExtra);
     const haflaga_heb  = HebCal.gregToHeb(haflaga_greg.year, haflaga_greg.month, haflaga_greg.day);
 
     const haflagaNote = `הפרש של ${haflagaDays} ימים — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
