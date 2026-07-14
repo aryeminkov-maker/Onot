@@ -243,7 +243,7 @@
       </select>
     </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
-      <button class="btn-primary" onclick="calculate()" style="flex:1">חשבי ימי פרישה</button>
+      <button class="btn-primary" id="btn-calculate" onclick="calculate()" style="flex:1">חשבי ימי פרישה</button>
       <button class="btn-secondary" aria-label="הגדרות וסת מיוחד" onclick="openSpecialModal()" style="width:52px;padding:0;font-size:20px;">⚙️</button>
     </div>
   </div>
@@ -372,12 +372,51 @@
   <!-- 4. הלכה -->
   <div class="card">
     <div class="card-title">הלכה</div>
+
     <div class="settings-item">
       <div>
+        <div class="settings-label">שיטת פסיקה <button class="tooltip-btn" onclick="document.getElementById('modal-shita-info').classList.add('open')">?</button></div>
+        <div class="settings-desc">בחרי את השיטה ההלכתית לחישוב</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0 20px 14px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:10px;border:2px solid transparent;" id="method-darchei-label">
+        <input type="radio" name="halacha-method" id="method-darchei" value="darchei" onchange="onMethodChange(this.value)" style="accent-color:var(--rose);width:18px;height:18px;flex-shrink:0;">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">דרכי טהרה — הרב מרדכי אליהו</div>
+          <div style="font-size:12px;color:var(--ink-soft);">ברירת מחדל · <a href="https://harav.org/books/darcitaara-6/" target="_blank" rel="noopener" style="color:var(--rose);">לאתר ←</a></div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:10px;border:2px solid transparent;" id="method-yoatzot-label">
+        <input type="radio" name="halacha-method" id="method-yoatzot" value="yoatzot" onchange="onMethodChange(this.value)" style="accent-color:var(--rose);width:18px;height:18px;flex-shrink:0;">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">יועצות הלכה — בית נשמת</div>
+          <div style="font-size:12px;color:var(--ink-soft);"><a href="https://hebrew.yoatzot.org/category/טהרת-המשפחה/וסתות-ועונות-פרישה/" target="_blank" rel="noopener" style="color:var(--rose);">לאתר ←</a></div>
+        </div>
+      </label>
+    </div>
+
+    <div class="settings-item" id="orzarua-setting">
+      <div>
         <div class="settings-label">חשש לעונת אור זרוע <button class="tooltip-btn" onclick="openTooltip('orzarua')">?</button></div>
-        <div class="settings-desc">חישוב עונת אור זרוע</div>
+        <div class="settings-desc" id="orzarua-desc">חישוב עונת אור זרוע</div>
       </div>
       <label class="switch"><input type="checkbox" id="toggle-orzarua" checked><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-item" style="border-bottom:none;">
+      <div>
+        <div class="settings-label">מסולקות דמים</div>
+        <div class="settings-desc">הריון / הנקה</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggle-mesulaket" onchange="onMesulaketChange(this.checked)"><span class="slider"></span></label>
+    </div>
+    <div id="mesulaket-type-row" style="display:none;padding:0 20px 14px;">
+      <select id="mesulaket-type" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--rose-light);font-family:inherit;font-size:14px;color:var(--ink);background:#fff;">
+        <option value="herayon">הריון (תוך 3 חודשים)</option>
+        <option value="herayon_late">הריון (לאחר 3 חודשים)</option>
+        <option value="meineket">הנקה (עד 24 חודש)</option>
+      </select>
     </div>
   </div>
 
@@ -495,7 +534,7 @@
       <br>• <strong>חודש לועזי</strong> — תאריך לועזי קבוע (נתון במחלוקת)
       <br>ממצאים הנתונים במחלוקת הפוסקים מסומנים בכתום עם הסבר והנחיה לשאול רב.
       <br><br>
-      <strong>ווסת חצי קבוע</strong> — אחרי 3 ראיות שכולן מחוץ לטווח 28-31 ימים (כולן מעל 31 או כולן מתחת ל-28), תקפוץ התראה מיוחדת על דין ווסת חצי קבוע (דרכי טהרה פרק ו' סעיף ו') — כולל הסבר שאין צורך לחשוש לבינונית ולחודש, אך יש לחשוש לעונת ההפלגה ותאריכה.
+      <strong>ווסת חצי קבוע</strong> — אחרי 3 ראיות שכולן מחוץ לטווח 28-31 ימים (כולן פחות מ-28, או כולן 32 ומעלה), תקפוץ התראה מיוחדת על דין ווסת חצי קבוע (דרכי טהרה פרק ז' סעיפים י"ז–י"ט) — כולל הסבר שאין צורך לחשוש לבינונית ולחודש, אך יש לחשוש לעונת ההפלגה ותאריכה.
       <br><br>
 
       <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">⚙️ הגדרות</p>
@@ -631,6 +670,53 @@
       </p>
     </div>
     <button class="btn-primary" style="margin-top:16px;" onclick="document.getElementById('modal-a11y-decl').classList.remove('open')">סגירה</button>
+  </div>
+</div>
+
+<!-- SHITA INFO MODAL -->
+<div class="modal-overlay" id="modal-shita-info" role="dialog" aria-modal="true" aria-label="הבדלים בין שיטות הפסיקה" onclick="if(event.target===this)closeModal('modal-shita-info')">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">הבדלים בין שיטות הפסיקה</div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">📖 דרכי טהרה — הרב מרדכי אליהו</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
+        • אור זרוע — חשש לכתחילה<br>
+        • מעוברת/מניקה: תוך 3 חודשים — שלושתן; אחרי כן — חודש והפלגה בלבד
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--rose-pale);padding-top:14px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">📖 יועצות הלכה — בית נשמת</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.8;">
+        • אור זרוע — חומרה בלבד, לא עיקר הדין<br>
+        • מסולקות דמים — אינן חוששות לעונה בינונית
+      </div>
+    </div>
+
+    <div style="background:var(--rose-pale);border-radius:10px;padding:12px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;">
+      <strong>משותף לשתי השיטות:</strong><br>
+      • עונה בינונית — חמורה ביותר; אם עברה ולא בדקה — אסורה עד שתבדוק (ו:יא)<br>
+      • יום חודש והפלגה — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)
+    </div>
+
+    <button class="btn-primary" onclick="closeModal('modal-shita-info')">הבנתי</button>
+  </div>
+</div>
+
+<!-- METHOD CHANGE MODAL -->
+<div class="modal-overlay" id="modal-method-change" role="dialog" aria-modal="true" aria-label="שינוי שיטת פסיקה" onclick="if(event.target===this)closeModal('modal-method-change')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">שינוי שיטת פסיקה</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">
+      שינוי השיטה ההלכתית עשוי להשפיע על חישוב העונות.<br>האם לחשב מחדש את העונות לפי השיטה החדשה?
+    </p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-primary" style="flex:1;" onclick="applyMethodChange(true)">חשבי מחדש</button>
+      <button class="btn-secondary" style="flex:1;" onclick="applyMethodChange(false)">שמרי כפי שהוא</button>
+    </div>
   </div>
 </div>
 
@@ -1202,60 +1288,72 @@ function fmtHeb(h)    { return HebCal.formatHeb(h); }
 // PRISHUT CALCULATOR
 // ════════════════════════════════════════════════════════
 function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeOrZarua) {
+  const method     = appState.settings.halachaMethod || 'darchei';
+  const mesulaket  = appState.settings.mesulaket || false;   // false | 'herayon' | 'herayon_late' | 'meineket'
+
   const [gy, gm, gd] = dateStr.split('-').map(Number);
   const abs0 = HebCal.gregToAbs(gy, gm, gd);
-  // heb0 = התאריך העברי של הראיה
-  // ביום: אותו יום עברי; בלילה: יום עברי הבא (היממה מתחילה בלילה)
   const heb0 = HebCal.absToHeb(abs0 + (onah === 'layla' ? 1 : 0));
   const results = [];
 
-  // 1. BEINONIT – יום 30 מהראיה, כולל יום הראיה עצמו (סעיף י, יג)
-  // "יום הראיה עולה לכאן ולכאן" — יום הראיה = יום 1, לכן יום 30 = abs + 29
-  const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
-  const beinonit_greg = HebCal.hebToGreg(beinonit_heb.year, beinonit_heb.month, beinonit_heb.day);
-  results.push({ type:'beinonit', name:'עונה בינונית', desc:'יום 30 (כולל יום הראיה)', icon:'📅',
-    onah, heb:beinonit_heb, greg:beinonit_greg, color:'rose' });
+  // האם לדלג על עונה בינונית?
+  // דרכי טהרה ז:פג–פה: אחרי 3 חודשים — פטורה מבינונית. יועצות: פטורה תמיד.
+  const skipBeinonit = mesulaket &&
+    (method === 'yoatzot' || mesulaket === 'herayon_late' || mesulaket === 'meineket');
 
-  // 2. HODESH – same Hebrew day next month, same onah
-  const hodesh_heb  = HebCal.nextMonthDate(heb0.year, heb0.month, heb0.day);
-  const hodesh_greg = HebCal.hebToGreg(hodesh_heb.year, hodesh_heb.month, hodesh_heb.day);
-  results.push({ type:'hodesh', name:'עונת החודש',
-    desc: hodesh_heb.roshChodesh
-      ? `א' ${HebCal.monthName(hodesh_heb.month,hodesh_heb.year)} — חודש הבא חסר (סעיף יא)`
-      : `יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''}`,
-    icon:'🌙', onah, heb:hodesh_heb, greg:hodesh_greg, color:'gold' });
+  // 1. BEINONIT
+  if (!skipBeinonit && specialType !== 'special') {
+    const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
+    const beinonit_greg = HebCal.hebToGreg(beinonit_heb.year, beinonit_heb.month, beinonit_heb.day);
+    const beinonitNote = 'יום 30 — חמורה ביותר; אם עברה ולא בדקה — אסורה עד בדיקה (ו:יא)';
+    results.push({ type:'beinonit', name:'עונה בינונית', desc: beinonitNote,
+      icon:'📅', onah, heb:beinonit_heb, greg:beinonit_greg, color:'rose' });
+  }
+
+  // 2. HODESH
+  // מסולקות: לפי שתי השיטות — חוששת לחודש
+  if (specialType !== 'special') {
+    const hodesh_heb  = HebCal.nextMonthDate(heb0.year, heb0.month, heb0.day);
+    const hodesh_greg = HebCal.hebToGreg(hodesh_heb.year, hodesh_heb.month, hodesh_heb.day);
+    const hodeshNote = hodesh_heb.roshChodesh
+          ? `א' ${HebCal.monthName(hodesh_heb.month,hodesh_heb.year)} — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`
+          : `יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''} — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
+    results.push({ type:'hodesh', name:'עונת החודש', desc: hodeshNote,
+      icon:'🌙', onah, heb:hodesh_heb, greg:hodesh_greg, color:'gold' });
+  }
 
   // 3. HAFLAGA + 4. OR ZARUA
-  if (specialType !== 'special' && prevDateStr && prevOnah) {
+  if (prevDateStr && prevOnah) {
     const [py, pm, pd] = prevDateStr.split('-').map(Number);
     const absPrev = HebCal.gregToAbs(py, pm, pd);
-    const hebPrev = HebCal.gregToHeb(py, pm, pd);
 
-    // הפלגה = הפרש אבסולוטי + 1 ("יום הראיה עולה לכאן ולכאן", סעיף יג)
     const dayDiff = abs0 - absPrev + 1;
-
-    // Onah offset: same onah = 0 extra, yom→layla adds half, layla→yom subtracts half
-    // We treat each full day as 2 onahs; compute total onahs elapsed
     let totalOnahs = dayDiff * 2;
     if (prevOnah === 'yom'   && onah === 'layla') totalOnahs -= 1;
     if (prevOnah === 'layla' && onah === 'yom')   totalOnahs += 1;
 
-    const haflagaDays  = Math.floor(totalOnahs / 2);
-    const haflagaOnah  = (totalOnahs % 2 === 0) ? onah : oppOnah(onah);
+    const haflagaDays = Math.floor(totalOnahs / 2);
+    const haflagaOnah = (totalOnahs % 2 === 0) ? onah : oppOnah(onah);
 
     const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaDays);
     const haflaga_heb  = HebCal.gregToHeb(haflaga_greg.year, haflaga_greg.month, haflaga_greg.day);
 
-    results.push({ type:'haflaga', name:'עונת ההפלגה',
-      desc:`הפרש של ${haflagaDays} ימים עבריים`,
+    const haflagaNote = `הפרש של ${haflagaDays} ימים — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
+
+    results.push({ type:'haflaga', name:'עונת ההפלגה', desc: haflagaNote,
       icon:'📏', onah:haflagaOnah, heb:haflaga_heb, greg:haflaga_greg, color:'green' });
 
-    // 4. OR ZARUA – יום 29 מהראיה, עונה הפוכה (= abs + 28 כולל יום הראיה)
-    if (includeOrZarua) {
+    // 4. OR ZARUA — לפי יועצות: חומרה בלבד, לא מוצג ברירת מחדל
+    const showOrZarua = includeOrZarua &&
+      (method === 'darchei' || appState.settings.orZarua === true);
+
+    if (showOrZarua) {
       const orz_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 28);
       const orz_greg = HebCal.hebToGreg(orz_heb.year, orz_heb.month, orz_heb.day);
-      results.push({ type:'orzarua', name:'עונת אור זרוע',
-        desc:'יום כ״ט – עונה ההפוכה',
+      const orzNote  = method === 'yoatzot'
+        ? 'יום כ״ט — חומרה (לא עיקר הדין)'
+        : 'יום כ״ט – עונה ההפוכה';
+      results.push({ type:'orzarua', name:'עונת אור זרוע', desc: orzNote,
         icon:'🌸', onah:oppOnah(onah), heb:orz_heb, greg:orz_greg, color:'rose' });
     }
   } else if (specialType !== 'special') {
@@ -1314,6 +1412,7 @@ function saveState() {
   try { localStorage.setItem('veset_app_v2', JSON.stringify(appState)); } catch(e) {}
 }
 function applySettings() {
+  const method = appState.settings.halachaMethod || 'darchei';
   document.getElementById('toggle-gcal').checked   = appState.settings.gcal;
   document.getElementById('notif-time-yom-vis').value   = appState.settings.notifTimeYom   || '07:00';
   document.getElementById('notif-time-layla-vis').value = appState.settings.notifTimeLayla || '19:00';
@@ -1323,6 +1422,17 @@ function applySettings() {
   document.getElementById('toggle-orzarua').checked = appState.settings.orZarua !== false;
   if (appState.settings.husband) document.getElementById('husband-email-group').style.display = 'block';
   if (appState.settings.notif)  { document.getElementById('notif-install-tip').style.display = 'block'; }
+
+  // שיטה הלכתית
+  const rb = document.getElementById('method-' + method);
+  if (rb) rb.checked = true;
+  updateMethodUI(method);
+
+  // מסולקות
+  const mes = appState.settings.mesulaket || false;
+  document.getElementById('toggle-mesulaket').checked = !!mes;
+  document.getElementById('mesulaket-type-row').style.display = mes ? 'block' : 'none';
+  if (mes) document.getElementById('mesulaket-type').value = mes;
 }
 
 // ════════════════════════════════════════════════════════
@@ -1458,6 +1568,10 @@ function renderResults(calc, dateStr) {
       <div class="summary-header">
         <div>חישוב ימי הפרישה לפי ראיה בתאריך</div>
         <div class="date-display">${fmtHeb(calc.heb0)} | ${onahLabel(calc.onah)}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--ink-soft);">
+          חושב לפי: <span id="method-badge" style="color:var(--rose);font-weight:600;">${(appState.settings.halachaMethod||'darchei')==='yoatzot'?'יועצות הלכה':'דרכי טהרה'}</span>
+          ${appState.settings.mesulaket ? ' · מסולקות דמים' : ''}
+        </div>
       </div>
       ${rows}
       <div style="padding:16px 20px;">
@@ -1946,6 +2060,7 @@ function scheduleNotifications(results) {
 }
 
 function saveSettings() {
+  const mesOn = document.getElementById('toggle-mesulaket').checked;
   appState.settings = {
     gcal:           document.getElementById('toggle-gcal').checked,
     notif:          false,
@@ -1954,7 +2069,9 @@ function saveSettings() {
     calStyle:       document.getElementById('cal-style').value,
     husband:        document.getElementById('toggle-husband').checked,
     husbandEmail:   document.getElementById('husband-email').value,
-    orZarua:        document.getElementById('toggle-orzarua').checked
+    orZarua:        document.getElementById('toggle-orzarua').checked,
+    halachaMethod:  document.querySelector('input[name="halacha-method"]:checked')?.value || 'darchei',
+    mesulaket:      mesOn ? (document.getElementById('mesulaket-type').value || 'herayon') : false,
   };
   saveState(); showToast('ההגדרות נשמרו ✓');
 }
@@ -1993,6 +2110,51 @@ function openModal(id) {
   el.classList.add('open');
   const first = el.querySelector('button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])');
   if (first) setTimeout(() => first.focus(), 50);
+}
+
+// ════════════════════════════════════════════════════════
+// HALACHA METHOD
+// ════════════════════════════════════════════════════════
+var _pendingMethod = null;
+
+function onMethodChange(newMethod) {
+  updateMethodUI(newMethod);
+  if (appState.history && appState.history.length > 0) {
+    _pendingMethod = newMethod;
+    document.getElementById('modal-method-change').classList.add('open');
+  } else {
+    appState.settings.halachaMethod = newMethod;
+    saveState();
+  }
+}
+
+function applyMethodChange(recalc) {
+  closeModal('modal-method-change');
+  appState.settings.halachaMethod = _pendingMethod;
+  _pendingMethod = null;
+  saveState();
+  if (recalc) {
+    const btn = document.getElementById('btn-calculate');
+    if (btn) btn.click();
+  }
+  showToast('שיטת הפסיקה עודכנה ✓');
+}
+
+function updateMethodUI(method) {
+  ['darchei','yoatzot'].forEach(m => {
+    const label = document.getElementById('method-' + m + '-label');
+    if (label) label.style.borderColor = method === m ? 'var(--rose)' : 'transparent';
+  });
+  const orzDesc = document.getElementById('orzarua-desc');
+  if (method === 'yoatzot') {
+    if (orzDesc) orzDesc.textContent = 'חומרה — לא עיקר הדין לפי שיטה זו';
+  } else {
+    if (orzDesc) orzDesc.textContent = 'חישוב עונת אור זרוע';
+  }
+}
+
+function onMesulaketChange(on) {
+  document.getElementById('mesulaket-type-row').style.display = on ? 'block' : 'none';
 }
 
 // ════════════════════════════════════════════════════════
@@ -2699,10 +2861,10 @@ function checkChatziKavua() {
 
   // בדוק את 3 ההפרשים האחרונים
   const last3 = intervals.slice(-3);
-  const allBelow28 = last3.every(d => d < 28);
-  const allAbove31 = last3.every(d => d > 31);
+  const allBelow28 = last3.length >= 2 && last3.every(d => d < 28);
+  const allFrom32  = last3.length >= 2 && last3.every(d => d >= 32);
 
-  if (!allBelow28 && !allAbove31) return null;
+  if (!allBelow28 && !allFrom32) return null;
 
   // חשב תאריך ההפלגה הבא
   const lastEntry = h[h.length - 1];
@@ -2727,8 +2889,8 @@ function checkChatziKavua() {
 function showChatziKavuaModal(data) {
   const haflagaDateStr = `${fmtGreg(data.haflagaGreg)} | ${fmtHeb(data.haflagaHeb)} | עונת ${onahLabel(data.lastOnah)}`;
   const sideExplain = data.side === 'below'
-    ? 'כל 3 ההפרשים האחרונים היו פחות מ-28 ימים'
-    : 'כל 3 ההפרשים האחרונים היו יותר מ-31 ימים';
+    ? 'כל ההפרשים האחרונים בין הראיות היו פחות מ-28 ימים'
+    : 'כל ההפרשים האחרונים בין הראיות היו 32 ימים ומעלה';
 
   const modal = document.createElement('div');
   modal.className = 'modal-overlay open';
@@ -2761,9 +2923,9 @@ function showChatziKavuaModal(data) {
 
     <div style="background:#F5F0FB;border:1px solid #C4B0E0;border-radius:12px;padding:14px;margin-bottom:16px;">
       <p style="font-size:13px;font-weight:600;color:#5A3A8A;margin-bottom:4px;">📖 מקור:</p>
-      <p style="font-size:13px;color:#5A3A8A;line-height:1.7;">דרכי טהרה, פרק ו' סעיף ו'</p>
-      <a href="https://harav.org/books/darcitaara-6/#_ftn12" target="_blank" rel="noopener"
-        style="font-size:12px;color:#7B5EA7;text-decoration:underline;">לסעיף המלא ←</a>
+      <p style="font-size:13px;color:#5A3A8A;line-height:1.7;">דרכי טהרה, פרק ז' סעיפים י"ז–י"ט</p>
+      <a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener"
+        style="font-size:12px;color:#7B5EA7;text-decoration:underline;">לסעיפים המלאים ←</a>
     </div>
 
     <div style="background:#FFF3D6;border:1px solid #F0D98B;border-radius:12px;padding:12px;margin-bottom:16px;">
@@ -2779,8 +2941,8 @@ function checkCyclesAfterCalculate() {
   const status = getVesetStatus(appState.history);
   const n = appState.history.filter(e => e.specialType !== 'special').length;
 
-  // בדיקת ווסת חצי קבוע (אחרי 3 ראיות = בפעם הרביעית)
-  if (n >= 4) {
+  // בדיקת ווסת חצי קבוע (אחרי 3 ראיות — כולן מחוץ לטווח 28-31)
+  if (n >= 3) {
     const chatzi = checkChatziKavua();
     if (chatzi) {
       const fp = 'chatzi_' + chatzi.side + '_' + chatzi.last3.join(',');
