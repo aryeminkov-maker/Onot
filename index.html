@@ -548,7 +548,7 @@
   <div class="card" style="text-align:center;">
     <p style="font-size:12px;color:var(--ink-soft);">לוח הטהרה</p>
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
-      <p style="font-size:18px;font-weight:700;color:var(--rose);margin:0;">גרסה 1.4</p>
+      <p style="font-size:18px;font-weight:700;color:var(--rose);margin:0;">גרסה 1.5</p>
       <button onclick="document.getElementById('modal-whats-new').classList.add('open')"
         style="background:var(--rose-pale);border:1px solid var(--rose-light);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:600;">
         ✨ מה חדש?
@@ -559,19 +559,37 @@
 </div>
 
 <!-- WHAT'S NEW MODAL -->
-<div class="modal-overlay" id="modal-whats-new" role="dialog" aria-modal="true" aria-label="מה חדש בגרסה 1.4" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-overlay" id="modal-whats-new" role="dialog" aria-modal="true" aria-label="מה חדש בגרסה 1.5" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-height:88vh;overflow-y:auto;">
     <div class="modal-handle"></div>
-    <div class="modal-title">✨ מה חדש בגרסה 1.4</div>
+    <div class="modal-title">✨ מה חדש בגרסה 1.5</div>
     <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;">
-      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔧 תיקון תקלות</p>
-      <p style="margin-bottom:14px;">תוקנו מספר באגים בחישובי הפלגה ועונת החודש, וכן שיפורים בביצועים הכלליים של האפליקציה.</p>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">♿ התאמות נגישות</p>
-      <p style="margin-bottom:14px;">האפליקציה עודכנה לעמוד בתקן הנגישות הישראלי 5568 (רמה AA): תמיכה מלאה בניווט מקלדת, כפתור נגישות עם הגדלת טקסט וניגודיות גבוהה, הצהרת נגישות, ועוד.</p>
-      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">📖 דיוק החישובים ההלכתיים</p>
-      <p style="margin-bottom:4px;">בוצע דיוק נוסף בחישוב עונת החודש בחודש חסר, ובחישוב ההפלגה לפי לוח שנה עברי.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">⚖️ בחירת שיטת פסיקה הלכתית</p>
+      <p style="margin-bottom:14px;">ניתן כעת לבחור בהגדרות את שיטת הפסיקה המועדפת — דרכי טהרה (הרב מרדכי אליהו) או יועצות הלכה (בית נשמת). החישוב מתאים את עצמו אוטומטית לשיטה הנבחרת.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🤰 מסולקות דמים</p>
+      <p style="margin-bottom:14px;">נוספה אפשרות בהגדרות לסמן הריון / הנקה — האפליקציה מתאימה את החישוב בהתאם לשיטת הפסיקה.</p>
+      <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">🔧 תיקון תקלות ושיפורים</p>
+      <p style="margin-bottom:20px;">תיקון מספר באגים בחלוניות, שיפורי נגישות, ועדכון הנחיות החישוב לפי מקורות הלכתיים מדויקים.</p>
+
+      <div style="border-top:1px solid var(--rose-pale);padding-top:14px;margin-bottom:4px;">
+        <p style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:10px;">גרסה 1.4</p>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:4px;font-size:12px;">♿ התאמות נגישות</p>
+        <p style="margin-bottom:10px;font-size:12px;">עמידה בתקן הנגישות הישראלי 5568 (רמה AA): ניווט מקלדת, כפתור נגישות, הצהרת נגישות.</p>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:4px;font-size:12px;">📖 דיוק החישובים ההלכתיים</p>
+        <p style="margin-bottom:10px;font-size:12px;">דיוק בחישוב עונת החודש בחודש חסר ובחישוב ההפלגה לפי לוח שנה עברי.</p>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:4px;font-size:12px;">⚠️ ווסת חצי קבוע</p>
+        <p style="font-size:12px;">זיהוי אוטומטי של דין ווסת חצי קבוע (דרכי טהרה ז:יז–יט) עם התראה מותאמת.</p>
+      </div>
+
+      <div style="border-top:1px solid var(--rose-pale);padding-top:14px;margin-top:14px;">
+        <p style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:10px;">גרסה 1.3</p>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:4px;font-size:12px;">📅 שמירה ביומן Google</p>
+        <p style="margin-bottom:10px;font-size:12px;">שמירת ימי הפרישה ישירות ליומן Google עם שעות מדויקות.</p>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:4px;font-size:12px;">🔄 זיהוי מחזוריות</p>
+        <p style="font-size:12px;">זיהוי אוטומטי של ווסת קבוע — הפלגה, חודש, ומורכבת — עם תאריך צפוי.</p>
+      </div>
     </div>
-    <button class="btn-primary" style="margin-top:16px;" onclick="document.getElementById('modal-whats-new').classList.remove('open')">סגירה</button>
+    <button class="btn-primary" style="margin-top:16px;" onclick="markWhatsNewSeen();document.getElementById('modal-whats-new').classList.remove('open')">הבנתי</button>
   </div>
 </div>
 
@@ -3112,12 +3130,20 @@ function showCycleModal(findings, forceShow) {
   showVesetModal(getVesetStatus(appState.history), forceShow);
 }
 
+const APP_VERSION = '1.5';
+
+function markWhatsNewSeen() {
+  try { localStorage.setItem('whats_new_seen', APP_VERSION); } catch(e) {}
+}
+
 function closeBeta() {
   document.getElementById('modal-beta').classList.remove('open');
   const dontShow = document.getElementById('beta-dont-show')?.checked;
   if (dontShow) {
     try { localStorage.setItem('beta_dismissed', '1'); } catch(e) {}
   }
+  // שמור גרסה נוכחית כ"נראתה" — כך משתמש חדש לא יקבל "מה חדש" בכניסה הראשונה
+  try { localStorage.setItem('whats_new_seen', APP_VERSION); } catch(e) {}
   sessionStorage.setItem('beta_seen', '1');
 }
 function openAbout() {
@@ -3147,9 +3173,16 @@ window.addEventListener('load', () => {
   }
   loadState();
   initA11y();
-  // Show welcome modal only if not previously dismissed
-  if (!sessionStorage.getItem('beta_seen') && !localStorage.getItem('beta_dismissed')) {
-    document.getElementById('modal-beta').classList.add('open');
+  const isReturning = localStorage.getItem('beta_dismissed') === '1';
+  const seenVersion = localStorage.getItem('whats_new_seen');
+  if (!isReturning) {
+    // משתמש חדש — חלונית ברכות
+    if (!sessionStorage.getItem('beta_seen')) {
+      document.getElementById('modal-beta').classList.add('open');
+    }
+  } else if (seenVersion !== APP_VERSION) {
+    // משתמש חוזר + גרסה חדשה — "מה חדש"
+    setTimeout(() => document.getElementById('modal-whats-new').classList.add('open'), 600);
   }
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
