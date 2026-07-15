@@ -390,7 +390,7 @@
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:10px;border:2px solid transparent;" id="method-yoatzot-label">
         <input type="radio" name="halacha-method" id="method-yoatzot" value="yoatzot" onchange="onMethodChange(this.value)" style="accent-color:var(--rose);width:18px;height:18px;flex-shrink:0;">
         <div>
-          <div style="font-size:14px;font-weight:600;color:var(--ink);">יועצות הלכה — בית נשמת</div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">על פי הנהוג בהדרכת יועצות הלכה — נשמת</div>
           <div style="font-size:12px;color:var(--ink-soft);"><a href="https://hebrew.yoatzot.org/category/טהרת-המשפחה/וסתות-ועונות-פרישה/" target="_blank" rel="noopener" style="color:var(--rose);">לאתר ←</a></div>
         </div>
       </label>
@@ -1591,7 +1591,7 @@ function renderResults(calc, dateStr) {
         <div>חישוב ימי הפרישה לפי ראיה בתאריך</div>
         <div class="date-display">${fmtHeb(calc.heb0)} | ${onahLabel(calc.onah)}</div>
         <div style="margin-top:4px;font-size:11px;color:var(--ink-soft);">
-          חושב לפי: <span id="method-badge" style="color:var(--rose);font-weight:600;">${(appState.settings.halachaMethod||'darchei')==='yoatzot'?'יועצות הלכה':'דרכי טהרה'}</span>
+          חושב לפי: <span id="method-badge" style="color:var(--rose);font-weight:600;">${(appState.settings.halachaMethod||'darchei')==='yoatzot'?'על פי הנהוג בהדרכת יועצות הלכה — נשמת':'דרכי טהרה — הרב מרדכי אליהו'}</span>
           ${appState.settings.mesulaket ? ' · מסולקות דמים' : ''}
         </div>
       </div>
