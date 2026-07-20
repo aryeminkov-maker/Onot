@@ -3268,6 +3268,29 @@ window.addEventListener('load', () => {
     // משתמש חוזר + גרסה חדשה — "מה חדש"
     setTimeout(() => document.getElementById('modal-whats-new').classList.add('open'), 600);
   }
+
+  // התראה חד-פעמית על באג חישוב הפלגה
+  const haflagaWarned = localStorage.getItem('haflaga_bug_warned');
+  if (!haflagaWarned && appState.history && appState.history.length >= 2) {
+    localStorage.setItem('haflaga_bug_warned', '1');
+    setTimeout(() => {
+      const m = document.createElement('div');
+      m.className = 'modal-overlay open';
+      m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+      m.addEventListener('click', e => { if(e.target===m) m.remove(); });
+      m.innerHTML = `<div class="modal">
+        <div class="modal-handle"></div>
+        <div style="font-size:22px;text-align:center;margin-bottom:8px;">⚠️</div>
+        <div class="modal-title" style="text-align:center;">עדכון חישוב חשוב</div>
+        <p style="font-size:14px;color:var(--ink-soft);line-height:1.9;margin-bottom:16px;">
+          בגרסה זו תוקן באג טכני בחישוב <strong>עונת ההפלגה</strong>.<br><br>
+          מומלץ <strong>לוודא מחדש</strong> את תאריך עונת ההפלגה הנוכחית על ידי הזנת הראיה האחרונה מחדש.
+        </p>
+        <button class="btn-primary" onclick="this.closest('.modal-overlay').remove()">הבנתי, אוודא מחדש</button>
+      </div>`;
+      document.body.appendChild(m);
+    }, 1500);
+  }
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   setInstalled(isStandalone);
