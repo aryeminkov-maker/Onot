@@ -876,10 +876,14 @@
     <div class="modal-handle"></div>
     <div class="modal-title" id="edit-modal-title">עריכת רישום</div>
     <div id="edit-modal-content"></div>
-    <div style="height:16px;"></div>
+    <div style="margin-top:14px;">
+      <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px;">📝 הערה</label>
+      <textarea id="edit-note" rows="2" placeholder="הוסיפי הערה לראיה זו..." style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--rose-light);font-family:inherit;font-size:14px;color:var(--ink);resize:none;box-sizing:border-box;"></textarea>
+    </div>
+    <div style="height:12px;"></div>
     <div style="display:flex;gap:10px;">
       <button class="btn-secondary" onclick="deleteEntry()" style="flex:1;color:#C0392B;border-color:#C0392B;">🗑 מחיקה</button>
-      <button class="btn-primary" onclick="closeModal('modal-edit')" style="flex:1;">סגירה</button>
+      <button class="btn-primary" onclick="saveNote()" style="flex:1;">שמירה</button>
     </div>
   </div>
 </div>
@@ -1596,7 +1600,17 @@ function renderResults(calc, dateStr) {
         </div>
       </div>
       ${rows}
-      <div style="padding:16px 20px;">
+      <div style="padding:12px 20px 0;">
+        <button onclick="toggleNoteField()" id="btn-add-note"
+          style="background:none;border:1px dashed var(--rose-light);border-radius:10px;width:100%;padding:10px;color:var(--rose);font-size:13px;cursor:pointer;font-family:inherit;">
+          📝 הוספת הערה לראיה זו
+        </button>
+        <div id="note-field" style="display:none;margin-top:8px;">
+          <textarea id="result-note" rows="2" placeholder="הוסיפי הערה..." style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--rose-light);font-family:inherit;font-size:14px;color:var(--ink);resize:none;box-sizing:border-box;"></textarea>
+          <button class="btn-secondary" onclick="saveResultNote()" style="margin-top:8px;width:auto;padding:8px 20px;font-size:13px;">שמירת הערה ✓</button>
+        </div>
+      </div>
+      <div style="padding:12px 20px 16px;">
         <button class="btn-primary" onclick="addToGoogleCalendar(appState._lastResults)"
           style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
@@ -1604,6 +1618,14 @@ function renderResults(calc, dateStr) {
         </button>
       </div>
     </div>`;
+
+  // טען הערה קיימת אם יש
+  const last = [...appState.history].sort((a,b)=>a.date<b.date?1:-1)[0];
+  if (last?.note) {
+    const btn = document.getElementById('btn-add-note');
+    if (btn) btn.textContent = '📝 ערכי הערה';
+    document.getElementById('result-note').value = last.note;
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -1620,11 +1642,12 @@ function renderHistory() {
   list.innerHTML = [...appState.history].reverse().map(e => {
     const [gy,gm,gd] = e.date.split('-').map(Number);
     const special = e.specialType === 'special' ? ' • וסת מיוחד' : '';
+    const noteIcon = e.note ? ' <span style="color:var(--rose);font-weight:700;" title="יש הערה">❗</span>' : '';
     return `<div class="history-item" onclick="editEntry(${e.id})">
       <div class="history-dot"></div>
       <div class="history-info">
-        <div class="history-date">${fmtGreg({year:gy,month:gm,day:gd})} | עונת ${onahLabel(e.onah)}</div>
-        <div class="history-sub">${e.heb0 ? fmtHeb(e.heb0) : ''}${special}</div>
+        <div class="history-date">${fmtGreg({year:gy,month:gm,day:gd})} | עונת ${onahLabel(e.onah)}${noteIcon}</div>
+        <div class="history-sub">${e.heb0 ? fmtHeb(e.heb0) : ''}${special}${e.note ? `<br><span style="font-size:12px;color:var(--ink-soft);">${e.note}</span>` : ''}</div>
       </div>
       <div style="color:var(--ink-soft);font-size:18px">‹</div>
     </div>`;
@@ -1879,7 +1902,40 @@ function editEntry(id) {
       <div style="padding:8px 0;border-bottom:1px solid var(--rose-pale);font-size:13px;color:var(--ink-soft);">
         ${r.icon} <strong>${r.name}</strong>: ${r.greg ? fmtGreg(r.greg) : ''} | ${r.onah ? onahLabel(r.onah) : ''}
       </div>`).join('')}`;
+  document.getElementById('edit-note').value = e.note || '';
   document.getElementById('modal-edit').classList.add('open');
+}
+
+function toggleNoteField() {
+  const field = document.getElementById('note-field');
+  const btn   = document.getElementById('btn-add-note');
+  if (!field) return;
+  const open = field.style.display === 'none';
+  field.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '✕ ביטול' : '📝 הוספת הערה לראיה זו';
+  if (open) document.getElementById('result-note')?.focus();
+}
+
+function saveResultNote() {
+  const note = document.getElementById('result-note')?.value.trim() || '';
+  const last = [...appState.history].sort((a,b)=>a.date<b.date?1:-1)[0];
+  if (!last) return;
+  last.note = note;
+  saveState();
+  const btn = document.getElementById('btn-add-note');
+  if (btn) btn.textContent = note ? '📝 ערכי הערה' : '📝 הוספת הערה לראיה זו';
+  document.getElementById('note-field').style.display = 'none';
+  showToast(note ? 'ההערה נשמרה ✓' : 'ההערה נמחקה ✓');
+}
+
+function saveNote() {
+  const entry = appState.history.find(x => x.id == editingId);
+  if (!entry) return;
+  entry.note = document.getElementById('edit-note').value.trim();
+  saveState();
+  closeModal('modal-edit');
+  renderHistory();
+  showToast('ההערה נשמרה ✓');
 }
 function deleteEntry() {
   if (!editingId) return;
@@ -2237,7 +2293,9 @@ function addToGoogleCalendar(results) {
     return ONAH_TITLES[r.type] || r.name;
   };
   const REMINDER_TEXT = '\n\nיש לבצע בדיקה ולנהוג על פי דיני ימי הפרישה\nאפליקציית לוח הטהרה: https://did.li/Onot-app';
-  const detailsFor = (r) => `${r.name} | ${r.desc}${REMINDER_TEXT}`;
+  const lastEntry = [...appState.history].sort((a,b)=>a.date<b.date?1:-1)[0];
+  const noteText  = lastEntry?.note ? `\n\nהערה: ${lastEntry.note}` : '';
+  const detailsFor = (r) => `${r.name} | ${r.desc}${REMINDER_TEXT}${noteText}`;
 
   const husbandParam = (appState.settings.husband && appState.settings.husbandEmail)
     ? `&add=${encodeURIComponent(appState.settings.husbandEmail)}` : '';
