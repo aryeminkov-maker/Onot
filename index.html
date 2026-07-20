@@ -1348,20 +1348,17 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
   if (prevDateStr && prevOnah) {
     const [py, pm, pd] = prevDateStr.split('-').map(Number);
 
-    // ספירת עונות — "יום הראיה עולה לכאן ולכאן"
-    // כל יום לועזי = 2 עונות (יום=0, לילה=1)
-    const idx1 = HebCal.gregToAbs(py,pm,pd)*2 + (prevOnah==='layla'?1:0);
-    const idx2 = abs0*2                         + (onah    ==='layla'?1:0);
-    const totalOnahs  = idx2 - idx1 + 1;  // כולל שתי הקצוות
-    const haflagaDays = Math.ceil(totalOnahs / 2);
-    const haflagaOnah = totalOnahs % 2 === 1 ? onah : oppOnah(onah);
+    // ימים עבריים — לילה = יום עברי הבא (+1)
+    // "יום הראיה עולה לכאן ולכאן" = ספירה כוללת שני הקצוות
+    const hebCur  = abs0 + (onah     === 'layla' ? 1 : 0);
+    const hebPrev = HebCal.gregToAbs(py, pm, pd) + (prevOnah === 'layla' ? 1 : 0);
+    const haflagaDays = hebCur - hebPrev + 1;
+    const haflagaOnah = onah; // אותה עונה תמיד
 
-    // תאריך לועזי של עונת ההפלגה
-    // מוסיפים haflagaDays-1 ימים לועזיים לתאריך הלועזי הנוכחי
-    // (אם עונת ההפלגה היא לילה ועונת הנוכחית ביום, מוסיפים עוד -1)
-    const offsetExtra = (onah==='yom' && haflagaOnah==='layla') ? 0
-                      : (onah==='layla' && haflagaOnah==='yom') ? -1 : 0;
-    const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaDays - 1 + offsetExtra);
+    // תאריך לועזי: מוסיפים haflagaDays-1 ימים לתאריך הנוכחי
+    // אם עונת ההפלגה היא לילה — הלילה מתרחש בתאריך לועזי שלפניו
+    const haflagaGregOffset = haflagaDays - 1 - (onah === 'layla' ? 1 : 0);
+    const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaGregOffset);
     const haflaga_heb  = HebCal.gregToHeb(haflaga_greg.year, haflaga_greg.month, haflaga_greg.day);
 
     const haflagaNote = `הפרש של ${haflagaDays} ימים — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
@@ -1802,7 +1799,9 @@ function renderCycleGraph() {
   for (let i=1; i<sorted.length; i++) {
     const [ay,am,ad] = sorted[i-1].date.split('-').map(Number);
     const [by,bm,bd] = sorted[i].date.split('-').map(Number);
-    intervals.push(HebCal.gregToAbs(by,bm,bd) - HebCal.gregToAbs(ay,am,ad));
+    const heb1 = HebCal.gregToAbs(ay,am,ad) + (sorted[i-1].onah==='layla'?1:0);
+    const heb2 = HebCal.gregToAbs(by,bm,bd) + (sorted[i  ].onah==='layla'?1:0);
+    intervals.push(heb2 - heb1 + 1);
   }
 
   const canvas = document.getElementById('cycle-chart');
@@ -2649,11 +2648,14 @@ function computeChashashDates(reiyot) {
   // 2.3 הפלגה — דורש לפחות 2 ראיות (סעיף יב)
   if (reiyot.length >= 2) {
     const prev = reiyot[reiyot.length-2];
-    const gap  = last.absDate - prev.absDate + 1; // "יום הראיה עולה לכאן ולכאן" (סעיף יג)
+    const hebLast = last.absDate + (last.onah==='layla'?1:0);
+    const hebPrev = prev.absDate + (prev.onah==='layla'?1:0);
+    const gap = hebLast - hebPrev + 1;
+    const haflagaOnah = last.onah;
     dates.push({
-      absDate: last.absDate + gap - 1, // gap כולל יום הראיה, לכן אחסור 1 בהוספה
+      absDate: last.absDate + gap - 1,
       reasonType: 'haflaga',
-      onah: last.onah,
+      onah: haflagaOnah,
       blocksIfUnchecked: false,
       requiresPriorOnah: false,
       label: `עונת ההפלגה — הפרש ${gap} ימים`,
@@ -2684,7 +2686,11 @@ function onNewReiya(reiyot, prevChashashDates) {
 function checkHaflagaEstablished(reiyot) {
   if (reiyot.length < 4) return { established: false };
   const last4 = reiyot.slice(-4);
-  const gaps = [1,2,3].map(i => last4[i].absDate - last4[i-1].absDate);
+  const gaps = [1,2,3].map(i => {
+    const heb1 = last4[i-1].absDate + (last4[i-1].onah==='layla'?1:0);
+    const heb2 = last4[i  ].absDate + (last4[i  ].onah==='layla'?1:0);
+    return heb2 - heb1 + 1;
+  });
   if (gaps[0] === gaps[1] && gaps[1] === gaps[2]) {
     return { established: true, value: gaps[0], consecutiveMatches: 3 };
   }
@@ -2711,7 +2717,11 @@ function checkShavuaEstablished(reiyot) {
   const last3 = reiyot.slice(-3);
   const dow0 = last3[0].dowJS;
   if (!last3.every(r => r.dowJS === dow0)) return { established: false };
-  const gaps = [1,2].map(i => last3[i].absDate - last3[i-1].absDate);
+  const gaps = [1,2].map(i => {
+    const heb1 = last3[i-1].absDate + (last3[i-1].onah==='layla'?1:0);
+    const heb2 = last3[i  ].absDate + (last3[i  ].onah==='layla'?1:0);
+    return heb2 - heb1 + 1;
+  });
   if (gaps.every(g => g % 7 === 0)) {
     return { established: true, value: dow0, consecutiveMatches: 3 };
   }
@@ -2727,7 +2737,11 @@ function checkDilugEstablished(reiyot, type) {
     vals = last4.map(r => r.heb.day);
   } else { // haflaga
     vals = [];
-    for(let i=1;i<last4.length;i++) vals.push(last4[i].absDate - last4[i-1].absDate);
+    for(let i=1;i<last4.length;i++) {
+      const heb1 = last4[i-1].absDate + (last4[i-1].onah==='layla'?1:0);
+      const heb2 = last4[i  ].absDate + (last4[i  ].onah==='layla'?1:0);
+      vals.push(heb2 - heb1 + 1);
+    }
     if (vals.length < 3) return { chashashOnly: false };
   }
   const deltas = [];
@@ -2787,8 +2801,13 @@ function getVesetStatus(history) {
   const serugRes   = checkSerugEstablished(reiyot);
 
   // --- הפלגה פשוטה ---
+  // חישוב הפרשים לפי ימים עבריים (לילה = יום עברי הבא) + "יום הראיה עולה לכאן ולכאן"
   const intervals = [];
-  for(let i=1;i<reiyot.length;i++) intervals.push(reiyot[i].absDate - reiyot[i-1].absDate);
+  for(let i=1;i<reiyot.length;i++) {
+    const heb1 = reiyot[i-1].absDate + (reiyot[i-1].onah==='layla'?1:0);
+    const heb2 = reiyot[i  ].absDate + (reiyot[i  ].onah==='layla'?1:0);
+    intervals.push(heb2 - heb1 + 1);
+  }
   const intervalGroups = {};
   intervals.forEach((d,i) => { if(!intervalGroups[d]) intervalGroups[d]=[]; intervalGroups[d].push(i); });
   Object.entries(intervalGroups).forEach(([days,idxs]) => {
@@ -2929,39 +2948,42 @@ function getVesetStatus(history) {
 function checkChatziKavua() {
   const h = appState.history.filter(e => e.specialType !== 'special')
     .sort((a,b) => a.date < b.date ? -1 : 1);
-  if (h.length < 4) return null; // צריך לפחות 4 ראיות (3 הפרשים)
+  if (h.length < 3) return null; // צריך לפחות 3 ראיות (2 הפרשים)
 
-  // חשב הפרשים בין ראיות עבריות
+  // חשב הפרשים בימים עבריים (לילה = יום עברי הבא)
   const intervals = [];
   for (let i = 1; i < h.length; i++) {
     const [ay,am,ad] = h[i-1].date.split('-').map(Number);
     const [by,bm,bd] = h[i].date.split('-').map(Number);
-    intervals.push(HebCal.gregToAbs(by,bm,bd) - HebCal.gregToAbs(ay,am,ad));
+    const heb1 = HebCal.gregToAbs(ay,am,ad) + (h[i-1].onah==='layla'?1:0);
+    const heb2 = HebCal.gregToAbs(by,bm,bd) + (h[i  ].onah==='layla'?1:0);
+    intervals.push(heb2 - heb1 + 1);
   }
 
-  // בדוק את 3 ההפרשים האחרונים
-  const last3 = intervals.slice(-3);
+  const last3 = intervals.slice(-Math.min(3, intervals.length));
   const allBelow28 = last3.length >= 2 && last3.every(d => d < 28);
   const allFrom32  = last3.length >= 2 && last3.every(d => d >= 32);
 
   if (!allBelow28 && !allFrom32) return null;
 
-  // חשב תאריך ההפלגה הבא
+  // חשב תאריך ההפלגה הבא (לפי אותה נוסחה)
   const lastEntry = h[h.length - 1];
   const prevEntry = h[h.length - 2];
   const [ly,lm,ld] = lastEntry.date.split('-').map(Number);
   const [py,pm,pd] = prevEntry.date.split('-').map(Number);
-  const haflagaDays = HebCal.gregToAbs(ly,lm,ld) - HebCal.gregToAbs(py,pm,pd);
-  const haflagaAbs  = HebCal.gregToAbs(ly,lm,ld) + haflagaDays;
-  const haflagaGreg = HebCal.absToGreg(haflagaAbs);
-  const haflagaHeb  = HebCal.gregToHeb(haflagaGreg.year, haflagaGreg.month, haflagaGreg.day);
+  const hebLast = HebCal.gregToAbs(ly,lm,ld) + (lastEntry.onah==='layla'?1:0);
+  const hebPrev = HebCal.gregToAbs(py,pm,pd) + (prevEntry.onah==='layla'?1:0);
+  const haflagaDays = hebLast - hebPrev + 1;
+
+  // תאריך לועזי של עונת ההפלגה הבאה
+  const lastGregAbs  = HebCal.gregToAbs(ly,lm,ld);
+  const gregOffset   = haflagaDays - 1 - (lastEntry.onah==='layla'?1:0);
+  const haflagaGreg  = HebCal.absToGreg(lastGregAbs + gregOffset);
+  const haflagaHeb   = HebCal.gregToHeb(haflagaGreg.year, haflagaGreg.month, haflagaGreg.day);
 
   return {
     side: allBelow28 ? 'below' : 'above',
-    last3,
-    haflagaDays,
-    haflagaGreg,
-    haflagaHeb,
+    last3, haflagaDays, haflagaGreg, haflagaHeb,
     lastOnah: lastEntry.onah
   };
 }
@@ -3037,8 +3059,8 @@ function checkCyclesAfterCalculate() {
   // הצג חלונית רק כשיש מחזוריות ממשית — לא רק תאריכי חשש בסיסיים
   const filtered = status.findings.filter(f => {
     if (f.type === 'kavua_haflaga' || f.type === 'kavua_hodesh') return n >= 4;
-    if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 3;
-    if (f.type === 'dilog') return n >= 4;
+    if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 4; // צריך 3 הפרשים = 4 ראיות
+    if (f.type === 'dilog') return n >= 5;
     return false;
   });
 
@@ -3057,8 +3079,8 @@ function analyzeCycles() {
   // סנן לפי מספר ראיות
   const filtered = status.findings.filter(f => {
     if (f.type === 'kavua_haflaga' || f.type === 'kavua_hodesh') return n >= 4;
-    if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 3;
-    if (f.type === 'dilog') return n >= 4;
+    if (['haflaga','hodesh','shavua','serug'].includes(f.type)) return n >= 4;
+    if (f.type === 'dilog') return n >= 5;
     return true;
   });
   showVesetModal({ ...status, findings: filtered }, true);
