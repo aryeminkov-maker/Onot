@@ -192,6 +192,53 @@
   </div>
 </div>
 
+<!-- LOCK SCREEN -->
+<div id="lock-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--rose);flex-direction:column;align-items:center;justify-content:center;padding:30px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <div style="font-size:48px;margin-bottom:12px;">🔐</div>
+    <div style="font-size:26px;font-weight:700;color:#fff;margin-bottom:6px;">לוח הטהרה</div>
+    <div style="font-size:14px;color:#F0D0D8;">הכניסי סיסמא להמשך</div>
+  </div>
+  <div style="width:100%;max-width:320px;">
+    <input type="password" id="lock-input" class="form-input"
+      placeholder="סיסמא..."
+      autocomplete="current-password"
+      style="text-align:center;font-size:18px;letter-spacing:4px;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')submitLock()">
+    <div id="lock-error" style="display:none;color:#FFD0D8;font-size:13px;text-align:center;margin-bottom:10px;"></div>
+    <button class="btn-primary" onclick="submitLock()"
+      style="width:100%;background:#fff;color:var(--rose);font-size:16px;margin-bottom:16px;">
+      כניסה
+    </button>
+    <button onclick="showForgotPassword()"
+      style="background:none;border:none;color:#F0D0D8;font-size:13px;cursor:pointer;width:100%;text-align:center;text-decoration:underline;">
+      שכחתי סיסמא
+    </button>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD SCREEN -->
+<div id="forgot-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--rose);flex-direction:column;align-items:center;justify-content:center;padding:30px;">
+  <div style="width:100%;max-width:320px;">
+    <div style="font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px;">שחזור סיסמא</div>
+    <div id="forgot-question" style="font-size:14px;color:#F0D0D8;text-align:center;margin-bottom:20px;"></div>
+    <input type="text" id="forgot-answer" class="form-input"
+      placeholder="תשובתך..."
+      autocomplete="off"
+      style="text-align:center;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')submitForgot()">
+    <div id="forgot-error" style="display:none;color:#FFD0D8;font-size:13px;text-align:center;margin-bottom:10px;"></div>
+    <button class="btn-primary" onclick="submitForgot()"
+      style="width:100%;background:#fff;color:var(--rose);font-size:16px;margin-bottom:12px;">
+      אימות
+    </button>
+    <button onclick="hideForgotPassword()"
+      style="background:none;border:none;color:#F0D0D8;font-size:13px;cursor:pointer;width:100%;text-align:center;">
+      חזרה
+    </button>
+  </div>
+</div>
+
 <!-- PAGE: HOME -->
 <div class="page active" id="page-home" role="main" id="main-content">
   <div class="page-header" style="position:relative;">
@@ -310,7 +357,7 @@
   <!-- 0. כללי -->
   <div class="card">
     <div class="card-title">כללי</div>
-    <div class="settings-item" style="border-bottom:none;">
+    <div class="settings-item">
       <div>
         <div class="settings-label">סגנון כיתוב</div>
         <div class="settings-desc">משפיע על התראות ביומן Google ובאפליקציה</div>
@@ -319,6 +366,13 @@
         <option value="text">טקסט מלא</option>
         <option value="emoji">פרחים 🌸🌼🌺🌷</option>
       </select>
+    </div>
+    <div class="settings-item" style="border-bottom:none;">
+      <div>
+        <div class="settings-label">🩸 שמירת יום הראיה ביומן</div>
+        <div class="settings-desc">הוספת אירוע ליום הראיה עצמה (בסגנון פרחים — יופיע כ-🩸)</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggle-raiya-gcal"><span class="slider"></span></label>
     </div>
   </div>
 
@@ -443,6 +497,48 @@
     </div>
   </div>
 
+  <!-- 6. סיסמת כניסה -->
+  <div class="card">
+    <div class="card-title">🔐 סיסמת כניסה</div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label">הפעלת סיסמת כניסה</div>
+        <div class="settings-desc">הסיסמא תידרש בכל פתיחה של האפליקציה</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggle-password" onchange="onPasswordToggle(this.checked)"><span class="slider"></span></label>
+    </div>
+    <div id="password-setup-area" style="display:none;padding:0 20px 16px;">
+      <div style="background:#FFF8E7;border:1px solid #F0D98B;border-radius:10px;padding:10px 12px;font-size:12px;color:#7A6020;margin-bottom:14px;line-height:1.7;">
+        ⚠️ <strong>שים לב:</strong> אין אפשרות לשחזר סיסמא שנשכחה — אלא באמצעות שאלת האבטחה שתגדיר למטה. שמרי את הסיסמא במקום בטוח.
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">סיסמא חדשה</label>
+        <input type="password" id="new-password" class="form-input" placeholder="הכניסי סיסמא..." autocomplete="new-password">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">אימות סיסמא</label>
+        <input type="password" id="confirm-password" class="form-input" placeholder="הכניסי שוב..." autocomplete="new-password">
+      </div>
+      <div style="margin-bottom:6px;font-size:13px;font-weight:600;color:var(--ink);">שאלת אבטחה לשחזור:</div>
+      <select id="security-question" class="form-input" style="margin-bottom:10px;">
+        <option value="mother">שם הפרטי של אמא שלך</option>
+        <option value="birth_city">עיר הלידה שלך</option>
+        <option value="pet">שם החיה הראשונה שלך</option>
+        <option value="school">שם בית הספר היסודי שלמדת בו</option>
+      </select>
+      <div class="form-group" style="margin-bottom:14px;">
+        <input type="text" id="security-answer" class="form-input" placeholder="תשובה..." autocomplete="off">
+      </div>
+      <button class="btn-primary" onclick="savePassword()">שמירת סיסמא</button>
+    </div>
+    <div id="password-change-area" style="display:none;padding:0 20px 16px;">
+      <div style="display:flex;gap:10px;">
+        <button class="btn-secondary" onclick="showChangePassword()" style="flex:1;">שינוי סיסמא</button>
+        <button class="btn-secondary" onclick="removePassword()" style="flex:1;color:#C0392B;border-color:#C0392B;">הסרת סיסמא</button>
+      </div>
+    </div>
+  </div>
+
   <div class="card" style="margin-top:0;"><button class="btn-primary" onclick="saveSettings()">שמירת הגדרות</button></div>
 </div>
 
@@ -480,17 +576,17 @@
     </p>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
       <strong>שלושה תאריכי חשש אחרי כל ראיה:</strong><br>
-      • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, **כולל יום הראיה** (סעיף י, יג: "יום הראיה עולה לכאן ולכאן"). דין חמור.<br>
-      • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. אם ראתה ב-ל' וחודש הבא חסר — עונת החודש היא א' לחודש שאחריו (סעיף יא).<br>
-      • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות כולל שני ימי הראיה (סעיף יב-יג).
+      • <strong>עונה בינונית</strong> — יום 30 עברי מדויק, **כולל יום הראיה** (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף י, יג</a>: "יום הראיה עולה לכאן ולכאן"). דין חמור.<br>
+      • <strong>עונת החודש</strong> — אותו יום עברי בחודש הבא. אם ראתה ב-ל' וחודש הבא חסר — עונת החודש היא א' לחודש שאחריו (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף יא</a>).<br>
+      • <strong>עונת ההפלגה</strong> — הפרש ימים בין שתי הראיות כולל שני ימי הראיה (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף יב-יג</a>).
     </p>
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:8px;">
       <strong>זיהוי וסת קבוע (מ-4 ראיות ומעלה):</strong><br>
-      • <strong>הפלגה</strong> — 3 הפרשים שווים רצופים (סעיף לא).<br>
-      • <strong>חודש</strong> — 3 ראיות רצופות באותו יום עברי (סעיף לח).<br>
-      • <strong>שבוע</strong> — 3 ראיות באותו יום בשבוע (סעיף מב).<br>
-      • <strong>דילוג</strong> — יום החודש עולה/יורד בדלתא קבועה (סעיף מה).<br>
-      • <strong>סירוג</strong> — יום קבוע + מרווח חודשים קבוע (סעיף נט).
+      • <strong>הפלגה</strong> — 3 הפרשים שווים רצופים (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף לא</a>).<br>
+      • <strong>חודש</strong> — 3 ראיות רצופות באותו יום עברי (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף לח</a>).<br>
+      • <strong>שבוע</strong> — 3 ראיות באותו יום בשבוע (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף מב</a>).<br>
+      • <strong>דילוג</strong> — יום החודש עולה/יורד בדלתא קבועה (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף מה</a>).<br>
+      • <strong>סירוג</strong> — יום קבוע + מרווח חודשים קבוע (<a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">סעיף נט</a>).
     </p>
     <p style="font-size:12px;color:#aaa;line-height:1.6;">הכלי אינו תחליף לפסיקת רב. בכל שאלה הלכתית יש לפנות לרב המשפחה.</p>
   </div>
@@ -534,7 +630,7 @@
       <br>• <strong>חודש לועזי</strong> — תאריך לועזי קבוע (נתון במחלוקת)
       <br>ממצאים הנתונים במחלוקת הפוסקים מסומנים בכתום עם הסבר והנחיה לשאול רב.
       <br><br>
-      <strong>ווסת חצי קבוע</strong> — אחרי 3 ראיות שכולן מחוץ לטווח 28-31 ימים (כולן פחות מ-28, או כולן 32 ומעלה), תקפוץ התראה מיוחדת על דין ווסת חצי קבוע (דרכי טהרה פרק ז' סעיפים י"ז–י"ט) — כולל הסבר שאין צורך לחשוש לבינונית ולחודש, אך יש לחשוש לעונת ההפלגה ותאריכה.
+      <strong>ווסת חצי קבוע</strong> — אחרי 3 ראיות שכולן מחוץ לטווח 28-31 ימים (כולן פחות מ-28, או כולן 32 ומעלה), תקפוץ התראה מיוחדת על דין ווסת חצי קבוע (דרכי טהרה <a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">פרק ז' סעיפים י"ז–י"ט</a>) — כולל הסבר שאין צורך לחשוש לבינונית ולחודש, אך יש לחשוש לעונת ההפלגה ותאריכה.
       <br><br>
 
       <p style="font-weight:600;color:var(--ink);margin-bottom:4px;">⚙️ הגדרות</p>
@@ -715,8 +811,8 @@
 
     <div style="background:var(--rose-pale);border-radius:10px;padding:12px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;">
       <strong>משותף לשתי השיטות:</strong><br>
-      • עונה בינונית — חמורה ביותר; אם עברה ולא בדקה — אסורה עד שתבדוק (ו:יא)<br>
-      • יום חודש והפלגה — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)
+      • עונה בינונית — חמורה ביותר; אם עברה ולא בדקה — אסורה עד שתבדוק (<a href="https://harav.org/books/darcitaara-6/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">ו:יא</a>)<br>
+      • יום חודש והפלגה — בדיעבד אם לא בדקה ולא ראתה — מותרת (<a href="https://harav.org/books/darcitaara-6/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">ו:יא</a>)
     </div>
 
     <button class="btn-primary" onclick="closeModal('modal-shita-info')">הבנתי</button>
@@ -748,6 +844,60 @@
       ניתן ללמוד בהרחבה על הלכות פרישה סמוך לוסת בספרי ההלכה השונים.
     </p>
     <button class="btn-primary" onclick="document.getElementById('modal-prisha-info').classList.remove('open')">הבנתי</button>
+  </div>
+</div>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--rose);flex-direction:column;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:24px;padding:32px 28px;width:min(340px,90vw);box-shadow:0 8px 40px rgba(0,0,0,.2);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:8px;">🔐</div>
+      <div style="font-size:20px;font-weight:700;color:var(--ink);">לוח הטהרה</div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-top:4px;">הכניסי סיסמא להמשך</div>
+    </div>
+    <input type="password" id="lock-input" class="form-input" placeholder="סיסמא..." autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')checkPassword()"
+      style="margin-bottom:12px;text-align:center;font-size:18px;letter-spacing:4px;">
+    <div id="lock-error" style="display:none;color:#C0392B;font-size:12px;text-align:center;margin-bottom:8px;"></div>
+    <button class="btn-primary" onclick="checkPassword()" style="width:100%;margin-bottom:12px;">כניסה</button>
+    <button onclick="showForgotPassword()" style="background:none;border:none;color:var(--rose);font-size:12px;cursor:pointer;font-family:inherit;width:100%;text-align:center;">שכחתי סיסמא</button>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-forgot-password" role="dialog" aria-modal="true" aria-label="שחזור סיסמא" onclick="if(event.target===this)closeModal('modal-forgot-password')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">שחזור סיסמא</div>
+    <div id="forgot-q-area">
+      <p id="forgot-question-text" style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:10px;"></p>
+      <input type="text" id="forgot-answer" class="form-input" placeholder="תשובה..." autocomplete="off" style="margin-bottom:14px;">
+      <div id="forgot-error" style="display:none;color:#C0392B;font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn-primary" onclick="checkSecurityAnswer()" style="width:100%;">אימות</button>
+    </div>
+    <div id="forgot-reset-area" style="display:none;">
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">התשובה נכונה! הגדירי סיסמא חדשה:</p>
+      <input type="password" id="reset-new-password" class="form-input" placeholder="סיסמא חדשה..." style="margin-bottom:10px;">
+      <input type="password" id="reset-confirm-password" class="form-input" placeholder="אימות..." style="margin-bottom:14px;">
+      <div id="reset-error" style="display:none;color:#C0392B;font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn-primary" onclick="resetPassword()" style="width:100%;">שמירת סיסמא חדשה</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-change-password" role="dialog" aria-modal="true" aria-label="שינוי סיסמא" onclick="if(event.target===this)closeModal('modal-change-password')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">שינוי סיסמא</div>
+    <input type="password" id="change-current" class="form-input" placeholder="סיסמא נוכחית..." style="margin-bottom:10px;" autocomplete="current-password">
+    <input type="password" id="change-new" class="form-input" placeholder="סיסמא חדשה..." style="margin-bottom:10px;" autocomplete="new-password">
+    <input type="password" id="change-confirm" class="form-input" placeholder="אימות סיסמא חדשה..." style="margin-bottom:14px;" autocomplete="new-password">
+    <div id="change-error" style="display:none;color:#C0392B;font-size:12px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary" onclick="closeModal('modal-change-password')" style="flex:1;">ביטול</button>
+      <button class="btn-primary" onclick="doChangePassword()" style="flex:1;">שמירה</button>
+    </div>
   </div>
 </div>
 
@@ -1301,6 +1451,12 @@ const HebCal = {
 // ════════════════════════════════════════════════════════
 // HELPERS
 // ════════════════════════════════════════════════════════
+// קישור למקור בדרכי טהרה באתר harav.org (לפרק המדויק; אין עוגנים פר-סעיף באתר)
+const DT_URL = { 'ו': 'https://harav.org/books/darcitaara-6/', 'ז': 'https://harav.org/books/darcitaara-7/' };
+function dtLink(chapter, text) {
+  const url = DT_URL[chapter] || DT_URL['ז'];
+  return `<a href="${url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-style:dotted;">${text}</a>`;
+}
 function onahLabel(o) { return o === 'yom' ? 'יום' : 'לילה'; }
 function oppOnah(o)   { return o === 'yom' ? 'layla' : 'yom'; }
 function fmtGreg(g)   { return `${String(g.day).padStart(2,'0')}/${String(g.month).padStart(2,'0')}/${g.year}`; }
@@ -1327,7 +1483,7 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
   if (!skipBeinonit && specialType !== 'special') {
     const beinonit_heb  = HebCal.addDaysToHeb(heb0.year, heb0.month, heb0.day, 29);
     const beinonit_greg = HebCal.hebToGreg(beinonit_heb.year, beinonit_heb.month, beinonit_heb.day);
-    const beinonitNote = 'יום 30 — חמורה ביותר; אם עברה ולא בדקה — אסורה עד בדיקה (ו:יא)';
+    const beinonitNote = `יום 30 — חמורה ביותר; אם עברה ולא בדקה — אסורה עד בדיקה ${dtLink('ו','(ו:יא)')}`;
     results.push({ type:'beinonit', name:'עונה בינונית', desc: beinonitNote,
       icon:'📅', onah, heb:beinonit_heb, greg:beinonit_greg, color:'rose' });
   }
@@ -1338,8 +1494,8 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
     const hodesh_heb  = HebCal.nextMonthDate(heb0.year, heb0.month, heb0.day);
     const hodesh_greg = HebCal.hebToGreg(hodesh_heb.year, hodesh_heb.month, hodesh_heb.day);
     const hodeshNote = hodesh_heb.roshChodesh
-          ? `א' ${HebCal.monthName(hodesh_heb.month,hodesh_heb.year)} — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`
-          : `יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''} — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
+          ? `א' ${HebCal.monthName(hodesh_heb.month,hodesh_heb.year)} — בדיעבד אם לא בדקה ולא ראתה — מותרת ${dtLink('ו','(ו:יא)')}`
+          : `יום ${heb0.day} בחודש הבא${hodesh_heb.capped ? ' (חודש חסר)' : ''} — בדיעבד אם לא בדקה ולא ראתה — מותרת ${dtLink('ו','(ו:יא)')}`;
     results.push({ type:'hodesh', name:'עונת החודש', desc: hodeshNote,
       icon:'🌙', onah, heb:hodesh_heb, greg:hodesh_greg, color:'gold' });
   }
@@ -1361,7 +1517,7 @@ function calcPrishut(dateStr, onah, specialType, prevDateStr, prevOnah, includeO
     const haflaga_greg = HebCal.addDaysToGreg(gy, gm, gd, haflagaGregOffset);
     const haflaga_heb  = HebCal.gregToHeb(haflaga_greg.year, haflaga_greg.month, haflaga_greg.day);
 
-    const haflagaNote = `הפרש של ${haflagaDays} ימים — בדיעבד אם לא בדקה ולא ראתה — מותרת (ו:יא)`;
+    const haflagaNote = `הפרש של ${haflagaDays} ימים — בדיעבד אם לא בדקה ולא ראתה — מותרת ${dtLink('ו','(ו:יא)')}`;
 
     results.push({ type:'haflaga', name:'עונת ההפלגה', desc: haflagaNote,
       icon:'📏', onah:haflagaOnah, heb:haflaga_heb, greg:haflaga_greg, color:'green' });
@@ -1443,6 +1599,8 @@ function applySettings() {
   document.getElementById('toggle-husband').checked = appState.settings.husband;
   document.getElementById('husband-email').value    = appState.settings.husbandEmail || '';
   document.getElementById('toggle-orzarua').checked = appState.settings.orZarua !== false;
+  const raiyaTog = document.getElementById('toggle-raiya-gcal');
+  if (raiyaTog) raiyaTog.checked = !!appState.settings.saveRaiyaInGcal;
   if (appState.settings.husband) document.getElementById('husband-email-group').style.display = 'block';
   if (appState.settings.notif)  { document.getElementById('notif-install-tip').style.display = 'block'; }
 
@@ -1456,6 +1614,14 @@ function applySettings() {
   document.getElementById('toggle-mesulaket').checked = !!mes;
   document.getElementById('mesulaket-type-row').style.display = mes ? 'block' : 'none';
   if (mes) document.getElementById('mesulaket-type').value = mes;
+  // סיסמת כניסה
+  const hasPw = !!localStorage.getItem('app_pw_hash');
+  const pwTog = document.getElementById('toggle-password');
+  if (pwTog) {
+    pwTog.checked = hasPw;
+    document.getElementById('password-change-area').style.display = hasPw ? 'block' : 'none';
+    document.getElementById('password-setup-area').style.display  = 'none';
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -2149,6 +2315,7 @@ function saveSettings() {
     orZarua:        document.getElementById('toggle-orzarua').checked,
     halachaMethod:  document.querySelector('input[name="halacha-method"]:checked')?.value || 'darchei',
     mesulaket:      mesOn ? (document.getElementById('mesulaket-type').value || 'herayon') : false,
+    saveRaiyaInGcal: document.getElementById('toggle-raiya-gcal')?.checked || false,
   };
   saveState(); showToast('ההגדרות נשמרו ✓');
 }
@@ -2190,7 +2357,270 @@ function openModal(id) {
 }
 
 // ════════════════════════════════════════════════════════
-// HALACHA METHOD
+// PASSWORD / LOCK SCREEN
+// ════════════════════════════════════════════════════════
+function hashStr(str) {
+  // Simple hash — not cryptographic, but sufficient for localStorage
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return h.toString(36);
+}
+
+function initLockScreen() {
+  const pwHash = localStorage.getItem('app_pw_hash');
+  if (!pwHash) return; // no password set
+  const lock = document.getElementById('lock-screen');
+  lock.style.display = 'flex';
+  setTimeout(() => document.getElementById('lock-input').focus(), 100);
+}
+
+function checkPassword() {
+  const input = document.getElementById('lock-input').value;
+  const stored = localStorage.getItem('app_pw_hash');
+  if (hashStr(input) === stored) {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-error').style.display = 'none';
+    sessionStorage.setItem('unlocked', '1');
+  } else {
+    const err = document.getElementById('lock-error');
+    err.textContent = 'סיסמא שגויה. נסי שנית.';
+    err.style.display = 'block';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').focus();
+  }
+}
+
+function showForgotPassword() {
+  const q = localStorage.getItem('app_pw_question') || 'mother';
+  const labels = { mother:'שם הפרטי של אמא שלך', birth_city:'עיר הלידה שלך', pet:'שם החיה הראשונה שלך', school:'שם בית הספר היסודי שלמדת בו' };
+  document.getElementById('forgot-question-text').textContent = labels[q] || labels['mother'];
+  document.getElementById('forgot-answer').value = '';
+  document.getElementById('forgot-error').style.display = 'none';
+  document.getElementById('forgot-q-area').style.display = 'block';
+  document.getElementById('forgot-reset-area').style.display = 'none';
+  document.getElementById('modal-forgot-password').classList.add('open');
+}
+
+function checkSecurityAnswer() {
+  const answer = document.getElementById('forgot-answer').value.trim().toLowerCase();
+  const stored  = localStorage.getItem('app_pw_answer_hash');
+  if (!answer) { showForgotErr('הכניסי תשובה'); return; }
+  if (hashStr(answer) === stored) {
+    document.getElementById('forgot-q-area').style.display = 'none';
+    document.getElementById('forgot-reset-area').style.display = 'block';
+  } else {
+    showForgotErr('תשובה שגויה');
+  }
+}
+
+function showForgotErr(msg) {
+  const e = document.getElementById('forgot-error');
+  e.textContent = msg; e.style.display = 'block';
+}
+
+function resetPassword() {
+  const p1 = document.getElementById('reset-new-password').value;
+  const p2 = document.getElementById('reset-confirm-password').value;
+  const err = document.getElementById('reset-error');
+  if (!p1 || p1.length < 4) { err.textContent='סיסמא חייבת להכיל לפחות 4 תווים'; err.style.display='block'; return; }
+  if (p1 !== p2) { err.textContent='הסיסמאות אינן תואמות'; err.style.display='block'; return; }
+  localStorage.setItem('app_pw_hash', hashStr(p1));
+  closeModal('modal-forgot-password');
+  document.getElementById('lock-screen').style.display = 'none';
+  sessionStorage.setItem('unlocked', '1');
+  showToast('הסיסמא עודכנה ✓');
+}
+
+function onPasswordToggle(on) {
+  document.getElementById('password-setup-area').style.display = on ? 'block' : 'none';
+  document.getElementById('password-change-area').style.display = 'none';
+  if (!on && localStorage.getItem('app_pw_hash')) {
+    if (confirm('האם להסיר את הסיסמא?')) {
+      localStorage.removeItem('app_pw_hash');
+      localStorage.removeItem('app_pw_answer_hash');
+      localStorage.removeItem('app_pw_question');
+      showToast('הסיסמא הוסרה');
+    } else {
+      document.getElementById('toggle-password').checked = true;
+      document.getElementById('password-change-area').style.display = 'block';
+      document.getElementById('password-setup-area').style.display = 'none';
+    }
+  }
+}
+
+function savePassword() {
+  const p1 = document.getElementById('new-password').value;
+  const p2 = document.getElementById('confirm-password').value;
+  const q  = document.getElementById('security-question').value;
+  const a  = document.getElementById('security-answer').value.trim().toLowerCase();
+  if (!p1 || p1.length < 4) { showToast('סיסמא חייבת להכיל לפחות 4 תווים'); return; }
+  if (p1 !== p2) { showToast('הסיסמאות אינן תואמות'); return; }
+  if (!a) { showToast('יש להכניס תשובה לשאלת האבטחה'); return; }
+  localStorage.setItem('app_pw_hash', hashStr(p1));
+  localStorage.setItem('app_pw_question', q);
+  localStorage.setItem('app_pw_answer_hash', hashStr(a));
+  document.getElementById('password-setup-area').style.display = 'none';
+  document.getElementById('password-change-area').style.display = 'block';
+  showToast('הסיסמא נשמרה ✓');
+}
+
+function removePassword() {
+  if (!confirm('האם להסיר את הסיסמא לגמרי?')) return;
+  localStorage.removeItem('app_pw_hash');
+  localStorage.removeItem('app_pw_answer_hash');
+  localStorage.removeItem('app_pw_question');
+  document.getElementById('toggle-password').checked = false;
+  document.getElementById('password-change-area').style.display = 'none';
+  showToast('הסיסמא הוסרה ✓');
+}
+
+function showChangePassword() {
+  ['change-current','change-new','change-confirm'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('change-error').style.display = 'none';
+  document.getElementById('modal-change-password').classList.add('open');
+}
+
+function doChangePassword() {
+  const cur = document.getElementById('change-current').value;
+  const p1  = document.getElementById('change-new').value;
+  const p2  = document.getElementById('change-confirm').value;
+  const err = document.getElementById('change-error');
+  if (hashStr(cur) !== localStorage.getItem('app_pw_hash')) {
+    err.textContent='הסיסמא הנוכחית שגויה'; err.style.display='block'; return;
+  }
+  if (!p1 || p1.length < 4) { err.textContent='סיסמא חייבת להכיל לפחות 4 תווים'; err.style.display='block'; return; }
+  if (p1 !== p2) { err.textContent='הסיסמאות אינן תואמות'; err.style.display='block'; return; }
+  localStorage.setItem('app_pw_hash', hashStr(p1));
+  closeModal('modal-change-password');
+  showToast('הסיסמא עודכנה ✓');
+}
+
+function initPasswordSettings() {
+  const hasPw = !!localStorage.getItem('app_pw_hash');
+  document.getElementById('toggle-password').checked = hasPw;
+  if (hasPw) {
+    document.getElementById('password-change-area').style.display = 'block';
+  }
+}
+// ════════════════════════════════════════════════════════
+// PASSWORD / LOCK
+// ════════════════════════════════════════════════════════
+function hashSimple(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  return h.toString(36);
+}
+
+function initLockScreen() {
+  const pwHash = localStorage.getItem('app_pw_hash');
+  if (!pwHash) return;
+  if (sessionStorage.getItem('unlocked') === '1') return;
+  const ls = document.getElementById('lock-screen');
+  ls.style.display = 'flex';
+  setTimeout(() => document.getElementById('lock-input').focus(), 200);
+}
+
+function submitLock() {
+  const input = document.getElementById('lock-input').value;
+  const stored = localStorage.getItem('app_pw_hash');
+  if (hashSimple(input) === stored) {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-error').style.display = 'none';
+    sessionStorage.setItem('unlocked', '1');
+  } else {
+    const err = document.getElementById('lock-error');
+    err.textContent = 'סיסמא שגויה. נסי שוב.';
+    err.style.display = 'block';
+    document.getElementById('lock-input').value = '';
+    document.getElementById('lock-input').focus();
+  }
+}
+
+function showForgotPassword() {
+  const q = localStorage.getItem('app_pw_q');
+  const labels = { mother:'שם הפרטי של אמא שלך', birth_city:'עיר הלידה שלך', pet:'שם החיה הראשונה שלך', school:'שם בית הספר היסודי שלמדת בו' };
+  document.getElementById('forgot-question').textContent = labels[q] || 'שאלת האבטחה שלך';
+  document.getElementById('lock-screen').style.display = 'none';
+  const fs = document.getElementById('forgot-screen');
+  fs.style.display = 'flex';
+  setTimeout(() => document.getElementById('forgot-answer').focus(), 100);
+}
+
+function hideForgotPassword() {
+  document.getElementById('forgot-screen').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('forgot-answer').value = '';
+  document.getElementById('forgot-error').style.display = 'none';
+}
+
+function submitForgot() {
+  const answer = document.getElementById('forgot-answer').value.trim().toLowerCase();
+  const stored  = localStorage.getItem('app_pw_qa');
+  if (hashSimple(answer) === stored) {
+    localStorage.removeItem('app_pw_hash');
+    localStorage.removeItem('app_pw_q');
+    localStorage.removeItem('app_pw_qa');
+    document.getElementById('forgot-screen').style.display = 'none';
+    sessionStorage.setItem('unlocked', '1');
+    showToast('הסיסמא הוסרה. הגדירי סיסמא חדשה בהגדרות.');
+    const tog = document.getElementById('toggle-password');
+    if (tog) { tog.checked = false; }
+    document.getElementById('password-setup-area').style.display = 'none';
+    document.getElementById('password-change-area').style.display = 'none';
+  } else {
+    const err = document.getElementById('forgot-error');
+    err.textContent = 'תשובה שגויה.';
+    err.style.display = 'block';
+    document.getElementById('forgot-answer').value = '';
+  }
+}
+
+function onPasswordToggle(on) {
+  const hasPw = !!localStorage.getItem('app_pw_hash');
+  document.getElementById('password-setup-area').style.display  = on && !hasPw ? 'block' : 'none';
+  document.getElementById('password-change-area').style.display = on && hasPw  ? 'block' : 'none';
+}
+
+function savePassword() {
+  const pw  = document.getElementById('new-password').value;
+  const pw2 = document.getElementById('confirm-password').value;
+  const q   = document.getElementById('security-question').value;
+  const ans = document.getElementById('security-answer').value.trim().toLowerCase();
+  if (!pw || pw.length < 4) { showToast('הסיסמא חייבת להכיל לפחות 4 תווים'); return; }
+  if (pw !== pw2)            { showToast('הסיסמאות אינן תואמות'); return; }
+  if (!ans)                  { showToast('יש למלא תשובה לשאלת האבטחה'); return; }
+  localStorage.setItem('app_pw_hash', hashSimple(pw));
+  localStorage.setItem('app_pw_q',    q);
+  localStorage.setItem('app_pw_qa',   hashSimple(ans));
+  sessionStorage.setItem('unlocked',  '1');
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+  document.getElementById('security-answer').value = '';
+  document.getElementById('password-setup-area').style.display  = 'none';
+  document.getElementById('password-change-area').style.display = 'block';
+  showToast('הסיסמא נשמרה ✓');
+}
+
+function showChangePassword() {
+  document.getElementById('password-change-area').style.display = 'none';
+  document.getElementById('password-setup-area').style.display  = 'block';
+}
+
+function removePassword() {
+  if (!confirm('האם למחוק את הסיסמא?')) return;
+  localStorage.removeItem('app_pw_hash');
+  localStorage.removeItem('app_pw_q');
+  localStorage.removeItem('app_pw_qa');
+  document.getElementById('toggle-password').checked = false;
+  document.getElementById('password-change-area').style.display = 'none';
+  document.getElementById('password-setup-area').style.display  = 'none';
+  showToast('הסיסמא הוסרה ✓');
+}
+
 // ════════════════════════════════════════════════════════
 var _pendingMethod = null;
 
@@ -2317,6 +2747,19 @@ function addToGoogleCalendar(results) {
     url:  makeUrl(r.greg, r.onah, titleFor(r), detailsFor(r)),
     name: r.name, icon: r.icon
   }));
+
+  // הוספת יום הראיה עצמה ביומן אם מופעל בהגדרות
+  if (appState.settings.saveRaiyaInGcal && lastEntry) {
+    const [gy,gm,gd] = lastEntry.date.split('-').map(Number);
+    const raiyaTitle  = style === 'emoji' ? '🩸' : 'יום הראיה';
+    const raiyaDesc   = `יום הראיה${lastEntry.note ? '\n\nהערה: ' + lastEntry.note : ''}\nאפליקציית לוח הטהרה: https://did.li/Onot-app`;
+    const raiyaOnah   = lastEntry.onah;
+    links.unshift({
+      url:  makeUrl({year:gy,month:gm,day:gd}, raiyaOnah, raiyaTitle, raiyaDesc),
+      name: raiyaTitle,
+      icon: '🩸'
+    });
+  }
 
   // Check for cycle predictions
   const findings = getCycleFindings();
@@ -2555,12 +2998,42 @@ function downloadIcs(items, titleFor, detailsFor) {
     ].join('\r\n');
   }).join('\r\n');
 
+  // הוספת יום הראיה ל-ICS אם מופעל
+  let raiyaEvent = '';
+  if (appState.settings.saveRaiyaInGcal) {
+    const lastEntry = [...appState.history].sort((a,b)=>a.date<b.date?1:-1)[0];
+    if (lastEntry) {
+      const [ry,rm,rd] = lastEntry.date.split('-').map(Number);
+      const style = appState.settings.calStyle || 'text';
+      const rTitle = style === 'emoji' ? '🩸' : 'יום הראיה';
+      const rOnah  = lastEntry.onah;
+      const yomTime   = (appState.settings.notifTimeYom   || '07:00').replace(':','');
+      const laylaTime = (appState.settings.notifTimeLayla || '19:00').replace(':','');
+      const startTime = rOnah === 'layla' ? laylaTime : yomTime;
+      const startH = parseInt(startTime.slice(0,2));
+      const endH   = String(startH+1).padStart(2,'0');
+      const startM = startTime.slice(2);
+      const pad = n => String(n).padStart(2,'0');
+      const dateStr = `${ry}${pad(rm)}${pad(rd)}`;
+      raiyaEvent = '\r\n' + [
+        'BEGIN:VEVENT',
+        `UID:veset-raiya-${dateStr}-${Date.now()}@luach-tahara`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART:${dateStr}T${startTime}00`,
+        `DTEND:${dateStr}T${endH}${startM}00`,
+        `SUMMARY:${escapeIcs(rTitle)}`,
+        `DESCRIPTION:${escapeIcs('יום הראיה\nאפליקציית לוח הטהרה: https://did.li/Onot-app')}`,
+        'END:VEVENT'
+      ].join('\r\n');
+    }
+  }
+
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Luach Tahara//HE',
     'CALSCALE:GREGORIAN',
-    events,
+    events + raiyaEvent,
     'END:VCALENDAR'
   ].join('\r\n');
 
@@ -2616,7 +3089,7 @@ function computeChashashDates(reiyot) {
     blocksIfUnchecked: true,
     requiresPriorOnah: true,
     label: 'עונה בינונית',
-    source: 'דרכי טהרה פ"ז סעיף י',
+    source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף י')}`,
     desc: 'יום 30 מהווסת האחרון — דין חמור כווסת קבוע'
   });
 
@@ -2641,7 +3114,7 @@ function computeChashashDates(reiyot) {
     blocksIfUnchecked: false,
     requiresPriorOnah: false,
     label: `עונת החודש — ${HebCal.dayLetters(yomHchodeshDay)} ${HebCal.monthName(yomHchodeshMonth, yomHchodeshYear)}`,
-    source: 'דרכי טהרה פ"ז סעיף יא',
+    source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף יא')}`,
     desc: 'אותו יום עברי בחודש הבא'
   });
 
@@ -2659,7 +3132,7 @@ function computeChashashDates(reiyot) {
       blocksIfUnchecked: false,
       requiresPriorOnah: false,
       label: `עונת ההפלגה — הפרש ${gap} ימים`,
-      source: 'דרכי טהרה פ"ז סעיף יב-יג',
+      source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף יב-יג')}`,
       desc: `${gap} ימים מהווסת האחרון`
     });
   }
@@ -2674,7 +3147,7 @@ function onNewReiya(reiyot, prevChashashDates) {
   if (oldYomHachodesh) {
     oldYomHachodesh.reasonType = 'yom_hachodesh_previous';
     oldYomHachodesh.label = oldYomHachodesh.label + ' (ישן)';
-    oldYomHachodesh.source += ' — נשמר בנפרד לאחר ראיה חדשה (סעיף טו)';
+    oldYomHachodesh.source += ` — נשמר בנפרד לאחר ראיה חדשה ${dtLink('ז','(סעיף טו)')}`;
   }
   const newDates = computeChashashDates(reiyot);
   return [...newDates, ...(oldYomHachodesh ? [oldYomHachodesh] : [])];
@@ -2816,7 +3289,7 @@ function getVesetStatus(history) {
       title: `הפלגה — ${days} ימים עבריים`,
       count: idxs.length,
       detail: idxs.map(i => ({ heb:`${reiyot[i].hebFmt||fmtHeb(reiyot[i].heb)} ← ${reiyot[i+1].hebFmt||fmtHeb(reiyot[i+1].heb)}`, days:`הפרש: ${days} ימים` })),
-      source: 'דרכי טהרה פ"ז סעיף יב',
+      source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף יב')}`,
       kavua: haflagaRes.established && parseInt(days) === haflagaRes.value
     });
   });
@@ -2827,9 +3300,9 @@ function getVesetStatus(history) {
       type: 'kavua_haflaga', disputed: false, kavua: true,
       title: `✅ נקבע וסת קבוע — הפלגה של ${haflagaRes.value} ימים`,
       count: 3, detail: [],
-      source: 'דרכי טהרה פ"ז סעיף כב, לא',
+      source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף כב, לא')}`,
       uiKey: 'veset_kavua_established',
-      tooltip: 'וסת נחשב קבוע לאחר 3 פעמים זהות רצופות (סעיף כב). מעיקר הדין מספיק לפרוש בעונה עצמה; יש נוהגים להחמיר ולפרוש גם עונה קודם (פרק ו סעיף ב).'
+      tooltip: `וסת נחשב קבוע לאחר 3 פעמים זהות רצופות ${dtLink('ז','(סעיף כב)')}. מעיקר הדין מספיק לפרוש בעונה עצמה; יש נוהגים להחמיר ולפרוש גם עונה קודם ${dtLink('ו','(פרק ו סעיף ב)')}.`
     });
   }
 
@@ -2843,10 +3316,10 @@ function getVesetStatus(history) {
         type: 'hodesh', disputed: false,
         title: `${kavua?'✅ נקבע ':''}וסת החודש — ${HebCal.dayLetters(parseInt(day))} לחודש העברי (${ents.length} פעמים)`,
         count: ents.length, detail: ents.map((e,i) => ({ heb: fmtHeb(e.heb), days: i>0?`${ents[i].absDate-ents[i-1].absDate} ימים`:''})),
-        source: 'דרכי טהרה פ"ז סעיף לח',
+        source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף לח')}`,
         kavua,
         uiKey: kavua ? 'veset_kavua_established' : 'yom_hachodesh_active',
-        tooltip: kavua ? 'נקבע וסת החודש לאחר 3 חזרות רצופות (סעיף לח).' : 'אותו יום עברי בחודש — עונת חשש כל עוד לא נקבע וסת קבוע.'
+        tooltip: kavua ? `נקבע וסת החודש לאחר 3 חזרות רצופות ${dtLink('ז','(סעיף לח)')}.` : 'אותו יום עברי בחודש — עונת חשש כל עוד לא נקבע וסת קבוע.'
       });
     }
   });
@@ -2870,9 +3343,9 @@ function getVesetStatus(history) {
           title: `${kavua?'✅ נקבע ':''}וסת השבוע — יום ${DOW_HEB[dow]} (${consecutive.length} פעמים)`,
           count: consecutive.length,
           detail: consecutive.map((e,i) => ({ heb: fmtHeb(e.heb), days: i>0?`${consecutive[i].absDate-consecutive[i-1].absDate} ימים (${Math.round((consecutive[i].absDate-consecutive[i-1].absDate)/7)} שבועות)`:''})),
-          source: 'דרכי טהרה פ"ז סעיף מב-מג',
+          source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף מב-מג')}`,
           kavua, disputeNote: haflagaConflict
-            ? 'שאלת חכם: זוהה גם דפוס יום-בשבוע וגם דפוס הפלגה — דיני שינוי/עקירה של וסת השבוע כשהוא סמוך לוסת הפלגה שנויים במחלוקת הפוסקים (סעיף מד).'
+            ? `שאלת חכם: זוהה גם דפוס יום-בשבוע וגם דפוס הפלגה — דיני שינוי/עקירה של וסת השבוע כשהוא סמוך לוסת הפלגה שנויים במחלוקת הפוסקים ${dtLink('ז','(סעיף מד)')}.`
             : null,
           uiKey: haflagaConflict ? 'shavua_haflaga_conflict' : (kavua ? 'veset_kavua_established' : null)
         });
@@ -2887,7 +3360,7 @@ function getVesetStatus(history) {
       title: `${dilugChodeshRes.established?'✅ נקבע ':'חשש '}וסת דילוג — יום החודש ${dilugChodeshRes.delta>0?'עולה':'יורד'} ב-${Math.abs(dilugChodeshRes.delta)} מדי חודש`,
       count: dilugChodeshRes.established ? 5 : 4,
       detail: reiyot.slice(-4).map((e,i) => ({ heb: fmtHeb(e.heb), days: `יום ${e.heb.day} בחודש` })),
-      source: 'דרכי טהרה פ"ז סעיף מה, מח',
+      source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף מה, מח')}`,
       kavua: dilugChodeshRes.established,
       disputeNote: !dilugChodeshRes.established
         ? 'חשש בלבד לפי שיטה א׳ (מ-4 ראיות). קביעה מלאה מ-5 ראיות (שיטה ב׳). מומלץ לשאול שאלת חכם.' : null,
@@ -2902,7 +3375,7 @@ function getVesetStatus(history) {
       title: `✅ נקבע וסת הסירוג — ${HebCal.dayLetters(serugRes.dayOfMonth)} לחודש כל ${serugRes.monthGap} חודשים`,
       count: 3,
       detail: reiyot.slice(-3).map(e => ({ heb: fmtHeb(e.heb), days: `${HebCal.dayLetters(e.heb.day)} ${HebCal.monthName(e.heb.month,e.heb.year)}` })),
-      source: 'דרכי טהרה פ"ז סעיף נט',
+      source: `דרכי טהרה ${dtLink('ז','פ"ז סעיף נט')}`,
       kavua: true,
       uiKey: 'veset_kavua_established'
     });
@@ -3025,7 +3498,7 @@ function showChatziKavuaModal(data) {
 
     <div style="background:#F5F0FB;border:1px solid #C4B0E0;border-radius:12px;padding:14px;margin-bottom:16px;">
       <p style="font-size:13px;font-weight:600;color:#5A3A8A;margin-bottom:4px;">📖 מקור:</p>
-      <p style="font-size:13px;color:#5A3A8A;line-height:1.7;">דרכי טהרה, פרק ז' סעיפים י"ז–י"ט</p>
+      <p style="font-size:13px;color:#5A3A8A;line-height:1.7;">דרכי טהרה, <a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener" style="color:inherit;">פרק ז' סעיפים י"ז–י"ט</a></p>
       <a href="https://harav.org/books/darcitaara-7/" target="_blank" rel="noopener"
         style="font-size:12px;color:#7B5EA7;text-decoration:underline;">לסעיפים המלאים ←</a>
     </div>
@@ -3257,6 +3730,7 @@ window.addEventListener('load', () => {
   }
   loadState();
   initA11y();
+  initLockScreen();
   const isReturning = localStorage.getItem('beta_dismissed') === '1';
   const seenVersion = localStorage.getItem('whats_new_seen');
   if (!isReturning) {
